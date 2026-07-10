@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section 9 · Speak Like a Local — Spanish</title>
+<style>
+  :root{
+    --green:#58cc02; --green-dark:#58a700; --green-light:#d7ffb8;
+    --red:#ff4b4b; --red-dark:#ea2b2b; --red-light:#ffdfe0;
+    --blue:#1cb0f6; --blue-dark:#1899d6; --blue-sel:#ddf4ff; --blue-border:#84d8ff;
+    --gray:#e5e5e5; --gray-dark:#afafaf; --text:#3c3c3c; --text-soft:#777;
+    --purple:#ce82ff; --gold:#ffc800; --gold-dark:#e6a800;
+    --font:'Nunito', ui-rounded, 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{margin:0; font-family:var(--font); color:var(--text); background:#fff;}
+  button{font-family:var(--font);}
+
+  .screen{display:none; height:100%; flex-direction:column;}
+  .screen.active{display:flex;}
+
+  .btn{
+    display:inline-block; border:none; cursor:pointer; user-select:none;
+    border-radius:16px; padding:14px 32px; font-size:15px; font-weight:800;
+    letter-spacing:.8px; text-transform:uppercase; transition:filter .15s;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:none !important;}
+  .btn-green{background:var(--green); color:#fff; box-shadow:0 4px 0 var(--green-dark);}
+  .btn-green:hover{filter:brightness(1.07);}
+  .btn-red{background:var(--red); color:#fff; box-shadow:0 4px 0 #d33131;}
+  .btn:disabled{background:var(--gray); color:var(--gray-dark); box-shadow:none; cursor:default; transform:none;}
+
+  /* ---------- path (home) screen ---------- */
+  #screen-path{background:#fff;}
+  .path-header{position:sticky; top:0; z-index:10; background:#fff; border-bottom:2px solid var(--gray);}
+  .path-header-inner{max-width:640px; margin:0 auto; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;}
+  .ph-title{display:flex; align-items:center; gap:10px; font-weight:900; font-size:17px;}
+  .ph-flag{font-size:24px;}
+  .ph-sub{color:var(--text-soft); font-weight:700; font-size:12px; letter-spacing:.5px;}
+  .ph-stats{display:flex; gap:14px; font-weight:900; font-size:15px;}
+  .ph-stat{display:flex; align-items:center; gap:4px;}
+  .ph-xp{color:#c78a00;} .ph-crown{color:var(--gold-dark);}
+
+  .path-scroll{flex:1; overflow-y:auto;}
+  .path-inner{max-width:640px; margin:0 auto; padding:20px 16px 80px;}
+
+  .unit-banner{border-radius:16px; padding:18px 20px; color:#fff; margin:26px 0 8px; box-shadow:0 4px 0 rgba(0,0,0,.18);}
+  .unit-banner .ub-label{font-size:12px; font-weight:900; letter-spacing:1.2px; opacity:.85;}
+  .unit-banner .ub-title{font-size:20px; font-weight:900; margin-top:2px;}
+  .unit-banner .ub-en{font-size:13px; font-weight:700; opacity:.85; margin-top:2px;}
+
+  .nodes{display:flex; flex-direction:column; align-items:center; padding:14px 0 4px;}
+  .node-wrap{position:relative; height:108px; display:flex; align-items:center; justify-content:center; width:100%;}
+  .node{width:74px; height:74px; border-radius:50%; border:none; cursor:pointer; position:relative;
+    display:flex; align-items:center; justify-content:center; transition:transform .1s;}
+  .node:active{transform:translateY(3px);}
+  .node .icon{width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:28px;}
+  .node-active{background:var(--unit-color,#58cc02); box-shadow:0 8px 0 var(--unit-shadow,#58a700);}
+  .node-done{background:var(--gold); box-shadow:0 8px 0 var(--gold-dark);}
+  .node-locked{background:var(--gray); box-shadow:0 8px 0 #d0d0d0; cursor:pointer;}
+  .node-locked .icon svg path{fill:#b5b5b5;}
+  .node-ring{position:absolute; inset:-10px; border-radius:50%; border:6px solid var(--unit-color,#58cc02); opacity:.25;}
+  .start-bubble{position:absolute; bottom:92px; left:50%; transform:translateX(-50%); background:#fff;
+    border:2px solid var(--gray); border-radius:12px; padding:8px 16px; font-weight:900; font-size:14px;
+    color:var(--unit-color,#58cc02); letter-spacing:1px; white-space:nowrap; animation:bob 1.4s ease-in-out infinite; z-index:2; pointer-events:none;}
+  .start-bubble::after{content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+    border:8px solid transparent; border-top-color:#fff; margin-top:-1px;}
+  .start-bubble::before{content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+    border:9px solid transparent; border-top-color:var(--gray);}
+  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(-6px);}}
+  .node-label{position:absolute; top:88px; left:50%; transform:translateX(-50%); font-size:12px; font-weight:800;
+    color:var(--text-soft); white-space:nowrap;}
+
+  .final-wrap{margin-top:30px;}
+
+  .path-footer-note{text-align:center; margin-top:40px;}
+  .reset-link{background:none; border:none; color:var(--gray-dark); font-size:12px; font-weight:700;
+    text-decoration:underline; cursor:pointer;}
+
+  #toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:#3c3c3c; color:#fff;
+    padding:12px 20px; border-radius:12px; font-weight:700; font-size:14px; opacity:0; pointer-events:none;
+    transition:all .25s; z-index:60; max-width:90%; text-align:center;}
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* ---------- lesson layout ---------- */
+  .topbar{display:flex; align-items:center; gap:16px; max-width:640px; width:100%; margin:0 auto; padding:20px 16px 8px;}
+  .quit-x{background:none; border:none; font-size:26px; color:var(--gray-dark); cursor:pointer; font-weight:700; padding:4px 8px;}
+  .quit-x:hover{color:var(--text-soft);}
+  .progress-wrap{flex:1; height:16px; background:var(--gray); border-radius:99px; overflow:hidden;}
+  .progress-fill{height:100%; width:0%; background:var(--green); border-radius:99px; transition:width .4s ease; position:relative;}
+  .progress-fill::after{content:''; position:absolute; top:4px; left:8px; right:8px; height:4px; border-radius:99px; background:rgba(255,255,255,.35);}
+  .hearts{display:flex; align-items:center; gap:5px; font-weight:900; color:var(--red); font-size:18px;}
+
+  .exercise-area{flex:1; overflow-y:auto; width:100%;}
+  .exercise-inner{max-width:640px; margin:0 auto; padding:24px 16px 40px;}
+  .new-word-tag{color:var(--purple); font-weight:900; font-size:14px; letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:6px; margin-bottom:10px;}
+  h2.prompt{font-size:24px; font-weight:900; margin:4px 0 22px;}
+
+  .sentence-row{display:flex; align-items:flex-start; gap:14px; margin-bottom:26px;}
+  .speaker-btn{flex:none; width:52px; height:52px; border-radius:14px; border:none; cursor:pointer;
+    background:var(--blue); box-shadow:0 4px 0 var(--blue-dark); display:flex; align-items:center; justify-content:center;}
+  .speaker-btn:active{transform:translateY(4px); box-shadow:none;}
+  .speaker-btn.small{width:44px; height:44px;}
+  .speaker-btn.turtle{background:#fff; border:2px solid var(--gray); box-shadow:0 4px 0 var(--gray);}
+  .speaker-btn svg{width:26px; height:26px;}
+  .source-text{font-size:19px; line-height:1.6; padding-top:10px;}
+
+  .answer-zone{min-height:120px; border-top:2px solid var(--gray); border-bottom:2px solid var(--gray);
+    position:relative; padding:8px 2px; display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start; margin-bottom:26px;}
+  .answer-zone::before{content:''; position:absolute; left:0; right:0; top:56px; height:2px; background:var(--gray);}
+
+  .word-bank{display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
+  .chip{background:#fff; border:2px solid var(--gray); border-bottom-width:4px; border-radius:12px;
+    padding:10px 14px; font-size:17px; font-weight:600; cursor:pointer; color:var(--text); transition:transform .06s;}
+  .chip:hover{background:#f7f7f7;}
+  .chip:active{transform:translateY(2px); border-bottom-width:2px; margin-bottom:2px;}
+  .chip.used{color:transparent; background:var(--gray); border-color:var(--gray); cursor:default; pointer-events:none;}
+
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .option-card{display:flex; align-items:center; gap:14px; text-align:left; background:#fff; border:2px solid var(--gray);
+    border-bottom-width:4px; border-radius:12px; padding:14px 16px; font-size:18px; font-weight:600; cursor:pointer; color:var(--text);}
+  .option-card:hover{background:#f7f7f7;}
+  .option-card .num{flex:none; width:28px; height:28px; border:2px solid var(--gray); border-radius:8px; font-size:13px;
+    font-weight:800; color:var(--gray-dark); display:flex; align-items:center; justify-content:center;}
+  .option-card.selected{border-color:var(--blue-border); background:var(--blue-sel); color:var(--blue-dark);}
+  .option-card.selected .num{border-color:var(--blue-border); color:var(--blue);}
+
+  .fill-sentence{font-size:21px; line-height:2.1; margin-bottom:28px;}
+  .blank-slot{display:inline-block; min-width:130px; border-bottom:2px solid var(--text); text-align:center;
+    font-weight:800; color:var(--blue-dark); padding:0 6px;}
+
+  .match-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 24px;}
+  .match-btn{background:#fff; border:2px solid var(--gray); border-bottom-width:4px; border-radius:12px;
+    padding:14px 10px; font-size:16px; font-weight:600; cursor:pointer; color:var(--text);}
+  .match-btn:hover{background:#f7f7f7;}
+  .match-btn.selected{border-color:var(--blue-border); background:var(--blue-sel); color:var(--blue-dark);}
+  .match-btn.done{border-color:var(--gray); background:#f7f7f7; color:var(--gray-dark); pointer-events:none;
+    border-bottom-width:2px; margin-bottom:2px;}
+  .match-btn.wrongflash{border-color:var(--red); background:var(--red-light); color:var(--red-dark); animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}}
+
+  textarea.type-box{width:100%; min-height:110px; resize:none; border:2px solid var(--gray); border-radius:12px;
+    background:#f7f7f7; font-family:var(--font); font-size:19px; padding:14px; color:var(--text); outline:none;}
+  textarea.type-box:focus{border-color:var(--blue-border);}
+  .cant-listen{background:none; border:none; color:var(--blue); font-weight:800; font-size:13px; letter-spacing:.5px;
+    text-transform:uppercase; cursor:pointer; margin-top:14px; padding:4px;}
+
+  .footer{border-top:2px solid var(--gray); background:#fff;}
+  .footer-inner{max-width:640px; margin:0 auto; padding:20px 16px; display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:96px;}
+  .footer.correct{background:var(--green-light); border-top-color:var(--green-light);}
+  .footer.wrong{background:var(--red-light); border-top-color:var(--red-light);}
+  .feedback{display:flex; align-items:center; gap:14px; flex:1; min-width:0;}
+  .feedback .icon-circle{flex:none; width:56px; height:56px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center;}
+  .feedback .fb-title{font-size:22px; font-weight:900;}
+  .feedback .fb-body{font-size:15px; font-weight:600; margin-top:2px; overflow-wrap:anywhere;}
+  .footer.correct .fb-title,.footer.correct .fb-body{color:var(--green-dark);}
+  .footer.wrong .fb-title,.footer.wrong .fb-body{color:var(--red-dark);}
+  .skip-btn{background:none; border:2px solid var(--gray); box-shadow:0 4px 0 var(--gray); color:var(--gray-dark);
+    border-radius:16px; padding:14px 24px; font-size:15px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; cursor:pointer;}
+
+  .center-screen{align-items:center; justify-content:center; text-align:center; padding:24px; gap:8px;}
+  .center-screen h1{font-size:30px; margin:12px 0 4px; font-weight:900;}
+  .center-screen .sub{color:var(--text-soft); font-size:17px; max-width:460px; line-height:1.5; margin-bottom:8px;}
+  .stat-row{display:flex; gap:12px; margin:18px 0;}
+  .stat-card{border-radius:16px; padding:3px; width:130px; overflow:hidden; text-align:center;}
+  .stat-card .label{font-size:12px; font-weight:900; letter-spacing:1px; color:#fff; padding:4px 0 6px;}
+  .stat-card .value{background:#fff; border-radius:13px; padding:14px 6px; font-size:22px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:6px;}
+  .stat-yellow{background:#ffc800;} .stat-yellow .value{color:#c78a00;}
+  .stat-green{background:var(--green);} .stat-green .value{color:var(--green-dark);}
+  .stat-blue{background:var(--blue);} .stat-blue .value{color:var(--blue-dark);}
+
+  .modal-back{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50;}
+  .modal-back.show{display:flex;}
+  .modal{background:#fff; border-radius:20px; padding:28px; max-width:380px; width:calc(100% - 40px); text-align:center;}
+  .modal h3{font-size:21px; font-weight:900; margin:10px 0 6px;}
+  .modal p{color:var(--text-soft); font-size:15px; line-height:1.5; margin:0 0 20px;}
+  .modal .btn{width:100%; margin-bottom:10px;}
+  .modal .ghost{background:none; border:none; color:var(--blue); font-weight:800; text-transform:uppercase; font-size:14px; letter-spacing:.5px; cursor:pointer; padding:8px;}
+
+  #confetti-canvas{position:fixed; inset:0; pointer-events:none; z-index:40;}
+  .fade-in{animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  .pop{animation:pop .4s ease;}
+  @keyframes pop{0%{transform:scale(.6); opacity:0;} 70%{transform:scale(1.08);} 100%{transform:scale(1); opacity:1;}}
+</style>
+</head>
+<body>
+
+<div id="screen-path" class="screen active">
+  <div class="path-header">
+    <div class="path-header-inner">
+      <div class="ph-title"><span class="ph-flag">🇪🇸</span>
+        <div>Section 9 · Speak Like a Local<div class="ph-sub">THE LEVEL AFTER THE LAST LEVEL · C1</div></div>
+      </div>
+      <div class="ph-stats">
+        <span class="ph-stat ph-xp">⚡ <span id="hdr-xp">0</span></span>
+        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/21</span>
+      </div>
+    </div>
+  </div>
+  <div class="path-scroll" id="path-scroll">
+    <div class="path-inner" id="path-inner"></div>
+  </div>
+</div>
+
+<div id="screen-lesson" class="screen">
+  <div class="topbar">
+    <button class="quit-x" onclick="askQuit()" title="Quit">✕</button>
+    <div class="progress-wrap"><div class="progress-fill" id="progress"></div></div>
+    <div class="hearts"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#ff4b4b" d="M12 21s-8-5.2-10.5-9.7C-.4 7.5 2.4 3.5 6.2 3.5c2.3 0 4.2 1.3 5.8 3.4 1.6-2.1 3.5-3.4 5.8-3.4 3.8 0 6.6 4 4.7 7.8C20 15.8 12 21 12 21z"/></svg><span id="heart-count">5</span></div>
+  </div>
+  <div class="exercise-area"><div class="exercise-inner" id="exercise"></div></div>
+  <div class="footer" id="footer">
+    <div class="footer-inner">
+      <div class="feedback" id="feedback"></div>
+      <button class="btn btn-green" id="check-btn" disabled onclick="mainButton()">Check</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-end" class="screen center-screen">
+  <div id="owl-end"></div>
+  <h1 id="end-title">Lesson complete!</h1>
+  <p class="sub" id="end-sub"></p>
+  <div class="stat-row">
+    <div class="stat-card stat-yellow pop"><div class="label">XP EARNED</div><div class="value">⚡ <span id="stat-xp">0</span></div></div>
+    <div class="stat-card stat-green pop" style="animation-delay:.15s"><div class="label">ACCURACY</div><div class="value">🎯 <span id="stat-acc">0%</span></div></div>
+    <div class="stat-card stat-blue pop" style="animation-delay:.3s"><div class="label">TIME</div><div class="value">⏱ <span id="stat-time">0:00</span></div></div>
+  </div>
+  <button class="btn btn-green" style="font-size:17px; padding:16px 48px;" onclick="backToPath()">Continue</button>
+</div>
+
+<div class="modal-back" id="quit-modal">
+  <div class="modal">
+    <div style="font-size:44px;">😢</div>
+    <h3>Wait, don't go!</h3>
+    <p>You'll lose your progress in this lesson if you quit now.</p>
+    <button class="btn btn-green" onclick="closeQuit()">Keep learning</button>
+    <button class="ghost" onclick="quitLesson()">End session</button>
+  </div>
+</div>
+<div class="modal-back" id="hearts-modal">
+  <div class="modal">
+    <div style="font-size:44px;">💔</div>
+    <h3>You ran out of hearts!</h3>
+    <p>Good thing this is <b>your</b> app — hearts are now unlimited. ¡Sigue así!</p>
+    <button class="btn btn-green" onclick="unlimitedHearts()">Keep going ∞</button>
+  </div>
+</div>
+<div class="modal-back" id="reset-modal">
+  <div class="modal">
+    <div style="font-size:44px;">🗑️</div>
+    <h3>Reset all progress?</h3>
+    <p>All XP and completed lessons will be erased. This cannot be undone.</p>
+    <button class="btn btn-red" onclick="doReset()">Yes, reset everything</button>
+    <button class="ghost" onclick="closeReset()">Cancel</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<script>
+'use strict';
+/*DATA-START*/
+const UNITS = [
+{ title:'Del corazón', en:'Everyday idioms & feelings', color:'#58cc02', shadow:'#58a700',
+  vocab:[['valer la pena','to be worth it'],['echar de menos','to miss (someone)'],['tomar el pelo','to pull someone’s leg'],['me da igual',"I don't mind"],['por si acaso','just in case'],['de una vez','once and for all'],['ponerse al día','to catch up'],['meter la pata','to mess up'],['a lo mejor','maybe'],['quedarse en blanco','to go blank']],
+  sentences:[
+    {es:'Si tuviera más tiempo, viajaría más.', en:'If I had more time, I would travel more.', dEs:['tendría','tengo','viajara'], dEn:['has','will','travelled']},
+    {es:'Se me olvidaron las llaves.', en:'I forgot the keys.', dEs:['olvidé','los','olvidan'], dEn:['my','lost','key']},
+    {es:'Llevo dos años estudiando español.', en:'I have been studying Spanish for two years.', dEs:['llevó','estudiar','estudiado'], dEn:['since','am','study']},
+    {es:'Ojalá pudiéramos quedarnos unos días más.', en:'I wish we could stay a few more days.', dEs:['podemos','quedarse','mucho'], dEn:['hope','can','stayed']},
+    {es:'Echo mucho de menos a mi familia.', en:'I miss my family a lot.', dEs:['hecho','falta','para'], dEn:['lose','very','much']},
+    {es:'Mi hermano siempre me toma el pelo.', en:'My brother is always pulling my leg.', dEs:['pela','cabeza','tomó'], dEn:['hair','combing','arm']},
+    {es:'No vale la pena discutir por tonterías.', en:'It’s not worth arguing over silly things.', dEs:['cuesta','sirve','pelear'], dEn:['fighting','about','worthless']},
+    {es:'Tenemos que ponernos al día de una vez.', en:'We need to catch up once and for all.', dEs:['ponemos','en','veces'], dEn:['must','meet','always']},
+    {es:'Me quedé en blanco durante el examen.', en:'I went blank during the exam.', dEs:['quedó','negro','por'], dEn:['stayed','white','in']},
+    {es:'Compra agua, por si acaso.', en:'Buy water, just in case.', dEs:['para','cuando','quizás'], dEn:['if','box','sure']}],
+  fills:[
+    {before:'Este restaurante cuesta ', after:', pero vale la pena.', options:['un ojo de la cara','un dedo del pie','una oreja de la cabeza'], correct:0, translation:"This restaurant costs an arm and a leg, but it's worth it."},
+    {before:'Ojalá ', after:' venir a la fiesta mañana.', options:['puedas','puedes','podrás'], correct:0, translation:'I hope you can come to the party tomorrow.'},
+    {before:'Si ', after:' rico, me compraría una casa en la playa.', options:['fuera','era','sería'], correct:0, translation:'If I were rich, I would buy myself a house on the beach.'}],
+  choices:[
+    {prompt:'Which of these means "to be worth it"?', options:['valer la pena','tener la culpa','dar la lata'], correct:0, note:'"Vale la pena" = it’s worth it.'},
+    {prompt:'What does this really mean?', context:'Mi hermano siempre me toma el pelo.', options:['My brother is always pulling my leg.','My brother always combs my hair.','My brother always borrows my hat.'], correct:0, note:'"Tomar el pelo" = to tease someone.'},
+    {prompt:'Your friend says "me da igual". What are they telling you?', options:["They don't mind either way.",'They feel sick.','They want the same again.'], correct:0, note:'"Me da igual" = it’s all the same to me.'}],
+  types:[
+    {source:'just in case', accepted:['por si acaso'], solution:'por si acaso'},
+    {source:'I miss you a lot.', accepted:['te echo mucho de menos','te echo de menos mucho','te extraño mucho'], solution:'Te echo mucho de menos.'}]
+},
+{ title:'En el trabajo', en:'Sound professional', color:'#1cb0f6', shadow:'#1899d6',
+  vocab:[['estar al tanto','to be up to date'],['dar por hecho','to take for granted'],['a corto plazo','in the short term'],['manos a la obra','let’s get to work'],['tener en cuenta','to keep in mind'],['a más tardar','at the latest'],['sacar adelante','to pull (something) off'],['estar hasta arriba','to be swamped'],['quedar en','to agree to'],['hacer falta','to be necessary']],
+  sentences:[
+    {es:'Me comentó que el informe estaría listo hoy.', en:'He mentioned to me that the report would be ready today.', dEs:['informes','ayer','listos'], dEn:['said','is','tomorrow']},
+    {es:'Es imprescindible que todos estén al tanto del proyecto.', en:'It is essential that everyone be up to date on the project.', dEs:['están','sean','encima'], dEn:['are','being','informed']},
+    {es:'Te lo mando el viernes a más tardar.', en:'I’ll send it to you on Friday at the latest.', dEs:['tarde','hasta','próximo'], dEn:['least','soonest','by']},
+    {es:'No des por hecho que van a aceptar la oferta.', en:'Don’t take for granted that they are going to accept the offer.', dEs:['dan','hecha','aceptan'], dEn:['do','taken','propose']},
+    {es:'Quedamos en reunirnos el lunes por la mañana.', en:'We agreed to meet on Monday morning.', dEs:['quedan','reunirse','para'], dEn:['stayed','met','in']},
+    {es:'Hace falta que alguien se encargue de esto.', en:'Someone needs to take charge of this.', dEs:['hará','encarga','para'], dEn:['need','charges','off']},
+    {es:'Estoy hasta arriba de trabajo esta semana.', en:'I am swamped with work this week.', dEs:['abajo','encima','del'], dEn:['under','busy','above']},
+    {es:'Si me lo hubieras dicho antes, habría cambiado la reunión.', en:'If you had told me earlier, I would have changed the meeting.', dEs:['dijiste','habías','cita'], dEn:['has','tell','will']},
+    {es:'Vamos a sacar adelante este proyecto cueste lo que cueste.', en:'We are going to pull this project off no matter what.', dEs:['costará','saca','atrás'], dEn:['cost','matters','however']},
+    {es:'Ten en cuenta que el jefe llega mañana.', en:'Keep in mind that the boss arrives tomorrow.', dEs:['tienes','cuentas','llegan'], dEn:['hold','account','arrive']}],
+  fills:[
+    {before:'Necesito el presupuesto para el jueves, ', after:'.', options:['a más tardar','a menos tardar','a más temprano'], correct:0, translation:'I need the budget by Thursday at the latest.'},
+    {before:'Es importante que ', after:' en cuenta los costes.', options:['tengas','tienes','tendrás'], correct:0, translation:'It’s important that you keep the costs in mind.'},
+    {before:'Bueno, basta de hablar: ¡', after:'!', options:['manos a la obra','pies a la obra','brazos al trabajo'], correct:0, translation:'Enough talking: let’s get to work!'}],
+  choices:[
+    {prompt:'Which of these means "to be swamped with work"?', options:['estar hasta arriba','estar por debajo','estar a la vuelta'], correct:0, note:'"Estoy hasta arriba" = I’m swamped.'},
+    {prompt:'What does this really mean?', context:'No lo des por hecho.', options:["Don't take it for granted.","Don't do it by hand.","Don't turn it in late."], correct:0, note:'"Dar por hecho" = to assume / take for granted.'},
+    {prompt:'Your coworker says "Estoy al tanto". What do they mean?', options:['They’re up to date on it.','They’re paying for it.','They’re almost done.'], correct:0, note:'"Estar al tanto" = to be in the loop.'}],
+  types:[
+    {source:'at the latest', accepted:['a mas tardar','a más tardar'], solution:'a más tardar'},
+    {source:'Keep in mind that it is expensive.', accepted:['ten en cuenta que es caro','tenga en cuenta que es caro'], solution:'Ten en cuenta que es caro.'}]
+},
+{ title:'Planes y contratiempos', en:'Plans & mishaps', color:'#ce82ff', shadow:'#a560e8',
+  vocab:[['a última hora','at the last minute'],['dar plantón','to stand (someone) up'],['menos mal','thank goodness'],['por poco','very nearly'],['hacer escala','to have a layover'],['de camino','on the way'],['un imprevisto','something unexpected'],['tener prisa','to be in a hurry'],['echar una mano','to lend a hand'],['salir redondo','to turn out perfectly']],
+  sentences:[
+    {es:'Se nos hizo tarde y perdimos el tren.', en:'We ran late and missed the train.', dEs:['hicimos','tardes','perdemos'], dEn:['lost','delayed','a']},
+    {es:'Menos mal que trajiste el paraguas.', en:'Thank goodness you brought the umbrella.', dEs:['bueno','trajeras','lluvia'], dEn:['less','bad','take']},
+    {es:'Por poco pierdo el vuelo esta mañana.', en:'I very nearly missed the flight this morning.', dEs:['perdí','casi','poca'], dEn:['little','lose','for']},
+    {es:'El vuelo hace escala en Madrid.', en:'The flight has a layover in Madrid.', dEs:['hará','escalas','por'], dEn:['does','scale','at']},
+    {es:'Surgió un imprevisto y no pude ir.', en:'Something unexpected came up and I couldn’t go.', dEs:['surgirá','pudo','fui'], dEn:['happened','could','went']},
+    {es:'¿Me echas una mano con las maletas?', en:'Can you lend me a hand with the suitcases?', dEs:['echar','manos','para'], dEn:['throw','hands','give']},
+    {es:'Me dio plantón otra vez; llevaba una hora esperando.', en:'He stood me up again; I had been waiting for an hour.', dEs:['daba','planta','esperaba'], dEn:['stand','waited','since']},
+    {es:'Cambiaron la reunión a última hora.', en:'They changed the meeting at the last minute.', dEs:['cambian','últimas','horas'], dEn:['minutes','final','in']},
+    {es:'Te recojo de camino al aeropuerto.', en:'I’ll pick you up on the way to the airport.', dEs:['recoges','camina','del'], dEn:['collect','road','by']},
+    {es:'Al final todo salió redondo.', en:'In the end everything turned out perfectly.', dEs:['salían','cuadrado','redonda'], dEn:['round','resulted','finally']}],
+  fills:[
+    {before:'', after:' que llegamos antes de que cerraran.', options:['Menos mal','Más mal','Menos bien'], correct:0, translation:'Thank goodness we arrived before they closed.'},
+    {before:'No te preocupes, yo te echo ', after:'.', options:['una mano','un pie','una pierna'], correct:0, translation:'Don’t worry, I’ll lend you a hand.'},
+    {before:'Íbamos a salir, pero surgió ', after:'.', options:['un imprevisto','una previsión','un previsto'], correct:0, translation:'We were going to leave, but something unexpected came up.'}],
+  choices:[
+    {prompt:'Which of these means "to stand someone up"?', options:['dar plantón','dar plantas','plantar cara'], correct:0, note:'"Plantar cara" means to stand up TO someone!'},
+    {prompt:'What does this really mean?', context:'Por poco me caigo.', options:['I almost fell.','I fell a little.','I rarely fall.'], correct:0, note:'"Por poco" + present = something almost happened.'},
+    {prompt:'Your friend says "¡Salió redondo!". What do they mean?', options:['It turned out perfectly.','It came out round.','It ended badly.'], correct:0, note:'"Salir redondo" = to go off without a hitch.'}],
+  types:[
+    {source:'at the last minute', accepted:['a ultima hora','a última hora'], solution:'a última hora'},
+    {source:'Thank goodness!', accepted:['menos mal'], solution:'¡Menos mal!'}]
+},
+{ title:'Opiniones', en:'Say what you really think', color:'#ff9600', shadow:'#e08600',
+  vocab:[['que yo sepa','as far as I know'],['por lo visto','apparently'],['hoy en día','nowadays'],['no tener sentido','to make no sense'],['estar de acuerdo','to agree'],['tener razón','to be right'],['en cambio','on the other hand'],['a fin de cuentas','at the end of the day'],['cada vez más','more and more'],['según','according to']],
+  sentences:[
+    {es:'No es que no me guste, es que no tengo hambre.', en:'It’s not that I don’t like it, it’s that I’m not hungry.', dEs:['gusta','tenga','sino'], dEn:['doesn’t','hunger','very']},
+    {es:'Por mucho que insistas, no voy a cambiar de opinión.', en:'No matter how much you insist, I’m not going to change my mind.', dEs:['insistes','opiniones','para'], dEn:['many','insisting','idea']},
+    {es:'Que yo sepa, la tienda sigue abierta.', en:'As far as I know, the store is still open.', dEs:['sé','siga','abierto'], dEn:['knew','until','opened']},
+    {es:'Por lo visto, van a subir los precios otra vez.', en:'Apparently, they are going to raise the prices again.', dEs:['vista','suben','precio'], dEn:['seemingly','rise','price']},
+    {es:'Hoy en día casi todo se compra por internet.', en:'Nowadays almost everything is bought online.', dEs:['días','compran','para'], dEn:['today','buys','on']},
+    {es:'Tienes razón, aunque no me guste admitirlo.', en:'You’re right, even though I don’t like to admit it.', dEs:['razones','gustan','admitir'], dEn:['reason','truth','say']},
+    {es:'A fin de cuentas, lo importante es la salud.', en:'At the end of the day, what matters is health.', dEs:['fines','cuenta','importa'], dEn:['accounts','important','wealth']},
+    {es:'Cada vez más gente trabaja desde casa.', en:'More and more people work from home.', dEs:['veces','mucha','trabajan'], dEn:['every','time','peoples']},
+    {es:'Según mi madre, antes todo era mejor.', en:'According to my mother, everything was better before.', dEs:['segundo','será','mejores'], dEn:['second','ago','best']},
+    {es:'Eso no tiene ningún sentido.', en:'That makes no sense at all.', dEs:['tienen','sentidos','nada'], dEn:['meaning','none','does']}],
+  fills:[
+    {before:'No es que ', after:' antipático; es que es tímido.', options:['sea','es','será'], correct:0, translation:'It’s not that he’s unfriendly; he’s just shy.'},
+    {before:'Aunque ', after:' mucho dinero, no sería más feliz.', options:['tuviera','tengo','tendré'], correct:0, translation:'Even if I had a lot of money, I wouldn’t be happier.'},
+    {before:'', after:', el concierto se canceló por la lluvia.', options:['Por lo visto','Por lo vista','Para lo visto'], correct:0, translation:'Apparently, the concert was canceled because of the rain.'}],
+  choices:[
+    {prompt:'Which of these means "apparently"?', options:['por lo visto','por si acaso','por las buenas'], correct:0, note:'"Por lo visto" = from what people say / it seems.'},
+    {prompt:'What does this really mean?', context:'Que yo sepa, nadie ha llamado.', options:['As far as I know, nobody has called.','Because I know nobody called.','I hope nobody calls.'], correct:0, note:'"Que yo sepa" softens a statement.'},
+    {prompt:'Your friend starts with "a fin de cuentas...". What are they about to do?', options:['Sum up what really matters.','Pay the bill.','Count to ten.'], correct:0, note:'"A fin de cuentas" = at the end of the day.'}],
+  types:[
+    {source:'nowadays', accepted:['hoy en dia','hoy en día'], solution:'hoy en día'},
+    {source:'You are right.', accepted:['tienes razon','tienes razón','llevas razon','llevas razón'], solution:'Tienes razón.'}]
+},
+{ title:'Cuéntamelo todo', en:'Tell stories like a native', color:'#ff4b96', shadow:'#d63384',
+  vocab:[['resulta que','it turns out that'],['total, que','long story short'],['de repente','all of a sudden'],['al parecer','it seems'],['ni idea','no idea'],['¡no me digas!','you don’t say!'],['dar la vuelta','to turn around'],['en cuanto','as soon as'],['hacerse el tonto','to play dumb'],['más te vale','you’d better']],
+  sentences:[
+    {es:'Resulta que Marta y Luis se conocían de antes.', en:'It turns out that Marta and Luis knew each other from before.', dEs:['resultan','conocen','después'], dEn:['results','met','since']},
+    {es:'Total, que al final nadie vino a la cena.', en:'Long story short, in the end nobody came to the dinner.', dEs:['totales','vinieron','vinos'], dEn:['total','history','anybody']},
+    {es:'De repente se fue la luz en todo el barrio.', en:'All of a sudden the power went out in the whole neighborhood.', dEs:['repentes','fueron','luces'], dEn:['suddenly','lights','gone']},
+    {es:'En cuanto llegue a casa, te llamo.', en:'As soon as I get home, I’ll call you.', dEs:['llegara','llegaré','para'], dEn:['arrives','when','phone']},
+    {es:'Al parecer, se van a mudar a Sevilla.', en:'It seems they are going to move to Seville.', dEs:['parece','mudarse','por'], dEn:['appears','moving','at']},
+    {es:'No tengo ni idea de dónde están las tijeras.', en:'I have no idea where the scissors are.', dEs:['tengas','ideas','adónde'], dEn:['any','ideas','is']},
+    {es:'Se hizo el tonto cuando le pregunté por el dinero.', en:'He played dumb when I asked him about the money.', dEs:['hace','tonta','preguntaré'], dEn:['made','silly','ask']},
+    {es:'Más te vale llegar puntual mañana.', en:'You’d better arrive on time tomorrow.', dEs:['vales','llegas','puntuales'], dEn:['worth','best','early']},
+    {es:'Tuvimos que dar la vuelta porque se me olvidó el pasaporte.', en:'We had to turn around because I forgot my passport.', dEs:['dimos','vuelto','olvidaron'], dEn:['give','return','forget']},
+    {es:'Si lo hubiera sabido, habría venido antes.', en:'If I had known, I would have come earlier.', dEs:['sabía','vendría','ayer'], dEn:['knew','will','came']}],
+  fills:[
+    {before:'', after:' que se casan en septiembre.', options:['Resulta','Resultado','Resultan'], correct:0, translation:'It turns out they’re getting married in September.'},
+    {before:'En cuanto ', after:' el paquete, avísame.', options:['llegue','llega','llegará'], correct:0, translation:'As soon as the package arrives, let me know.'},
+    {before:'Cuando le pregunté, se hizo ', after:'.', options:['el tonto','la tontería','un tono'], correct:0, translation:'When I asked him, he played dumb.'}],
+  choices:[
+    {prompt:'Your friend tells you shocking gossip. What do you say?', options:['¡No me digas!','¡No me hables!','¡No me toques!'], correct:0, note:'"¡No me digas!" = You don’t say! / No way!'},
+    {prompt:'What does this really mean?', context:'Total, que me quedé sin entradas.', options:['Long story short, I ended up without tickets.','In total, I bought tickets.','Finally, I got the tickets.'], correct:0, note:'"Total, que..." wraps up a long story.'},
+    {prompt:'Which of these means "all of a sudden"?', options:['de repente','de repuesto','de reojo'], correct:0, note:'"De repuesto" = spare; "de reojo" = out of the corner of your eye.'}],
+  types:[
+    {source:'no idea', accepted:['ni idea'], solution:'ni idea'},
+    {source:'It turns out that it was true.', accepted:['resulta que era verdad','resulta que fue verdad'], solution:'Resulta que era verdad.'}]
+}];
+
+const LESSON_PLANS = [
+  [['choice',0],['tr',0,'en2es'],['listen',1],['fill',0],['matchV',[0,1,2,3,4]],['tr',2,'es2en'],['type',0],['tr',3,'en2es'],['listen',2],['choice',1]],
+  [['fill',1],['tr',4,'en2es'],['listen',5],['tr',6,'es2en'],['matchV',[5,6,7,8,9]],['type',1],['tr',7,'en2es'],['choice',2],['listen',4],['tr',0,'es2en']],
+  [['fill',2],['tr',8,'en2es'],['listen',9],['tr',5,'es2en'],['matchV',[0,2,4,6,8]],['tr',6,'en2es'],['listen',3],['type',0],['tr',1,'es2en'],['choice',0]],
+  [['listen',0],['tr',3,'es2en'],['fill',0],['matchV',[1,3,5,7,9]],['tr',9,'en2es'],['type',1],['listen',7],['tr',2,'en2es'],['fill',2],['tr',8,'es2en'],['choice',1],['listen',6]]
+];
+const FINAL_MATCHES = [
+  [[0,0],[1,5],[2,1],[3,1],[4,4]],
+  [[0,6],[1,9],[2,8],[3,7],[4,2]]
+];
+const FINAL_PLAN = [
+  ['listen',0,5],['tr',0,7,'en2es'],
+  ['tr',1,0,'es2en'],['fill',1,1],
+  ['listen',2,6],['tr',2,2,'en2es'],
+  ['matchM',0],
+  ['tr',3,1,'en2es'],['fill',3,1],
+  ['listen',4,8],['tr',4,9,'en2es'],
+  ['type',3,1],['type',4,1],
+  ['matchM',1],
+  ['tr',4,7,'es2en']
+];
+
+const tokenize = s => s.replace(/[.,!?¡¿;:()]/g,' ').split(/\s+/).filter(Boolean);
+
+function buildExercise(unit, op, isReview) {
+  const u = UNITS[unit];
+  const kind = op[0];
+  if (kind === 'choice') {
+    const c = u.choices[op[1]];
+    return { type:'choice', prompt:c.prompt, context:c.context, options:c.options, correct:c.correct, note:c.note, newWord:!isReview };
+  }
+  if (kind === 'tr') {
+    const s = u.sentences[op[1]], dir = op[2];
+    if (dir === 'en2es') return { type:'translate', dir, source:s.en, answer:tokenize(s.es), distractors:s.dEs, solution:s.es };
+    return { type:'translate', dir, source:s.es, answer:tokenize(s.en), distractors:s.dEn, solution:s.en };
+  }
+  if (kind === 'listen') {
+    const s = u.sentences[op[1]];
+    return { type:'listen', sentence:s.es, answer:tokenize(s.es), distractors:s.dEs, translation:s.en };
+  }
+  if (kind === 'fill') { const f = u.fills[op[1]]; return Object.assign({type:'fillblank'}, f); }
+  if (kind === 'matchV') {
+    return { type:'match', prompt:'Tap the matching pairs', pairs:op[1].map(i => u.vocab[i]) };
+  }
+  if (kind === 'type') {
+    const t = u.types[op[1]];
+    return { type:'type', dir:'en2es', prompt:'Type this in Spanish', source:t.source, accepted:t.accepted, solution:t.solution };
+  }
+  throw new Error('bad op ' + kind);
+}
+
+function composeLesson(nodeIdx) {
+  if (nodeIdx === 20) {
+    return FINAL_PLAN.map(op => {
+      if (op[0] === 'matchM') {
+        return { type:'match', prompt:'Tap the matching pairs',
+                 pairs:FINAL_MATCHES[op[1]].map(pv => UNITS[pv[0]].vocab[pv[1]]) };
+      }
+      const unit = op[1];
+      const sub = [op[0]].concat(op.slice(2));
+      return buildExercise(unit, sub, true);
+    });
+  }
+  const unit = Math.floor(nodeIdx / 4), lesson = nodeIdx % 4;
+  return LESSON_PLANS[lesson].map(op => buildExercise(unit, op, lesson === 3));
+}
+/*DATA-END*/
+
+/* ============================ helpers ============================ */
+const $ = s => document.querySelector(s);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const stripAccents = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+const normalize = s => s.toLowerCase().replace(/[.,!?¡¿;:'"’]/g, '').replace(/\s+/g, ' ').trim();
+const isSpanish = ex => (ex.type === 'translate' && ex.dir === 'en2es') || ex.type === 'listen' ||
+                        (ex.type === 'type') || ex.type === 'fillblank';
+const PRAISE = ['Nice!', 'Excellent!', 'Great job!', '¡Muy bien!', 'Amazing!', '¡Perfecto!'];
+const NODE_NAMES = ['Lesson 1', 'Lesson 2', 'Lesson 3', 'Unit Review'];
+const TOTAL_NODES = 21;
+
+/* ============================ persistence ============================ */
+const STORE_KEY = 'seccion9_progress_v1';
+let PROG = { done: {}, xp: 0 };
+function loadProgress() {
+  try { const raw = localStorage.getItem(STORE_KEY); if (raw) PROG = JSON.parse(raw); } catch (e) {}
+  if (!PROG || typeof PROG !== 'object') PROG = { done: {}, xp: 0 };
+  PROG.done = PROG.done || {}; PROG.xp = PROG.xp || 0;
+}
+function saveProgress() { try { localStorage.setItem(STORE_KEY, JSON.stringify(PROG)); } catch (e) {} }
+const doneCount = () => Object.keys(PROG.done).length;
+const isDone = i => !!PROG.done[i];
+const isUnlocked = i => i === 0 || isDone(i - 1);
+
+/* ============================ sound fx ============================ */
+let actx = null;
+function audio() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } return actx; }
+function tone(freq, delay, dur, type, vol) {
+  const c = audio(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  const t = c.currentTime + (delay || 0);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol || 0.18, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+}
+const sfxCorrect  = () => { tone(523.25, 0, 0.15); tone(783.99, 0.1, 0.25); };
+const sfxWrong    = () => { tone(196, 0, 0.18, 'square', 0.08); tone(147, 0.14, 0.3, 'square', 0.08); };
+const sfxMatch    = () => tone(660, 0, 0.09, 'sine', 0.12);
+const sfxComplete = () => { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.12, 0.3)); tone(1318.5, 0.55, 0.5, 'sine', 0.12); };
+
+/* ============================ speech ============================ */
+let voices = [];
+function loadVoices() { voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+if (window.speechSynthesis) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function pickVoice(lang) {
+  const pref = lang === 'es' ? ['es-ES', 'es-MX', 'es-US', 'es'] : ['en-US', 'en-GB', 'en'];
+  for (const p of pref) { const v = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(p.toLowerCase())); if (v) return v; }
+  return null;
+}
+function speak(text, lang, rate) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang === 'es' ? 'es-ES' : 'en-US';
+  const v = pickVoice(lang); if (v) u.voice = v;
+  u.rate = rate || 0.95;
+  speechSynthesis.speak(u);
+}
+
+/* ============================ icons / owl ============================ */
+function owlSVG(celebrate) {
+  const wingL = celebrate ? 'rotate(-115 28 88)' : 'rotate(-15 28 88)';
+  const wingR = celebrate ? 'rotate(115 122 88)' : 'rotate(15 122 88)';
+  const sparkles = celebrate ?
+    '<text x="8" y="30" font-size="20">✨</text><text x="122" y="22" font-size="22">✨</text><text x="132" y="120" font-size="18">✨</text><text x="2" y="115" font-size="16">✨</text>' : '';
+  return '<svg width="160" height="160" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">' +
+    sparkles +
+    '<ellipse cx="28" cy="88" rx="13" ry="26" fill="#43c000" transform="' + wingL + '"/>' +
+    '<ellipse cx="122" cy="88" rx="13" ry="26" fill="#43c000" transform="' + wingR + '"/>' +
+    '<ellipse cx="75" cy="85" rx="52" ry="58" fill="#58cc02"/>' +
+    '<ellipse cx="75" cy="106" rx="30" ry="30" fill="#89e219"/>' +
+    '<circle cx="55" cy="62" r="19" fill="#fff"/><circle cx="95" cy="62" r="19" fill="#fff"/>' +
+    '<circle cx="59" cy="64" r="8" fill="#4b4b4b"/><circle cx="91" cy="64" r="8" fill="#4b4b4b"/>' +
+    '<circle cx="62" cy="61" r="2.6" fill="#fff"/><circle cx="94" cy="61" r="2.6" fill="#fff"/>' +
+    '<path d="M67 80 Q75 74 83 80 Q79 92 75 92 Q71 92 67 80Z" fill="#f49000"/>' +
+    '<ellipse cx="64" cy="141" rx="8" ry="5" fill="#f49000"/><ellipse cx="86" cy="141" rx="8" ry="5" fill="#f49000"/>' +
+    '</svg>';
+}
+const ICON_SPEAKER = '<svg viewBox="0 0 24 24" fill="none"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="#fff"/><path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_TURTLE  = '<svg viewBox="0 0 24 24" fill="none"><ellipse cx="11" cy="13" rx="6.5" ry="4.5" fill="#1cb0f6"/><circle cx="19" cy="11.5" r="2.3" fill="#1cb0f6"/><rect x="5" y="16.5" width="2.5" height="3" rx="1" fill="#1cb0f6"/><rect x="14" y="16.5" width="2.5" height="3" rx="1" fill="#1cb0f6"/></svg>';
+const ICON_CHECK = '<svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 7" stroke="#58cc02" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_X = '<svg width="30" height="30" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="#ea2b2b" stroke-width="3.5" stroke-linecap="round"/></svg>';
+const ICON_STAR = '<svg width="34" height="34" viewBox="0 0 24 24"><path fill="#fff" d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.3l6.5-.9z"/></svg>';
+
+/* ============================ path (home) ============================ */
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function nodeButton(i, color, shadow, label, icon) {
+  const wrap = document.createElement('div'); wrap.className = 'node-wrap';
+  wrap.style.setProperty('--unit-color', color); wrap.style.setProperty('--unit-shadow', shadow);
+  const offs = [0, -56, 0, 56];
+  const off = i === 20 ? 0 : offs[i % 4];
+  const b = document.createElement('button');
+  const done = isDone(i), unlocked = isUnlocked(i);
+  b.className = 'node ' + (done ? 'node-done' : unlocked ? 'node-active' : 'node-locked');
+  b.style.transform = 'translateX(' + off + 'px)';
+  b.innerHTML = '<span class="icon">' + icon + '</span>';
+  if (!done && unlocked) {
+    const ring = document.createElement('span'); ring.className = 'node-ring'; b.appendChild(ring);
+    const bub = document.createElement('span'); bub.className = 'start-bubble'; bub.textContent = 'START';
+    bub.style.setProperty('--unit-color', color);
+    b.appendChild(bub); b.id = 'active-node';
+  }
+  const lab = document.createElement('span'); lab.className = 'node-label'; lab.textContent = label;
+  lab.style.transform = 'translateX(calc(-50% + ' + off + 'px))';
+  b.appendChild(lab);
+  b.onclick = () => {
+    if (!unlocked) { toast('🔒 Complete the previous lesson to unlock!'); return; }
+    startNode(i, done);
+  };
+  wrap.appendChild(b);
+  return wrap;
+}
+
+function renderPath() {
+  $('#hdr-xp').textContent = PROG.xp;
+  $('#hdr-crowns').textContent = doneCount();
+  const inner = $('#path-inner'); inner.innerHTML = '';
+  UNITS.forEach((u, ui) => {
+    const banner = document.createElement('div'); banner.className = 'unit-banner';
+    banner.style.background = u.color;
+    banner.innerHTML = '<div class="ub-label">UNIT ' + (ui + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
+    banner.querySelector('.ub-title').textContent = u.title;
+    banner.querySelector('.ub-en').textContent = u.en;
+    inner.appendChild(banner);
+    const nodes = document.createElement('div'); nodes.className = 'nodes';
+    for (let l = 0; l < 4; l++) {
+      const i = ui * 4 + l;
+      const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' : ICON_STAR;
+      nodes.appendChild(nodeButton(i, u.color, u.shadow, NODE_NAMES[l], icon));
+    }
+    inner.appendChild(nodes);
+  });
+  const fin = document.createElement('div'); fin.className = 'nodes final-wrap';
+  fin.appendChild(nodeButton(20, '#ce82ff', '#a560e8', 'Final Challenge', '<span style="font-size:30px">👑</span>'));
+  inner.appendChild(fin);
+  const note = document.createElement('div'); note.className = 'path-footer-note';
+  note.innerHTML = '<div style="font-size:13px;color:var(--gray-dark);font-weight:700;margin-bottom:8px;">Para la leyenda que terminó el curso 🏆</div>';
+  const rl = document.createElement('button'); rl.className = 'reset-link'; rl.textContent = 'Reset all progress';
+  rl.onclick = () => $('#reset-modal').classList.add('show');
+  note.appendChild(rl);
+  inner.appendChild(note);
+  setTimeout(() => { const a = $('#active-node'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 80);
+}
+
+function backToPath() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  show('#screen-path');
+  renderPath();
+}
+function closeReset() { $('#reset-modal').classList.remove('show'); }
+function doReset() { PROG = { done: {}, xp: 0 }; saveProgress(); closeReset(); renderPath(); toast('Progress reset. ¡Buena suerte!'); }
+
+/* ============================ lesson state ============================ */
+let CURRENT = [], nodeIdx = 0, isPractice = false;
+let queue = [], currentIdx = -1, phase = 'answer';
+let solved = new Set(), attempted = new Set();
+let hearts = 5, unlimited = false, mistakes = 0, firstTryCorrect = 0, startTime = 0;
+let selection = null, zoneTokens = [], matchDone = 0, matchSel = null;
+
+function startNode(i, replay) {
+  audio();
+  nodeIdx = i; isPractice = !!replay;
+  CURRENT = composeLesson(i);
+  queue = CURRENT.map((_, k) => k);
+  solved = new Set(); attempted = new Set();
+  hearts = 5; unlimited = false; mistakes = 0; firstTryCorrect = 0;
+  startTime = Date.now();
+  $('#heart-count').textContent = hearts;
+  updateProgress();
+  show('#screen-lesson');
+  nextExercise();
+}
+
+function updateProgress() { $('#progress').style.width = (solved.size / CURRENT.length * 100) + '%'; }
+
+function nextExercise() {
+  if (queue.length === 0) return endLesson();
+  currentIdx = queue.shift();
+  phase = 'answer'; selection = null; zoneTokens = []; matchSel = null; matchDone = 0;
+  renderExercise(CURRENT[currentIdx]);
+  renderFooterAnswer(CURRENT[currentIdx]);
+}
+
+/* ============================ exercise rendering ============================ */
+function speakerRow(text, lang, opts) {
+  const row = document.createElement('div'); row.className = 'sentence-row';
+  const b = document.createElement('button'); b.className = 'speaker-btn' + (opts && opts.big ? '' : ' small');
+  b.innerHTML = ICON_SPEAKER; b.onclick = () => speak(text, lang);
+  row.appendChild(b);
+  if (opts && opts.turtle) {
+    const t = document.createElement('button'); t.className = 'speaker-btn small turtle';
+    t.innerHTML = ICON_TURTLE; t.onclick = () => speak(text, lang, 0.55);
+    row.appendChild(t);
+  }
+  if (opts && opts.showText) {
+    const s = document.createElement('div'); s.className = 'source-text'; s.textContent = text;
+    row.appendChild(s);
+  }
+  return row;
+}
+
+function buildWordBank(area, ex) {
+  const zone = document.createElement('div'); zone.className = 'answer-zone'; zone.id = 'zone';
+  area.appendChild(zone);
+  const bank = document.createElement('div'); bank.className = 'word-bank';
+  const tokens = shuffle(ex.answer.concat(ex.distractors || []));
+  tokens.forEach(tok => {
+    const chip = document.createElement('button'); chip.className = 'chip'; chip.textContent = tok;
+    chip.onclick = () => {
+      if (phase !== 'answer' || chip.classList.contains('used')) return;
+      chip.classList.add('used');
+      const z = document.createElement('button'); z.className = 'chip'; z.textContent = tok;
+      z.onclick = () => {
+        if (phase !== 'answer') return;
+        zone.removeChild(z); chip.classList.remove('used');
+        zoneTokens = zoneTokens.filter(e => e.el !== z);
+        refreshCheck();
+      };
+      zone.appendChild(z);
+      zoneTokens.push({ tok: tok, el: z });
+      tone(880, 0, 0.05, 'sine', 0.06);
+      refreshCheck();
+    };
+    bank.appendChild(chip);
+  });
+  area.appendChild(bank);
+}
+
+function renderExercise(ex) {
+  const area = $('#exercise'); area.innerHTML = ''; area.className = 'exercise-inner fade-in';
+  void area.offsetWidth;
+
+  if (ex.newWord && ex.type === 'choice') {
+    const tag = document.createElement('div'); tag.className = 'new-word-tag';
+    tag.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ce82ff"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg> NEW EXPRESSION';
+    area.appendChild(tag);
+  }
+  const h = document.createElement('h2'); h.className = 'prompt';
+
+  if (ex.type === 'choice') {
+    h.textContent = ex.prompt; area.appendChild(h);
+    if (ex.context) area.appendChild(speakerRow(ex.context, 'es', { showText: true }));
+    const wrap = document.createElement('div'); wrap.className = 'options';
+    ex.options.forEach((opt, i) => {
+      const card = document.createElement('button'); card.className = 'option-card';
+      card.innerHTML = '<span class="num">' + (i + 1) + '</span><span></span>';
+      card.lastChild.textContent = opt;
+      card.onclick = () => selectOption(wrap, card, i);
+      wrap.appendChild(card);
+    });
+    area.appendChild(wrap);
+
+  } else if (ex.type === 'translate') {
+    h.textContent = 'Translate this sentence'; area.appendChild(h);
+    area.appendChild(speakerRow(ex.source, ex.dir === 'es2en' ? 'es' : 'en', { showText: true }));
+    buildWordBank(area, ex);
+    if (ex.dir === 'es2en') setTimeout(() => speak(ex.source, 'es'), 350);
+
+  } else if (ex.type === 'listen') {
+    h.textContent = 'Tap what you hear'; area.appendChild(h);
+    const row = speakerRow(ex.sentence, 'es', { big: true, turtle: true });
+    row.style.justifyContent = 'center'; area.appendChild(row);
+    const cwrap = document.createElement('div'); cwrap.style.textAlign = 'center';
+    const reveal = document.createElement('div');
+    const cant = document.createElement('button'); cant.className = 'cant-listen';
+    cant.textContent = "Can't play audio? Show text";
+    cant.onclick = () => { reveal.className = 'source-text'; reveal.style.textAlign = 'center'; reveal.textContent = ex.sentence; cant.remove(); };
+    cwrap.appendChild(reveal); cwrap.appendChild(cant); area.appendChild(cwrap);
+    buildWordBank(area, ex);
+    setTimeout(() => speak(ex.sentence, 'es'), 350);
+
+  } else if (ex.type === 'fillblank') {
+    h.textContent = 'Complete the sentence'; area.appendChild(h);
+    const sent = document.createElement('div'); sent.className = 'fill-sentence';
+    const slot = document.createElement('span'); slot.className = 'blank-slot'; slot.innerHTML = '&nbsp;';
+    sent.appendChild(document.createTextNode(ex.before));
+    sent.appendChild(slot);
+    sent.appendChild(document.createTextNode(ex.after));
+    area.appendChild(sent);
+    const wrap = document.createElement('div'); wrap.className = 'options';
+    ex.options.forEach((opt, i) => {
+      const card = document.createElement('button'); card.className = 'option-card';
+      card.innerHTML = '<span class="num">' + (i + 1) + '</span><span></span>';
+      card.lastChild.textContent = opt;
+      card.onclick = () => { selectOption(wrap, card, i); slot.textContent = opt; };
+      wrap.appendChild(card);
+    });
+    area.appendChild(wrap);
+
+  } else if (ex.type === 'match') {
+    h.textContent = ex.prompt; area.appendChild(h);
+    const grid = document.createElement('div'); grid.className = 'match-grid';
+    const left = shuffle(ex.pairs.map(p => p[0]));
+    const right = shuffle(ex.pairs.map(p => p[1]));
+    const lookup = {}; ex.pairs.forEach(p => lookup[p[0]] = p[1]);
+    const cols = [left, right];
+    for (let r = 0; r < ex.pairs.length; r++) {
+      for (let c = 0; c < 2; c++) {
+        const txt = cols[c][r];
+        const b = document.createElement('button'); b.className = 'match-btn'; b.textContent = txt;
+        b.onclick = () => handleMatch(ex, lookup, b, c, txt);
+        grid.appendChild(b);
+      }
+    }
+    area.appendChild(grid);
+
+  } else if (ex.type === 'type') {
+    h.textContent = ex.prompt; area.appendChild(h);
+    area.appendChild(speakerRow(ex.source, 'en', { showText: true }));
+    const ta = document.createElement('textarea'); ta.className = 'type-box'; ta.id = 'type-box';
+    ta.placeholder = 'Type in Spanish'; ta.autocapitalize = 'off'; ta.autocomplete = 'off'; ta.spellcheck = false;
+    ta.oninput = refreshCheck;
+    ta.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); if (!$('#check-btn').disabled) mainButton(); } };
+    area.appendChild(ta);
+    setTimeout(() => ta.focus(), 100);
+  }
+}
+
+function selectOption(wrap, card, i) {
+  if (phase !== 'answer') return;
+  wrap.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selection = i;
+  tone(880, 0, 0.05, 'sine', 0.06);
+  refreshCheck();
+}
+
+function handleMatch(ex, lookup, btn, col, txt) {
+  if (btn.classList.contains('done') || phase !== 'answer') return;
+  if (matchSel && matchSel.btn === btn) { btn.classList.remove('selected'); matchSel = null; return; }
+  if (!matchSel) { btn.classList.add('selected'); matchSel = { btn, col, txt }; tone(880, 0, 0.05, 'sine', 0.06); return; }
+  if (matchSel.col === col) { matchSel.btn.classList.remove('selected'); btn.classList.add('selected'); matchSel = { btn, col, txt }; return; }
+  const es = col === 0 ? txt : matchSel.txt;
+  const en = col === 0 ? matchSel.txt : txt;
+  const a = matchSel.btn, b = btn;
+  matchSel = null;
+  if (lookup[es] === en) {
+    a.classList.remove('selected'); b.classList.remove('selected');
+    a.classList.add('done'); b.classList.add('done');
+    sfxMatch(); matchDone++;
+    if (matchDone === ex.pairs.length) {
+      phase = 'feedback';
+      solved.add(currentIdx);
+      if (!attempted.has(currentIdx)) { attempted.add(currentIdx); firstTryCorrect++; }
+      updateProgress(); sfxCorrect();
+      showFeedback(true, PRAISE[Math.floor(Math.random() * PRAISE.length)], '');
+    }
+  } else {
+    a.classList.remove('selected'); b.classList.remove('selected');
+    a.classList.add('wrongflash'); b.classList.add('wrongflash');
+    sfxWrong();
+    setTimeout(() => { a.classList.remove('wrongflash'); b.classList.remove('wrongflash'); }, 450);
+  }
+}
+
+/* ============================ footer / grading ============================ */
+function renderFooterAnswer(ex) {
+  const f = $('#footer'); f.className = 'footer';
+  const fb = $('#feedback'); fb.innerHTML = '';
+  if (ex.type !== 'match') {
+    const sk = document.createElement('button'); sk.className = 'skip-btn'; sk.textContent = 'Skip';
+    sk.onclick = skipExercise; fb.appendChild(sk);
+  }
+  const btn = $('#check-btn'); btn.textContent = 'Check';
+  btn.className = 'btn btn-green'; btn.disabled = true;
+}
+
+function refreshCheck() {
+  if (phase !== 'answer') return;
+  const ex = CURRENT[currentIdx];
+  let ok = false;
+  if (ex.type === 'translate' || ex.type === 'listen') ok = zoneTokens.length > 0;
+  else if (ex.type === 'choice' || ex.type === 'fillblank') ok = selection !== null;
+  else if (ex.type === 'type') { const ta = $('#type-box'); ok = ta && ta.value.trim().length > 0; }
+  $('#check-btn').disabled = !ok;
+}
+
+function mainButton() {
+  if (phase === 'answer') grade();
+  else nextExercise();
+}
+
+function solutionOf(ex) {
+  return ex.solution || (ex.type === 'listen' ? ex.sentence :
+    ex.type === 'fillblank' ? ex.before + ex.options[ex.correct] + ex.after :
+    ex.type === 'choice' ? ex.options[ex.correct] : '');
+}
+
+function grade() {
+  const ex = CURRENT[currentIdx];
+  let ok = false, accentNote = false;
+  if (ex.type === 'translate' || ex.type === 'listen') {
+    ok = zoneTokens.map(z => z.tok).join(' ') === ex.answer.join(' ');
+  } else if (ex.type === 'choice' || ex.type === 'fillblank') {
+    ok = selection === ex.correct;
+  } else if (ex.type === 'type') {
+    const val = normalize($('#type-box').value);
+    ok = ex.accepted.some(a => normalize(a) === val);
+    if (!ok) { accentNote = ex.accepted.some(a => stripAccents(normalize(a)) === stripAccents(val)); ok = accentNote; }
+  }
+  if (!attempted.has(currentIdx)) { attempted.add(currentIdx); if (ok) firstTryCorrect++; }
+  phase = 'feedback';
+  const solution = solutionOf(ex);
+
+  if (ok) {
+    solved.add(currentIdx); updateProgress(); sfxCorrect();
+    if (isSpanish(ex)) setTimeout(() => speak(solution, 'es'), 250);
+    let body = ex.translation || ex.note || '';
+    if (accentNote) body = 'Pay attention to the accents: ' + solution + (body ? ' — ' + body : '');
+    showFeedback(true, PRAISE[Math.floor(Math.random() * PRAISE.length)], body);
+  } else {
+    mistakes++; loseHeart();
+    queue.push(currentIdx);
+    sfxWrong();
+    const body = solution + (ex.translation ? ' — ' + ex.translation : '');
+    showFeedback(false, 'Correct solution:', body);
+  }
+}
+
+function skipExercise() {
+  if (phase !== 'answer') return;
+  const ex = CURRENT[currentIdx];
+  if (!attempted.has(currentIdx)) attempted.add(currentIdx);
+  mistakes++;
+  phase = 'feedback';
+  queue.push(currentIdx);
+  sfxWrong();
+  showFeedback(false, 'Correct solution:', solutionOf(ex) + (ex.translation ? ' — ' + ex.translation : ''));
+}
+
+function showFeedback(ok, title, body) {
+  const f = $('#footer'); f.className = 'footer ' + (ok ? 'correct' : 'wrong');
+  const fb = $('#feedback');
+  fb.innerHTML = '<div class="icon-circle">' + (ok ? ICON_CHECK : ICON_X) + '</div>' +
+    '<div style="min-width:0"><div class="fb-title"></div><div class="fb-body"></div></div>';
+  fb.querySelector('.fb-title').textContent = title;
+  fb.querySelector('.fb-body').textContent = body;
+  const btn = $('#check-btn'); btn.textContent = 'Continue'; btn.disabled = false;
+  btn.className = 'btn ' + (ok ? 'btn-green' : 'btn-red');
+}
+
+function loseHeart() {
+  if (unlimited) return;
+  hearts = Math.max(0, hearts - 1);
+  $('#heart-count').textContent = hearts;
+  if (hearts === 0) $('#hearts-modal').classList.add('show');
+}
+function unlimitedHearts() {
+  unlimited = true;
+  $('#heart-count').textContent = '∞';
+  $('#hearts-modal').classList.remove('show');
+}
+
+/* ============================ quit / end ============================ */
+function askQuit() { $('#quit-modal').classList.add('show'); }
+function closeQuit() { $('#quit-modal').classList.remove('show'); }
+function quitLesson() { closeQuit(); backToPath(); }
+
+function xpFor(node, perfect, practice) {
+  if (practice) return 10;
+  const base = node === 20 ? 40 : (node % 4 === 3 ? 25 : 20);
+  const bonus = perfect ? (node === 20 ? 10 : 5) : 0;
+  return base + bonus;
+}
+
+function endLesson() {
+  const secs = Math.round((Date.now() - startTime) / 1000);
+  const acc = Math.round(firstTryCorrect / CURRENT.length * 100);
+  const perfect = mistakes === 0;
+  const earned = xpFor(nodeIdx, perfect, isPractice);
+  const first = !isDone(nodeIdx);
+  PROG.done[nodeIdx] = 1;
+  PROG.xp += earned;
+  saveProgress();
+
+  $('#stat-xp').textContent = '+' + earned;
+  $('#stat-acc').textContent = acc + '%';
+  $('#stat-time').textContent = Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0');
+  const allDone = doneCount() >= TOTAL_NODES;
+  $('#end-title').textContent = (nodeIdx === 20 && first) ? 'SECTION 9 COMPLETE!' :
+    perfect ? 'Perfect lesson!' : 'Lesson complete!';
+  $('#end-sub').textContent = (nodeIdx === 20 && first) ? 'You mastered the level after the last level. ¡Eres oficialmente una leyenda! 🏆' :
+    allDone ? 'Everything is gold. ¡Impresionante!' :
+    perfect ? 'Not a single mistake. ¡Eres una leyenda!' :
+    isPractice ? 'Practice makes perfect. ¡Sigue así!' :
+    '¡Increíble! You just learned what the app never taught you.';
+  $('#owl-end').innerHTML = owlSVG(true);
+  show('#screen-end');
+  sfxComplete();
+  confetti();
+}
+
+/* ============================ confetti ============================ */
+function confetti() {
+  const cv = $('#confetti-canvas'), ctx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  const colors = ['#58cc02', '#1cb0f6', '#ffc800', '#ff4b4b', '#ce82ff', '#ff9600'];
+  const parts = Array.from({ length: 130 }, () => ({
+    x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * 0.5,
+    w: 6 + Math.random() * 7, h: 8 + Math.random() * 8,
+    c: colors[Math.floor(Math.random() * colors.length)],
+    vy: 2 + Math.random() * 3.5, vx: -1.5 + Math.random() * 3,
+    rot: Math.random() * Math.PI, vr: -0.1 + Math.random() * 0.2
+  }));
+  const t0 = Date.now();
+  (function frame() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    parts.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    });
+    if (Date.now() - t0 < 4000) requestAnimationFrame(frame);
+    else ctx.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+
+/* ============================ keyboard ============================ */
+document.addEventListener('keydown', e => {
+  if (!$('#screen-lesson').classList.contains('active')) return;
+  if (document.querySelector('.modal-back.show')) return;
+  const ex = CURRENT[currentIdx];
+  if (e.key === 'Enter') {
+    const inType = document.activeElement && document.activeElement.id === 'type-box';
+    if (!inType && (!$('#check-btn').disabled)) { e.preventDefault(); mainButton(); }
+  } else if (phase === 'answer' && ex && (ex.type === 'choice' || ex.type === 'fillblank')) {
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= ex.options.length) {
+      const cards = document.querySelectorAll('.option-card');
+      if (cards[n - 1]) cards[n - 1].click();
+    }
+  }
+});
+
+/* ============================ init ============================ */
+loadProgress();
+renderPath();
+/*EOF-MARK*/
+</script>
+</body>
+</html>
