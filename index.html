@@ -55,6 +55,11 @@
   .practice-card .pc-sub{color:var(--text-soft); font-size:13px; font-weight:700; margin-top:2px;}
   .practice-card .btn{padding:10px 18px; font-size:13px; flex:none;}
 
+  .section-divider{background:#3c4a5e; color:#fff; border-radius:20px; padding:24px 20px; margin:44px 0 10px; text-align:center; box-shadow:0 5px 0 #2b3648;}
+  .section-divider.locked{opacity:.55;}
+  .section-divider .sd-label{font-size:12px; font-weight:900; letter-spacing:1.6px; opacity:.75;}
+  .section-divider .sd-title{font-size:24px; font-weight:900; margin-top:4px;}
+  .section-divider .sd-en{font-size:14px; font-weight:700; opacity:.8; margin-top:2px;}
   .unit-banner{border-radius:16px; padding:18px 20px; color:#fff; margin:26px 0 8px; box-shadow:0 4px 0 rgba(0,0,0,.18);}
   .unit-banner .ub-label{font-size:12px; font-weight:900; letter-spacing:1.2px; opacity:.85;}
   .unit-banner .ub-title{font-size:20px; font-weight:900; margin-top:2px;}
@@ -202,11 +207,11 @@
   <div class="path-header">
     <div class="path-header-inner">
       <div class="ph-title"><span class="ph-flag">🇪🇸</span>
-        <div>Section 9 · Speak Like a Local<div class="ph-sub">THE LEVEL AFTER THE LAST LEVEL · C1</div></div>
+        <div>Sections 9–14 · Beyond the Course<div class="ph-sub">THE LEVELS AFTER THE LAST LEVEL · C1 → C2</div></div>
       </div>
       <div class="ph-stats">
         <span class="ph-stat ph-xp">⚡ <span id="hdr-xp">0</span></span>
-        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/21</span>
+        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/126</span>
       </div>
     </div>
   </div>
@@ -400,7 +405,647 @@ const UNITS = [
   types:[
     {source:'no idea', accepted:['ni idea'], solution:'ni idea'},
     {source:'It turns out that it was true.', accepted:['resulta que era verdad','resulta que fue verdad'], solution:'Resulta que era verdad.'}]
+},
+/* ===== SECTION 10 · La sobremesa ===== */
+{ title:'En la cocina', en:'Cooking like a pro',
+  vocab:[['picar','to chop'],['a fuego lento','on low heat'],['las sobras','the leftovers'],['probar','to taste'],['hervir','to boil'],['congelar','to freeze'],['al punto','cooked just right'],['quemarse','to get burned'],['echar un vistazo','to take a quick look'],['oler a gloria','to smell heavenly']],
+  sentences:[
+    {es:'Deja cocer la salsa a fuego lento veinte minutos.', en:'Let the sauce cook on low heat for twenty minutes.', dEs:['fuegos','lentos','cocina'], dEn:['fire','slowly','minute']},
+    {es:'¿Puedes picar la cebolla mientras pongo la mesa?', en:'Can you chop the onion while I set the table?', dEs:['pica','cebollas','mesas'], dEn:['sliced','tables','laying']},
+    {es:'Se me quemó el arroz otra vez.', en:'I burned the rice again.', dEs:['quemé','quemaron','arroces'], dEn:['burn','rices','myself']},
+    {es:'Huele a gloria: ¿qué estás preparando?', en:'It smells heavenly: what are you making?', dEs:['huelo','glorias','preparas'], dEn:['smelling','heaven','cook']},
+    {es:'Guarda las sobras en un táper para mañana.', en:'Put the leftovers in a container for tomorrow.', dEs:['guardas','sobra','táperes'], dEn:['keep','leftover','box']},
+    {es:'Prueba la sopa y dime si le falta sal.', en:'Taste the soup and tell me if it needs salt.', dEs:['pruebas','sopas','salado'], dEn:['try','soups','salty']},
+    {es:'El secreto es no dejar que hierva del todo.', en:'The secret is not to let it boil completely.', dEs:['hierve','hervido','todos'], dEn:['boils','whole','secretly']},
+    {es:'¿Cómo quieres el filete, al punto o muy hecho?', en:'How do you want the steak, medium or well done?', dEs:['puntos','hecha','quiero'], dEn:['point','made','good']},
+    {es:'Congela el pan si no te lo vas a comer hoy.', en:'Freeze the bread if you are not going to eat it today.', dEs:['congelas','panes','comes'], dEn:['frozen','breads','eats']},
+    {es:'Esta tortilla está buenísima; pásame la receta.', en:'This omelet is delicious; pass me the recipe.', dEs:['buenísimo','recetas','pasa'], dEn:['passing','recipes','very']}],
+  fills:[
+    {before:'Cocina la carne ', after:' para que quede tierna.', options:['a fuego lento','a fuego loco','a fuego frío'], correct:0, translation:'Cook the meat on low heat so it stays tender.'},
+    {before:'Se me ', after:' las tostadas; qué desastre.', options:['quemaron','quemé','quemaba'], correct:0, translation:'I burned the toast; what a disaster.'},
+    {before:'Añade el ajo cuando el aceite ', after:' caliente.', options:['esté','está','estará'], correct:0, translation:'Add the garlic when the oil is hot.'}],
+  choices:[
+    {prompt:'Which of these means "leftovers"?', options:['las sobras','los sobres','las sombras'], correct:0, note:'"Los sobres" = envelopes; "las sombras" = shadows!'},
+    {prompt:'What does it mean?', context:'Esta paella está para chuparse los dedos.', options:['This paella is finger-licking good.','This paella needs more fingers.','You should eat this paella with your hands.'], correct:0, note:'"Para chuparse los dedos" = delicious.'},
+    {prompt:'Your host asks "¿Repites?" at dinner. What are they offering?', options:['A second helping.','To repeat what they said.','To do the dishes again.'], correct:0, note:'"Repetir" at the table = to have seconds.'}],
+  types:[
+    {source:'on low heat', accepted:['a fuego lento'], solution:'a fuego lento'},
+    {source:'The soup smells heavenly.', accepted:['la sopa huele a gloria'], solution:'La sopa huele a gloria.'}]
+},
+{ title:'De tapas', en:'Eating out like a local',
+  vocab:[['ir de tapas','to go out for tapas'],['la caña','the small draft beer'],['pedir','to order'],['la cuenta','the bill'],['dejar propina','to leave a tip'],['estar hasta los topes','to be packed (full)'],['la ración','the sharing plate'],['el menú del día','the set lunch menu'],['invitar','to treat (pay for someone)'],['hacer cola','to wait in line']],
+  sentences:[
+    {es:'¿Nos ponemos en la barra o pedimos mesa?', en:'Do we stand at the bar or ask for a table?', dEs:['pones','barras','mesas'], dEn:['put','bars','tables']},
+    {es:'El bar estaba hasta los topes, así que nos fuimos.', en:'The bar was packed, so we left.', dEs:['estaban','tope','vamos'], dEn:['pack','until','gone']},
+    {es:'Hoy invito yo; tú pagaste la última vez.', en:'Today it is on me; you paid last time.', dEs:['invitas','pagas','últimas'], dEn:['invite','pays','times']},
+    {es:'¿Nos trae la cuenta cuando pueda, por favor?', en:'Could you bring us the bill when you can, please?', dEs:['traes','cuentas','puede'], dEn:['brings','account','may']},
+    {es:'Pedimos tres raciones para compartir.', en:'We ordered three plates to share.', dEs:['pidieron','ración','compartimos'], dEn:['asked','dishes','sharing']},
+    {es:'En España no es obligatorio dejar propina.', en:'In Spain it is not mandatory to leave a tip.', dEs:['propinas','dejas','obligatoria'], dEn:['tips','leaving','must']},
+    {es:'Había tanta cola que desistimos.', en:'There was such a long line that we gave up.', dEs:['colas','desistieron','tanto'], dEn:['queue','quit','much']},
+    {es:'El menú del día incluye primero, segundo y postre.', en:'The set menu includes a starter, a main and dessert.', dEs:['menús','días','incluyen'], dEn:['including','menus','second']},
+    {es:'Ponme una caña y unas bravas, porfa.', en:'Give me a small beer and some spicy potatoes, please.', dEs:['pon','cañas','brava'], dEn:['put','beers','potato']},
+    {es:'¿Qué me recomiendas de la carta?', en:'What do you recommend from the menu?', dEs:['recomienda','cartas','para'], dEn:['recommends','letter','card']}],
+  fills:[
+    {before:'Camarero, ¿nos pone ', after:' cuando pueda?', options:['la cuenta','el cuento','la cuentista'], correct:0, translation:'Waiter, could you bring us the bill when you can? ("El cuento" = a story!)'},
+    {before:'Este bar siempre está ', after:' los viernes.', options:['hasta los topes','hasta las tapas','hasta los topos'], correct:0, translation:'This bar is always packed on Fridays. ("Topos" = moles!)'},
+    {before:'Hoy ', after:' yo; guarda la cartera.', options:['invito','invita','invitas'], correct:0, translation:'Today it is on me; put your wallet away.'}],
+  choices:[
+    {prompt:'Which of these means "to wait in line"?', options:['hacer cola','hacer caso','hacer gracia'], correct:0, note:'"Hacer caso" = to pay attention; "hacer gracia" = to be funny.'},
+    {prompt:'What does it mean?', context:'Esta ronda corre de mi cuenta.', options:['This round is on me.','This round makes me run.','I am counting the drinks.'], correct:0, note:'"Correr de la cuenta de alguien" = to be paid by someone.'},
+    {prompt:'The waiter says "¿Algo de postre?". What is he asking?', options:['If you want dessert.','If something is missing.','If you want the bill.'], correct:0, note:'Always say yes to flan.'}],
+  types:[
+    {source:'the bill', accepted:['la cuenta'], solution:'la cuenta'},
+    {source:'Today it is on me.', accepted:['hoy invito yo','invito yo hoy','hoy invito'], solution:'Hoy invito yo.'}]
+},
+{ title:'¡Qué rico!', en:'Talk about food like a critic',
+  vocab:[['estar riquísimo','to be super tasty'],['soso','bland'],['picante','spicy'],['agrio','sour'],['crujiente','crunchy'],['tener buena pinta','to look good'],['empalagoso','sickly sweet'],['casero','homemade'],['de temporada','in season'],['a la plancha','grilled']],
+  sentences:[
+    {es:'Este gazpacho tiene una pinta increíble.', en:'This gazpacho looks incredible.', dEs:['pintas','tienen','bueno'], dEn:['paint','seems','incredibly']},
+    {es:'La tarta está un poco empalagosa para mi gusto.', en:'The cake is a bit sickly sweet for my taste.', dEs:['empalagoso','gustos','tartas'], dEn:['sick','sweetly','tastes']},
+    {es:'Prefiero el pescado a la plancha, no frito.', en:'I prefer the fish grilled, not fried.', dEs:['planchas','fritos','prefieres'], dEn:['prefers','iron','fry']},
+    {es:'A esta sopa le falta un poco de sal; está sosa.', en:'This soup needs a bit of salt; it is bland.', dEs:['soso','faltan','sales'], dEn:['lacking','salts','flavor']},
+    {es:'¡Cuidado, que pica bastante!', en:'Careful, it is quite spicy!', dEs:['picas','picado','bastantes'], dEn:['quiet','stings','itchy']},
+    {es:'No hay nada como el pan casero recién hecho.', en:'There is nothing like freshly made homemade bread.', dEs:['caseros','recientes','hechos'], dEn:['home','recent','breads']},
+    {es:'Las fresas están de temporada en primavera.', en:'Strawberries are in season in spring.', dEs:['temporadas','primaveras','estación'], dEn:['seasons','springs','weather']},
+    {es:'El limón le da un toque agrio que me encanta.', en:'The lemon gives it a sour touch that I love.', dEs:['agria','toques','limones'], dEn:['touches','lemons','acid']},
+    {es:'La corteza está crujiente y el interior, tierno.', en:'The crust is crunchy and the inside is tender.', dEs:['crujientes','cortezas','tiernos'], dEn:['crunch','insides','softly']},
+    {es:'Todo estaba riquísimo; repetiría sin pensarlo.', en:'Everything was delicious; I would have seconds without thinking twice.', dEs:['riquísima','repetiré','pensarla'], dEn:['second','thoughts','deliciously']}],
+  fills:[
+    {before:'Este plato está ', after:'; casi no le pusiste sal.', options:['soso','sosa','sosos'], correct:0, translation:'This dish is bland; you barely added salt.'},
+    {before:'Me encanta la verdura ', after:'.', options:['de temporada','de temporal','del tiempo'], correct:0, translation:'I love seasonal vegetables.'},
+    {before:'¡Qué buena ', after:' tiene ese asado!', options:['pinta','pintura','punta'], correct:0, translation:'That roast looks so good! ("Pintura" = paint!)'}],
+  choices:[
+    {prompt:'Which of these means "bland"?', options:['soso','sordo','sucio'], correct:0, note:'"Sordo" = deaf; "sucio" = dirty.'},
+    {prompt:'What does it mean?', context:'Este flan está de muerte.', options:['This flan is to die for.','This flan is deadly.','This flan has gone bad.'], correct:0, note:'"Estar de muerte" = amazing.'},
+    {prompt:'Your friend says "se me hace la boca agua". What is happening?', options:['Their mouth is watering.','They spilled water.','They are thirsty.'], correct:0, note:'The highest compliment before eating.'}],
+  types:[
+    {source:'homemade', accepted:['casero','casera'], solution:'casero'},
+    {source:'It looks really good.', accepted:['tiene muy buena pinta','tiene buena pinta'], solution:'Tiene muy buena pinta.'}]
+},
+{ title:'La sobremesa', en:'The art of table talk',
+  vocab:[['la sobremesa','the after-meal chat'],['brindar','to make a toast'],['¡salud!','cheers!'],['el anfitrión','the host'],['quedarse a gusto','to feel at ease'],['ponerse las botas','to stuff yourself'],['picar algo','to have a nibble'],['de sobra','more than enough'],['estar en buena compañía','to be in good company'],['alargarse','to run long']],
+  sentences:[
+    {es:'La sobremesa se alargó hasta las seis de la tarde.', en:'The after-meal chat ran long until six in the evening.', dEs:['sobremesas','alarga','tardes'], dEn:['lunch','runs','evenings']},
+    {es:'Brindemos por los que no pudieron venir.', en:'Let us toast to those who could not come.', dEs:['brindamos','pudo','vengan'], dEn:['toasts','can','came']},
+    {es:'El anfitrión insistió en que repitiéramos postre.', en:'The host insisted that we have more dessert.', dEs:['anfitriones','insistí','repetimos'], dEn:['hosts','insists','desserts']},
+    {es:'Comí de más; me puse las botas con el cordero.', en:'I overate; I stuffed myself with the lamb.', dEs:['puso','bota','corderos'], dEn:['overeat','boot','lambs']},
+    {es:'Quédate a cenar; hay comida de sobra.', en:'Stay for dinner; there is more than enough food.', dEs:['quedas','cenas','sobras'], dEn:['stays','foods','leftover']},
+    {es:'En casa de mi suegra, la comida es algo muy serio.', en:'At my mother-in-law’s house, lunch is a very serious matter.', dEs:['suegras','comidas','serios'], dEn:['houses','dinner','seriously']},
+    {es:'¿Picamos algo antes de que llegue el resto?', en:'Shall we have a nibble before the rest arrive?', dEs:['picas','llega','restos'], dEn:['bite','arrives','rests']},
+    {es:'Levantó la copa y gritó: ¡salud!', en:'He raised his glass and shouted: cheers!', dEs:['levanta','copas','grita'], dEn:['raises','glasses','shouts']},
+    {es:'Con ustedes siempre estoy en buena compañía.', en:'With you all I am always in good company.', dEs:['contigo','compañías','buenas'], dEn:['goodly','companies','withing']},
+    {es:'No te vayas todavía, que ahora viene lo mejor.', en:'Do not leave yet, the best part is coming now.', dEs:['vas','vienen','mejores'], dEn:['leaves','comes','better']}],
+  fills:[
+    {before:'En España, la ', after:' puede durar más que la comida.', options:['sobremesa','sobrecama','sobredosis'], correct:0, translation:'In Spain, the after-meal chat can last longer than the meal itself.'},
+    {before:'¡Levantad las copas! Vamos a ', after:'.', options:['brindar','brincar','bordar'], correct:0, translation:'Raise your glasses! Let us make a toast. ("Brincar" = to jump; "bordar" = to embroider!)'},
+    {before:'Tranquilo, hay postre ', after:' para todos.', options:['de sobra','de sobre','de sombra'], correct:0, translation:'Relax, there is more than enough dessert for everyone.'}],
+  choices:[
+    {prompt:'Which of these means "to stuff yourself"?', options:['ponerse las botas','ponerse los guantes','ponerse las pilas'], correct:0, note:'"Ponerse las pilas" = to get your act together!'},
+    {prompt:'What does it mean?', context:'Estás en tu casa.', options:['Make yourself at home.','You are in your house.','Go back to your house.'], correct:0, note:'A classic host phrase.'},
+    {prompt:'After lunch, your Spanish friends stay chatting for two hours. What is this called?', options:['La sobremesa.','La siesta.','La merienda.'], correct:0, note:'A sacred tradition.'}],
+  types:[
+    {source:'Cheers!', accepted:['salud'], solution:'¡Salud!'},
+    {source:'There is more than enough.', accepted:['hay de sobra'], solution:'Hay de sobra.'}]
+},
+{ title:'Recetas de la abuela', en:'Instructions & kitchen wisdom',
+  vocab:[['la receta','the recipe'],['remover','to stir'],['añadir','to add'],['la masa','the dough'],['reposar','to rest (dough)'],['el truco','the trick'],['a ojo','by eye (without measuring)'],['el pellizco','the pinch'],['batir','to whisk'],['el horno','the oven']],
+  sentences:[
+    {es:'Se baten los huevos con un pellizco de sal.', en:'You whisk the eggs with a pinch of salt.', dEs:['bate','huevo','pellizcos'], dEn:['whisks','egg','pinches']},
+    {es:'Añade la harina poco a poco y sigue removiendo.', en:'Add the flour little by little and keep stirring.', dEs:['añades','harinas','mueve'], dEn:['adds','flours','stirred']},
+    {es:'Deja reposar la masa media hora.', en:'Let the dough rest for half an hour.', dEs:['dejas','masas','reposa'], dEn:['lets','doughs','rests']},
+    {es:'Mi abuela lo hacía todo a ojo y le salía perfecto.', en:'My grandmother did everything by eye and it turned out perfect.', dEs:['abuelas','hacías','ojos'], dEn:['grandmothers','eyes','resulted']},
+    {es:'El truco está en precalentar bien el horno.', en:'The trick is to preheat the oven well.', dEs:['trucos','hornos','caliente'], dEn:['tricks','ovens','heat']},
+    {es:'Esta receta pasa de madres a hijas desde hace un siglo.', en:'This recipe has been passed from mothers to daughters for a century.', dEs:['recetas','madre','hijos'], dEn:['passes','mother','centuries']},
+    {es:'Remueve a fuego medio hasta que espese.', en:'Stir on medium heat until it thickens.', dEs:['remueves','espesa','medios'], dEn:['stirs','thick','middle']},
+    {es:'Si la masa se pega, añade un poco más de harina.', en:'If the dough sticks, add a bit more flour.', dEs:['pegan','añades','harinas'], dEn:['stick','adds','flours']},
+    {es:'Hornea veinte minutos o hasta que se dore.', en:'Bake for twenty minutes or until it browns.', dEs:['horneas','dora','doren'], dEn:['bakes','brown','golden']},
+    {es:'De postre, nada supera al flan de la abuela.', en:'For dessert, nothing beats grandma’s flan.', dEs:['postres','superan','abuelas'], dEn:['desserts','beat','grandmothers']}],
+  fills:[
+    {before:'Deja ', after:' la masa antes de estirarla.', options:['reposar','reposa','reposando'], correct:0, translation:'Let the dough rest before rolling it out.'},
+    {before:'Mi madre no mide nada: cocina ', after:'.', options:['a ojo','a mano','a pie'], correct:0, translation:'My mom does not measure anything: she cooks by eye.'},
+    {before:'Remueve hasta que ', after:' la salsa.', options:['espese','espesa','espesará'], correct:0, translation:'Stir until the sauce thickens.'}],
+  choices:[
+    {prompt:'Which of these means "a pinch (of salt)"?', options:['un pellizco','un pellejo','un pestillo'], correct:0, note:'"Pellejo" = hide/skin; "pestillo" = door latch.'},
+    {prompt:'What does it mean?', context:'Esta receta es mano de santo.', options:['This recipe works miracles.','This recipe is handmade by a saint.','This recipe is very difficult.'], correct:0, note:'"Mano de santo" = a sure remedy.'},
+    {prompt:'Grandma says "el secreto está en el sofrito". What is she talking about?', options:['The slow-fried base of onion, garlic and tomato.','A secret drawer in the kitchen.','Whispering while cooking.'], correct:0, note:'Every great dish starts with a good sofrito.'}],
+  types:[
+    {source:'the recipe', accepted:['la receta'], solution:'la receta'},
+    {source:'Let it rest for half an hour.', accepted:['déjalo reposar media hora','dejalo reposar media hora','deja reposar media hora','déjala reposar media hora','dejala reposar media hora'], solution:'Déjalo reposar media hora.'}]
+},
+/* ===== SECTION 11 · Salud y bienestar ===== */
+{ title:'En el médico', en:'At the doctor’s office',
+  vocab:[['pedir cita','to make an appointment'],['la consulta','the doctor’s office'],['el seguro','the insurance'],['la receta médica','the prescription'],['los análisis','the blood tests'],['la tensión','the blood pressure'],['el resfriado','the cold'],['la gripe','the flu'],['encontrarse mal','to feel unwell'],['recuperarse','to recover']],
+  sentences:[
+    {es:'Quería pedir cita con el médico de cabecera.', en:'I wanted to make an appointment with my family doctor.', dEs:['pides','citas','médicos'], dEn:['want','appointments','doctors']},
+    {es:'¿Desde cuándo se encuentra usted mal?', en:'Since when have you been feeling unwell?', dEs:['encuentras','malo','dónde'], dEn:['find','bad','until']},
+    {es:'Le voy a tomar la tensión, súbase la manga.', en:'I am going to take your blood pressure, roll up your sleeve.', dEs:['tomas','tensiones','mangas'], dEn:['takes','pressures','sleeves']},
+    {es:'No es nada grave: un resfriado de manual.', en:'It is nothing serious: a textbook cold.', dEs:['graves','resfriados','manuales'], dEn:['gravely','colds','book']},
+    {es:'Con la gripe, lo mejor es descansar y beber líquidos.', en:'With the flu, the best thing is to rest and drink fluids.', dEs:['gripes','descansas','líquido'], dEn:['flus','resting','liquid']},
+    {es:'Tiene que hacerse unos análisis en ayunas.', en:'You have to get blood tests done on an empty stomach.', dEs:['haces','ayuna','para'], dEn:['makes','fasting','stomachs']},
+    {es:'El seguro no me cubre esta prueba.', en:'The insurance does not cover this test for me.', dEs:['seguros','cubren','pruebas'], dEn:['insurances','covered','tests']},
+    {es:'Vuelva dentro de dos semanas para revisión.', en:'Come back in two weeks for a check-up.', dEs:['vuelve','semana','revisiones'], dEn:['return','week','checking']},
+    {es:'Se recuperó del todo en cuestión de días.', en:'He recovered completely in a matter of days.', dEs:['recupera','cuestiones','día'], dEn:['recovers','matters','completed']},
+    {es:'Guarde reposo y tome el jarabe cada ocho horas.', en:'Rest and take the syrup every eight hours.', dEs:['guardas','jarabes','hora'], dEn:['rests','syrups','hour']}],
+  fills:[
+    {before:'Tengo que ', after:' cita con el dentista.', options:['pedir','preguntar','poner'], correct:0, translation:'I have to make an appointment with the dentist. (In Spanish you "ask for" an appointment!)'},
+    {before:'El médico me mandó unos ', after:' de sangre.', options:['análisis','analistas','anales'], correct:0, translation:'The doctor ordered some blood tests for me. ("Analistas" = analysts!)'},
+    {before:'Que te mejores; espero que ', after:' pronto.', options:['te recuperes','te recuperas','te recuperarás'], correct:0, translation:'Get well; I hope you recover soon.'}],
+  choices:[
+    {prompt:'Which of these means "to feel unwell"?', options:['encontrarse mal','encontrarse lejos','buscarse mal'], correct:0, note:'"Encontrarse" here = to feel, not to find.'},
+    {prompt:'What does it mean?', context:'Estoy hecho polvo.', options:['I am exhausted.','I am covered in dust.','I am broken into pieces.'], correct:0, note:'"Estar hecho polvo" = worn out.'},
+    {prompt:'The doctor says "no es nada del otro mundo". What does she mean?', options:['It is nothing out of the ordinary.','It is from another world.','It is untreatable.'], correct:0, note:'A very common reassurance.'}],
+  types:[
+    {source:'to make an appointment', accepted:['pedir cita'], solution:'pedir cita'},
+    {source:'Get well soon!', accepted:['que te mejores','que se mejore'], solution:'¡Que te mejores!'}]
+},
+{ title:'Me duele todo', en:'Aches, pains & little accidents',
+  vocab:[['doler','to hurt'],['la muela','the molar'],['el mareo','the dizziness'],['la tirita','the band-aid'],['torcerse el tobillo','to twist your ankle'],['la quemadura','the burn'],['el moratón','the bruise'],['estornudar','to sneeze'],['la tos','the cough'],['el dolor de cabeza','the headache']],
+  sentences:[
+    {es:'Me duelen las muelas cuando como algo frío.', en:'My teeth hurt when I eat something cold.', dEs:['duele','muela','comes'], dEn:['hurts','tooth','eats']},
+    {es:'Me torcí el tobillo bajando las escaleras.', en:'I twisted my ankle going down the stairs.', dEs:['torció','tobillos','subiendo'], dEn:['twist','ankles','upstairs']},
+    {es:'Me mareo cuando me levanto demasiado rápido.', en:'I feel dizzy when I stand up too fast.', dEs:['mareas','levantas','despacio'], dEn:['feels','stands','slow']},
+    {es:'No paro de estornudar; será alergia.', en:'I cannot stop sneezing; it must be an allergy.', dEs:['paras','estornudo','alergias'], dEn:['stops','sneezes','allergic']},
+    {es:'Ponte una tirita para que no se infecte.', en:'Put on a band-aid so it does not get infected.', dEs:['pones','tiritas','infecta'], dEn:['puts','bandage','infection']},
+    {es:'Me salió un moratón enorme en la rodilla.', en:'I got a huge bruise on my knee.', dEs:['salieron','moratones','rodillas'], dEn:['get','bruises','knees']},
+    {es:'Esta tos no se me va ni con jarabe.', en:'This cough will not go away even with syrup.', dEs:['toses','jarabes','vas'], dEn:['coughs','syrups','goes']},
+    {es:'Me quemé la mano con la sartén.', en:'I burned my hand on the frying pan.', dEs:['quemó','manos','sartenes'], dEn:['burns','hands','pans']},
+    {es:'Le dio un tirón en la espalda al levantar la caja.', en:'He pulled a muscle in his back lifting the box.', dEs:['dieron','tirones','espaldas'], dEn:['pulls','backs','boxes']},
+    {es:'Ni el café me quita el dolor de cabeza.', en:'Not even coffee takes my headache away.', dEs:['cafés','quitan','dolores'], dEn:['coffees','removed','headaches']}],
+  fills:[
+    {before:'Me ', after:' mucho las muelas.', options:['duelen','duele','dolemos'], correct:0, translation:'My molars really hurt. (Plural subject, plural verb!)'},
+    {before:'Se torció ', after:' jugando al tenis.', options:['el tobillo','la tobilla','el toballo'], correct:0, translation:'He twisted his ankle playing tennis.'},
+    {before:'No paro de ', after:'; creo que soy alérgico al polen.', options:['estornudar','estornudo','estornudando'], correct:0, translation:'I cannot stop sneezing; I think I am allergic to pollen.'}],
+  choices:[
+    {prompt:'Which of these means "bruise"?', options:['el moratón','el marrón','el montón'], correct:0, note:'"Marrón" = brown; "montón" = a pile!'},
+    {prompt:'What does it mean?', context:'Tengo agujetas por el gimnasio de ayer.', options:['My muscles are sore from yesterday’s workout.','I have needles from yesterday’s gym.','I left my things at the gym yesterday.'], correct:0, note:'"Agujetas" = post-workout soreness.'},
+    {prompt:'Your friend says "me va a estallar la cabeza". What do they mean?', options:['They have a pounding headache.','Their head is literally exploding.','They just had a great idea.'], correct:0, note:'"Estallar" = to explode (figuratively here!).'}],
+  types:[
+    {source:'My head hurts.', accepted:['me duele la cabeza'], solution:'Me duele la cabeza.'},
+    {source:'the cough', accepted:['la tos'], solution:'la tos'}]
+},
+{ title:'Vida sana', en:'Healthy habits',
+  vocab:[['madrugar','to get up early'],['trasnochar','to stay up late'],['estar en forma','to be in shape'],['cuidarse','to take care of yourself'],['dejar de fumar','to quit smoking'],['el descanso','the rest'],['saludable','healthy'],['el hábito','the habit'],['a diario','daily'],['moverse','to get moving']],
+  sentences:[
+    {es:'Para estar en forma, no hace falta matarse en el gimnasio.', en:'To be in shape, you do not need to kill yourself at the gym.', dEs:['formas','matas','gimnasios'], dEn:['shapes','kills','gyms']},
+    {es:'Dejé de fumar hace tres años y no lo echo de menos.', en:'I quit smoking three years ago and I do not miss it.', dEs:['dejo','fumo','año'], dEn:['quits','smoke','missing']},
+    {es:'Intento caminar media hora a diario.', en:'I try to walk half an hour daily.', dEs:['intentas','caminas','diarios'], dEn:['tries','walking','day']},
+    {es:'Trasnochar entre semana me destroza.', en:'Staying up late on weekdays destroys me.', dEs:['trasnochas','semanas','destrozan'], dEn:['stays','weekday','destroyed']},
+    {es:'Cuanto más madrugo, más me cunde el día.', en:'The earlier I get up, the more I get out of my day.', dEs:['madrugas','cunden','días'], dEn:['soon','gets','days']},
+    {es:'Beber suficiente agua es un hábito que cuesta coger.', en:'Drinking enough water is a habit that is hard to pick up.', dEs:['bebes','hábitos','cuestan'], dEn:['drink','habits','cost']},
+    {es:'Si no descanso bien, estoy insoportable.', en:'If I do not rest well, I am unbearable.', dEs:['descansas','buenos','soportable'], dEn:['rests','good','bearable']},
+    {es:'Muévete un poco cada hora si trabajas sentado.', en:'Get moving a little every hour if you work sitting down.', dEs:['mueve','horas','sentados'], dEn:['moves','hours','seated']},
+    {es:'Se cuida mucho: ni fuma ni bebe ni trasnocha.', en:'He takes good care of himself: he does not smoke, drink or stay up late.', dEs:['cuidas','fumas','bebes'], dEn:['cares','smokes','drinks']},
+    {es:'Más vale prevenir que curar.', en:'Better safe than sorry.', dEs:['vales','prevenido','curado'], dEn:['safely','sorrier','worse']}],
+  fills:[
+    {before:'Mañana tengo que ', after:' para coger el primer tren.', options:['madrugar','madrugada','madrugo'], correct:0, translation:'Tomorrow I have to get up early to catch the first train.'},
+    {before:'Deberías dejar ', after:' fumar de una vez.', options:['de','a','en'], correct:0, translation:'You should quit smoking once and for all. (Dejar DE + infinitive!)'},
+    {before:'Hago ejercicio ', after:': ni un día sin moverme.', options:['a diario','al diario','en diario'], correct:0, translation:'I exercise daily: not a single day without moving.'}],
+  choices:[
+    {prompt:'Which of these means "to stay up very late"?', options:['trasnochar','trasplantar','tramitar'], correct:0, note:'"Trasplantar" = to transplant; "tramitar" = to process paperwork.'},
+    {prompt:'What does it mean?', context:'Hay que ponerse las pilas con la dieta.', options:['It is time to get serious about the diet.','You should eat batteries.','The diet needs more energy.'], correct:0, note:'"Ponerse las pilas" = to get your act together.'},
+    {prompt:'Your doctor says "todo con moderación". What is the advice?', options:['Everything in moderation.','Do everything modern.','Moderate your speed.'], correct:0, note:'Wise words for flan lovers.'}],
+  types:[
+    {source:'to get up early', accepted:['madrugar'], solution:'madrugar'},
+    {source:'Better safe than sorry.', accepted:['mas vale prevenir que curar','más vale prevenir que curar'], solution:'Más vale prevenir que curar.'}]
+},
+{ title:'En la farmacia', en:'At the pharmacy',
+  vocab:[['la farmacia de guardia','the on-duty pharmacy'],['el ibuprofeno','the ibuprofen'],['la pomada','the ointment'],['la dosis','the dose'],['en ayunas','on an empty stomach'],['cada ocho horas','every eight hours'],['los efectos secundarios','the side effects'],['sin receta','over the counter'],['la caducidad','the expiration'],['el prospecto','the leaflet']],
+  sentences:[
+    {es:'¿Esto se vende sin receta o necesito una?', en:'Is this sold over the counter or do I need a prescription?', dEs:['vendes','recetas','necesitas'], dEn:['sell','counters','prescriptions']},
+    {es:'Tome una cápsula cada ocho horas con comida.', en:'Take one capsule every eight hours with food.', dEs:['toma','cápsulas','hora'], dEn:['takes','capsules','foods']},
+    {es:'Lea el prospecto antes de tomar el medicamento.', en:'Read the leaflet before taking the medicine.', dEs:['lee','prospectos','medicamentos'], dEn:['reads','leaflets','medicines']},
+    {es:'¿Cuál es la farmacia de guardia más cercana?', en:'Which is the nearest on-duty pharmacy?', dEs:['farmacias','guardias','cercanas'], dEn:['near','pharmacies','guard']},
+    {es:'Este jarabe me da sueño; lo tomo por la noche.', en:'This syrup makes me sleepy; I take it at night.', dEs:['jarabes','sueños','tomas'], dEn:['sleep','nights','dreams']},
+    {es:'No supere la dosis diaria recomendada.', en:'Do not exceed the recommended daily dose.', dEs:['superas','diarias','recomendadas'], dEn:['exceeds','doses','recommend']},
+    {es:'Revisa la fecha de caducidad antes de tomarlo.', en:'Check the expiration date before taking it.', dEs:['revisas','fechas','caducidades'], dEn:['checks','dates','expired']},
+    {es:'La pomada se aplica dos veces al día sobre la zona.', en:'The ointment is applied twice a day on the area.', dEs:['pomadas','aplican','zonas'], dEn:['ointments','applies','areas']},
+    {es:'Si nota efectos secundarios, consulte a su médico.', en:'If you notice side effects, consult your doctor.', dEs:['notas','efecto','consultas'], dEn:['notices','effect','consults']},
+    {es:'El ibuprofeno es mejor tomarlo con el estómago lleno.', en:'Ibuprofen is best taken on a full stomach.', dEs:['estómagos','llenos','tomar'], dEn:['stomachs','fully','take']}],
+  fills:[
+    {before:'Estas pastillas se toman ', after:', media hora antes de desayunar.', options:['en ayunas','en ayunos','sin ayunas'], correct:0, translation:'These pills are taken on an empty stomach, half an hour before breakfast.'},
+    {before:'Aplícate la ', after:' en la quemadura.', options:['pomada','posada','pomelo'], correct:0, translation:'Apply the ointment on the burn. ("Posada" = inn; "pomelo" = grapefruit!)'},
+    {before:'¿Tienen algo para la tos que se venda ', after:' receta?', options:['sin','con','por'], correct:0, translation:'Do you have anything for a cough that is sold without a prescription?'}],
+  choices:[
+    {prompt:'Which of these means "side effects"?', options:['efectos secundarios','efectos especiales','defectos secundarios'], correct:0, note:'"Efectos especiales" = special effects!'},
+    {prompt:'What does it mean?', context:'Este medicamento es mano de santo para la garganta.', options:['It works wonders for your throat.','It is blessed by a saint.','It is only for priests.'], correct:0, note:'"Mano de santo" strikes again.'},
+    {prompt:'The pharmacist says "tómelo con comida, que no le siente mal". Why?', options:['So it does not upset your stomach.','So you do not feel sad.','So you do not sit down wrong.'], correct:0, note:'"Sentar mal" = to disagree with you.'}],
+  types:[
+    {source:'on an empty stomach', accepted:['en ayunas'], solution:'en ayunas'},
+    {source:'every eight hours', accepted:['cada ocho horas'], solution:'cada ocho horas'}]
+},
+{ title:'Cuerpo y mente', en:'Stress, moods & balance',
+  vocab:[['el estrés','the stress'],['relajarse','to relax'],['desconectar','to switch off'],['el estado de ánimo','the mood'],['animarse','to cheer up'],['agobiarse','to get overwhelmed'],['respirar hondo','to take a deep breath'],['el desahogo','the release (venting)'],['dar un paseo','to take a walk'],['dormir a pierna suelta','to sleep like a log']],
+  sentences:[
+    {es:'Cuando me agobio, salgo a dar un paseo.', en:'When I get overwhelmed, I go out for a walk.', dEs:['agobias','sales','paseos'], dEn:['gets','goes','walks']},
+    {es:'Respira hondo y cuenta hasta diez.', en:'Take a deep breath and count to ten.', dEs:['respiras','hondos','cuentas'], dEn:['breathes','deeply','counts']},
+    {es:'Necesito desconectar del trabajo el fin de semana.', en:'I need to switch off from work on the weekend.', dEs:['desconectas','trabajos','semanas'], dEn:['needs','works','weekends']},
+    {es:'Anoche dormí a pierna suelta por primera vez en semanas.', en:'Last night I slept like a log for the first time in weeks.', dEs:['dormiste','piernas','sueltas'], dEn:['sleeps','logs','nightly']},
+    {es:'Hablar contigo siempre me anima.', en:'Talking with you always cheers me up.', dEs:['hablas','animan','conmigo'], dEn:['talks','cheer','ups']},
+    {es:'El estrés se me nota hasta en la piel.', en:'My stress shows even on my skin.', dEs:['notan','pieles','para'], dEn:['stressed','showing','skins']},
+    {es:'Llorar un rato también es un desahogo.', en:'Crying for a while is also a release.', dEs:['lloras','ratos','desahogos'], dEn:['cries','whiles','released']},
+    {es:'No estoy triste; es solo un bajón pasajero.', en:'I am not sad; it is just a passing slump.', dEs:['tristes','bajones','pasajeros'], dEn:['sadly','slumps','passenger']},
+    {es:'Hazte un favor y acuéstate temprano hoy.', en:'Do yourself a favor and go to bed early today.', dEs:['haces','favores','acuestas'], dEn:['does','favors','beds']},
+    {es:'Poco a poco recuperó el buen estado de ánimo.', en:'Little by little he got his good mood back.', dEs:['recuperas','estados','ánimos'], dEn:['recovers','moods','backs']}],
+  fills:[
+    {before:'No te ', after:' tanto; todo saldrá bien.', options:['agobies','agobias','agobiarás'], correct:0, translation:'Do not get so overwhelmed; everything will turn out fine.'},
+    {before:'Anoche dormí ', after:'.', options:['a pierna suelta','a pierna rota','a mano suelta'], correct:0, translation:'Last night I slept like a log.'},
+    {before:'Cuando estés nervioso, ', after:' hondo.', options:['respira','respiras','respirar'], correct:0, translation:'When you are nervous, take a deep breath.'}],
+  choices:[
+    {prompt:'Which of these means "to switch off (mentally)"?', options:['desconectar','descongelar','desconfiar'], correct:0, note:'"Descongelar" = to defrost!'},
+    {prompt:'What does it mean?', context:'Tengo el ánimo por los suelos.', options:['I am feeling really down.','My soul is on the floor.','I dropped something.'], correct:0, note:'"Por los suelos" = at rock bottom.'},
+    {prompt:'Your friend says "no le des más vueltas". What are they telling you?', options:['Stop overthinking it.','Do not spin it again.','Take another lap.'], correct:0, note:'"Darle vueltas a algo" = to overthink.'}],
+  types:[
+    {source:'to take a deep breath', accepted:['respirar hondo'], solution:'respirar hondo'},
+    {source:'Everything will turn out fine.', accepted:['todo saldra bien','todo saldrá bien','todo va a salir bien'], solution:'Todo saldrá bien.'}]
+},
+/* ===== SECTION 12 · De viaje otra vez ===== */
+{ title:'Reservas y cambios', en:'Bookings, fares & fine print',
+  vocab:[['la reserva','the booking'],['anular','to cancel'],['el suplemento','the extra charge'],['la tarifa','the fare'],['reembolsar','to refund'],['la escala','the layover'],['facturar','to check in (luggage)'],['el asiento de pasillo','the aisle seat'],['la ida y vuelta','the round trip'],['con antelación','in advance']],
+  sentences:[
+    {es:'Quisiera cambiar mi reserva para el jueves.', en:'I would like to change my booking to Thursday.', dEs:['quiero','reservas','viernes'], dEn:['want','bookings','Fridays']},
+    {es:'¿La tarifa incluye equipaje facturado?', en:'Does the fare include checked luggage?', dEs:['tarifas','incluyen','facturas'], dEn:['fares','included','bag']},
+    {es:'Anulan el vuelo y te reembolsan el importe.', en:'They cancel the flight and refund you the amount.', dEs:['anula','reembolsa','importes'], dEn:['cancels','refunds','amounts']},
+    {es:'Reserva con antelación; en agosto se dispara todo.', en:'Book in advance; in August everything skyrockets.', dEs:['reservas','antelaciones','disparan'], dEn:['books','advances','shoots']},
+    {es:'Prefiero asiento de pasillo para estirar las piernas.', en:'I prefer an aisle seat to stretch my legs.', dEs:['asientos','pasillos','pierna'], dEn:['prefers','seats','leg']},
+    {es:'El billete de ida y vuelta sale más barato.', en:'The round-trip ticket works out cheaper.', dEs:['billetes','idas','vueltas'], dEn:['tickets','working','cheapest']},
+    {es:'Cobran un suplemento por elegir asiento.', en:'They charge an extra fee for choosing a seat.', dEs:['cobra','suplementos','asientos'], dEn:['charges','extras','seats']},
+    {es:'¿Hay que facturar la maleta o puede ir en cabina?', en:'Do I have to check the suitcase or can it go in the cabin?', dEs:['facturas','maletas','cabinas'], dEn:['checks','suitcases','cabins']},
+    {es:'Con una escala tan corta, no llegamos al siguiente vuelo.', en:'With such a short layover, we will not make the next flight.', dEs:['escalas','cortas','llegan'], dEn:['layovers','shortly','flights']},
+    {es:'Última llamada para los pasajeros del vuelo a Lima.', en:'Last call for passengers on the flight to Lima.', dEs:['últimas','llamadas','pasajero'], dEn:['lastly','calls','passenger']}],
+  fills:[
+    {before:'Compra los billetes ', after:' para que salgan más baratos.', options:['con antelación','con retraso','con demora'], correct:0, translation:'Buy the tickets in advance so they turn out cheaper.'},
+    {before:'El vuelo hace ', after:' en Ámsterdam.', options:['escala','escalera','escalada'], correct:0, translation:'The flight has a layover in Amsterdam. ("Escalera" = stairs; "escalada" = climbing!)'},
+    {before:'Si cancelas con 24 horas, te ', after:' el importe.', options:['reembolsan','reembolsas','reembolso'], correct:0, translation:'If you cancel 24 hours ahead, they refund you the amount.'}],
+  choices:[
+    {prompt:'Which of these means "round trip"?', options:['ida y vuelta','ida y venida','vuelta y vuelta'], correct:0, note:'"Vuelta y vuelta" is how you order a rare steak!'},
+    {prompt:'What does it mean?', context:'El hotel está a un paso del centro.', options:['The hotel is a stone’s throw from downtown.','The hotel has only one step.','You must walk to the hotel.'], correct:0, note:'"A un paso" = very close.'},
+    {prompt:'The airline says your flight "sale con retraso". What is happening?', options:['It is delayed.','It leaves backwards.','It is ahead of schedule.'], correct:0, note:'"Retraso" = delay.'}],
+  types:[
+    {source:'in advance', accepted:['con antelacion','con antelación'], solution:'con antelación'},
+    {source:'I would like to change my booking.', accepted:['quisiera cambiar mi reserva','querría cambiar mi reserva','me gustaría cambiar mi reserva','me gustaria cambiar mi reserva'], solution:'Quisiera cambiar mi reserva.'}]
+},
+{ title:'Quejas con clase', en:'Complaining politely',
+  vocab:[['la queja','the complaint'],['reclamar','to file a claim'],['el ruido','the noise'],['las vistas','the view'],['el malentendido','the misunderstanding'],['hacer la vista gorda','to turn a blind eye'],['quedar como un señor','to come across gracefully'],['solucionar','to solve'],['el encargado','the manager'],['de mala gana','reluctantly']],
+  sentences:[
+    {es:'Disculpe, pero la habitación no es lo que reservamos.', en:'Excuse me, but the room is not what we booked.', dEs:['disculpa','habitaciones','reservan'], dEn:['excuses','rooms','book']},
+    {es:'Hay un ruido constante que no nos deja dormir.', en:'There is a constant noise that does not let us sleep.', dEs:['ruidos','constantes','dejan'], dEn:['noises','constantly','sleeps']},
+    {es:'¿Podría hablar con el encargado, por favor?', en:'Could I speak with the manager, please?', dEs:['puedes','encargados','hablas'], dEn:['can','managers','speaks']},
+    {es:'Nos prometieron vistas al mar y damos a un muro.', en:'They promised us sea views and we face a wall.', dEs:['prometen','vista','muros'], dEn:['promise','walls','facing']},
+    {es:'Seguro que ha sido un malentendido; lo solucionamos ahora mismo.', en:'Surely it was a misunderstanding; we will solve it right away.', dEs:['malentendidos','solucionan','mismos'], dEn:['sure','misunderstandings','solves']},
+    {es:'El recepcionista nos atendió de mala gana.', en:'The receptionist served us reluctantly.', dEs:['recepcionistas','atienden','ganas'], dEn:['receptionists','serves','reluctant']},
+    {es:'Si no lo arreglan, pondré una reclamación por escrito.', en:'If they do not fix it, I will file a written complaint.', dEs:['arregla','pondrás','reclamaciones'], dEn:['fixes','files','complained']},
+    {es:'No quiero parecer grosero, pero esto es inaceptable.', en:'I do not want to seem rude, but this is unacceptable.', dEs:['quieres','pareces','groseros'], dEn:['wants','seems','acceptable']},
+    {es:'Al final nos cambiaron de habitación sin coste.', en:'In the end they moved us to another room at no cost.', dEs:['cambian','habitaciones','costes'], dEn:['moves','rooms','costs']},
+    {es:'No pienso hacer la vista gorda con este servicio.', en:'I am not going to turn a blind eye to this service.', dEs:['piensas','vistas','gordas'], dEn:['thinks','blindly','services']}],
+  fills:[
+    {before:'Quiero poner una ', after:' por escrito.', options:['queja','ceja','teja'], correct:0, translation:'I want to file a written complaint. ("Ceja" = eyebrow; "teja" = roof tile!)'},
+    {before:'El camarero nos sirvió ', after:'.', options:['de mala gana','de mala lana','de mala cama'], correct:0, translation:'The waiter served us reluctantly.'},
+    {before:'Esta vez no voy a hacer ', after:'.', options:['la vista gorda','la vista flaca','la visita gorda'], correct:0, translation:'This time I am not going to turn a blind eye.'}],
+  choices:[
+    {prompt:'Which phrase starts a polite complaint?', options:['Disculpe, pero...','¡Oiga usted!','Me da igual...'], correct:0, note:'Politeness opens doors (and upgrades).'},
+    {prompt:'What does it mean?', context:'Esto no hay por dónde cogerlo.', options:['This is a complete mess.','There is no handle on this.','You cannot pick this up.'], correct:0, note:'Total-disaster idiom.'},
+    {prompt:'The manager offers "una atención de la casa". What is it?', options:['A complimentary treat.','A house call.','Extra attention to detail.'], correct:0, note:'Free dessert incoming.'}],
+  types:[
+    {source:'Excuse me, but...', accepted:['disculpe pero','disculpa pero'], solution:'Disculpe, pero...'},
+    {source:'Could you solve it, please?', accepted:['podria solucionarlo por favor','podría solucionarlo por favor','puede solucionarlo por favor'], solution:'¿Podría solucionarlo, por favor?'}]
+},
+{ title:'Perderse y encontrarse', en:'Directions & getting lost',
+  vocab:[['perderse','to get lost'],['el atajo','the shortcut'],['a mano derecha','on the right-hand side'],['todo recto','straight ahead'],['la bocacalle','the side street'],['el casco antiguo','the old town'],['cruzar','to cross'],['quedar lejos','to be far away'],['el plano','the city map'],['orientarse','to get your bearings']],
+  sentences:[
+    {es:'Nos perdimos por el casco antiguo, y fue lo mejor del viaje.', en:'We got lost in the old town, and it was the best part of the trip.', dEs:['perdemos','cascos','antiguos'], dEn:['get','towns','trips']},
+    {es:'Siga todo recto y gire en la segunda bocacalle.', en:'Go straight ahead and turn at the second side street.', dEs:['sigues','rectos','bocacalles'], dEn:['goes','straightly','streets']},
+    {es:'¿El museo queda muy lejos de aquí?', en:'Is the museum very far from here?', dEs:['quedan','museos','cercas'], dEn:['stays','museums','nears']},
+    {es:'Conozco un atajo que te ahorra diez minutos.', en:'I know a shortcut that saves you ten minutes.', dEs:['conoces','atajos','ahorran'], dEn:['knows','shortcuts','saving']},
+    {es:'La catedral está a mano derecha, no tiene pérdida.', en:'The cathedral is on the right; you cannot miss it.', dEs:['manos','derechas','pérdidas'], dEn:['rights','cathedrals','missed']},
+    {es:'Cruza la plaza y verás la entrada al fondo.', en:'Cross the square and you will see the entrance at the back.', dEs:['cruzas','plazas','entradas'], dEn:['crosses','squares','entrances']},
+    {es:'Sin datos en el móvil, tuvimos que orientarnos con un plano.', en:'Without data on our phones, we had to get our bearings with a map.', dEs:['dato','móviles','planos'], dEn:['datas','phone','maps']},
+    {es:'Pregunta a cualquiera; aquí la gente es muy maja.', en:'Ask anyone; people here are really nice.', dEs:['preguntas','cualquier','majas'], dEn:['asks','peoples','nicely']},
+    {es:'Me suena esta calle; creo que ya hemos pasado por aquí.', en:'This street rings a bell; I think we have already been through here.', dEs:['suenan','calles','pasamos'], dEn:['sounds','streets','passed']},
+    {es:'Al final el hotel estaba a la vuelta de la esquina.', en:'In the end the hotel was just around the corner.', dEs:['finales','vueltas','esquinas'], dEn:['finally','corners','turned']}],
+  fills:[
+    {before:'Perdona, ¿la estación queda ', after:' de aquí?', options:['lejos','larga','luego'], correct:0, translation:'Excuse me, is the station far from here?'},
+    {before:'Siga ', after:' hasta el semáforo.', options:['todo recto','todo curvo','todo cerca'], correct:0, translation:'Go straight ahead until the traffic light.'},
+    {before:'El bar está ', after:' derecha, junto a la farmacia.', options:['a mano','a pie','a cara'], correct:0, translation:'The bar is on the right-hand side, next to the pharmacy.'}],
+  choices:[
+    {prompt:'Which of these means "shortcut"?', options:['el atajo','el tajo','el atasco'], correct:0, note:'"El atasco" = a traffic jam!'},
+    {prompt:'What does it mean?', context:'No tiene pérdida.', options:['You cannot miss it.','It has no loss.','It is not worth losing.'], correct:0, note:'What locals say before you get lost anyway.'},
+    {prompt:'A local says the beach is "a dos pasos". How far is it?', options:['Very close.','Two blocks up.','A two-hour walk.'], correct:0, note:'Literally "two steps away".'}],
+  types:[
+    {source:'straight ahead', accepted:['todo recto','todo derecho'], solution:'todo recto'},
+    {source:'We got lost.', accepted:['nos perdimos'], solution:'Nos perdimos.'}]
+},
+{ title:'Cultura y museos', en:'Museums & must-sees',
+  vocab:[['la obra maestra','the masterpiece'],['la entrada gratuita','the free admission'],['la visita guiada','the guided tour'],['la audioguía','the audio guide'],['el cuadro','the painting'],['la exposición','the exhibition'],['imprescindible','a must / essential'],['la taquilla','the ticket office'],['el patrimonio','the heritage'],['agotarse','to sell out']],
+  sentences:[
+    {es:'La exposición temporal es aún mejor que la permanente.', en:'The temporary exhibition is even better than the permanent one.', dEs:['exposiciones','temporales','permanentes'], dEn:['exhibitions','temporarily','ones']},
+    {es:'Los domingos por la tarde la entrada es gratuita.', en:'On Sunday afternoons admission is free.', dEs:['domingo','tardes','entradas'], dEn:['Mondays','afternoon','freely']},
+    {es:'Reserva la visita guiada; se agota enseguida.', en:'Book the guided tour; it sells out right away.', dEs:['reservas','visitas','agotan'], dEn:['books','tours','selling']},
+    {es:'Este cuadro es la joya de la colección.', en:'This painting is the jewel of the collection.', dEs:['cuadros','joyas','colecciones'], dEn:['paintings','jewels','collections']},
+    {es:'Madruga si quieres ver la obra maestra sin gente.', en:'Go early if you want to see the masterpiece without crowds.', dEs:['madrugas','obras','maestras'], dEn:['goes','works','crowded']},
+    {es:'Sacamos las entradas en la taquilla para evitar comisiones.', en:'We got the tickets at the ticket office to avoid fees.', dEs:['sacan','entrada','taquillas'], dEn:['gets','offices','fee']},
+    {es:'El casco antiguo entero es Patrimonio de la Humanidad.', en:'The entire old town is a World Heritage Site.', dEs:['cascos','enteros','patrimonios'], dEn:['entirely','towns','sites']},
+    {es:'Dos horas de cola, pero valió muchísimo la pena.', en:'Two hours of queuing, but it was totally worth it.', dEs:['hora','colas','valieron'], dEn:['hour','queue','worthy']},
+    {es:'La audioguía está incluida en el precio.', en:'The audio guide is included in the price.', dEs:['audioguías','incluidas','precios'], dEn:['guides','includes','prices']},
+    {es:'Es un museo pequeño pero absolutamente imprescindible.', en:'It is a small museum but absolutely essential.', dEs:['museos','pequeños','imprescindibles'], dEn:['museums','smaller','essentially']}],
+  fills:[
+    {before:'Hay que hacer ', after:' dos horas para entrar.', options:['cola','bola','ola'], correct:0, translation:'You have to queue for two hours to get in. ("Ola" = wave!)'},
+    {before:'La entrada es ', after:' los miércoles.', options:['gratuita','gratuito','graduada'], correct:0, translation:'Admission is free on Wednesdays. (La entrada is feminine!)'},
+    {before:'Esta exposición es ', after:'; no te la pierdas.', options:['imprescindible','imprevisible','impresentable'], correct:0, translation:'This exhibition is a must; do not miss it. ("Impresentable" = disgraceful!)'}],
+  choices:[
+    {prompt:'Which of these means "masterpiece"?', options:['obra maestra','obra madre','obra mayor'], correct:0, note:'Literally "master work".'},
+    {prompt:'What does it mean?', context:'Este museo es una pasada.', options:['This museum is amazing.','This museum is a corridor.','This museum is overpriced.'], correct:0, note:'"Una pasada" = incredible.'},
+    {prompt:'The sign says "prohibido el flash". What can you not do?', options:['Use flash photography.','Run in the halls.','Bring flashlights.'], correct:0, note:'The paintings thank you.'}],
+  types:[
+    {source:'the guided tour', accepted:['la visita guiada'], solution:'la visita guiada'},
+    {source:'Do not miss it!', accepted:['no te lo pierdas','no te la pierdas'], solution:'¡No te lo pierdas!'}]
+},
+{ title:'Aventuras', en:'Tell your travel stories',
+  vocab:[['inolvidable','unforgettable'],['el flechazo','love at first sight'],['la anécdota','the story (anecdote)'],['pasarlo bomba','to have a blast'],['el contratiempo','the setback'],['de milagro','miraculously'],['la aventura','the adventure'],['recorrer','to travel around'],['el atardecer','the sunset'],['llover a cántaros','to pour (rain)']],
+  sentences:[
+    {es:'Recorrimos la costa entera en una furgoneta alquilada.', en:'We traveled the whole coast in a rented van.', dEs:['recorren','costas','alquiladas'], dEn:['travels','coasts','renting']},
+    {es:'Perdimos el ferry, pero de milagro conseguimos otro barco.', en:'We missed the ferry, but miraculously we got another boat.', dEs:['pierden','barcos','consiguen'], dEn:['miss','boats','gets']},
+    {es:'Lo pasamos bomba en las fiestas del pueblo.', en:'We had a blast at the town festival.', dEs:['pasan','bombas','pueblos'], dEn:['has','blasts','towns']},
+    {es:'El atardecer desde el faro fue inolvidable.', en:'The sunset from the lighthouse was unforgettable.', dEs:['atardeceres','faros','olvidable'], dEn:['sunsets','lighthouses','forgettable']},
+    {es:'Fue un flechazo: vimos la casa y la quisimos al momento.', en:'It was love at first sight: we saw the house and wanted it instantly.', dEs:['flechazos','vemos','queremos'], dEn:['sees','wants','instant']},
+    {es:'Cada contratiempo se convirtió en una anécdota que contar.', en:'Every setback became a story to tell.', dEs:['contratiempos','convierte','anécdotas'], dEn:['setbacks','becomes','stories']},
+    {es:'Mientras cenábamos, empezó a llover a cántaros.', en:'While we were having dinner, it started to pour.', dEs:['cenamos','empieza','cántaro'], dEn:['dinners','starts','raining']},
+    {es:'Merecieron la pena hasta los madrugones.', en:'Even the early starts were worthwhile.', dEs:['merecen','penas','madrugón'], dEn:['earliest','start','worth']},
+    {es:'Nos quedamos sin gasolina en mitad de la nada.', en:'We ran out of gas in the middle of nowhere.', dEs:['quedan','gasolinas','mitades'], dEn:['runs','gases','middles']},
+    {es:'Volveremos el año que viene, eso seguro.', en:'We will come back next year, that is for sure.', dEs:['volverán','años','vienen'], dEn:['returns','years','surely']}],
+  fills:[
+    {before:'Lo pasamos ', after:' en la feria.', options:['bomba','bombilla','bombona'], correct:0, translation:'We had a blast at the fair. ("Bombilla" = lightbulb; "bombona" = gas canister!)'},
+    {before:'Nos salvamos ', after:': el tren salió con retraso.', options:['de milagro','de milagros','por milagroso'], correct:0, translation:'We were saved miraculously: the train left late.'},
+    {before:'Mientras ', after:' por la playa, encontramos una cala escondida.', options:['paseábamos','paseamos','pasearemos'], correct:0, translation:'While we were strolling along the beach, we found a hidden cove.'}],
+  choices:[
+    {prompt:'Which of these means "to have a blast"?', options:['pasarlo bomba','pasarlo bombero','ponerse bomba'], correct:0, note:'"Bombero" = firefighter!'},
+    {prompt:'What does it mean?', context:'Llovía a cántaros.', options:['It was pouring.','It was raining jugs.','It rained on the pitchers.'], correct:0, note:'The Spanish version of "raining cats and dogs".'},
+    {prompt:'Your friend describes a trip as "redondo". What was it like?', options:['Perfect from start to finish.','Round-shaped.','Exhausting.'], correct:0, note:'"Salir redondo" strikes again.'}],
+  types:[
+    {source:'unforgettable', accepted:['inolvidable'], solution:'inolvidable'},
+    {source:'We had a blast.', accepted:['lo pasamos bomba','nos lo pasamos bomba','lo pasamos genial'], solution:'Lo pasamos bomba.'}]
+},
+/* ===== SECTION 13 · El mundo de hoy ===== */
+{ title:'Las noticias', en:'Read the news critically',
+  vocab:[['los titulares','the headlines'],['la prensa','the press'],['el suceso','the incident'],['la fuente','the source'],['el bulo','the fake news story'],['desmentir','to deny (a claim)'],['la portada','the front page'],['en directo','live'],['el periodista','the journalist'],['de última hora','breaking (news)']],
+  sentences:[
+    {es:'No te creas todo lo que sale en los titulares.', en:'Do not believe everything that appears in the headlines.', dEs:['crees','titular','salen'], dEn:['believes','headline','appearing']},
+    {es:'La noticia resultó ser un bulo.', en:'The news story turned out to be fake.', dEs:['noticias','resultan','bulos'], dEn:['new','turns','fakes']},
+    {es:'El gobierno desmintió los rumores esta mañana.', en:'The government denied the rumors this morning.', dEs:['desmienten','gobiernos','rumor'], dEn:['denies','governments','rumor']},
+    {es:'Contrasta la información con varias fuentes.', en:'Check the information against several sources.', dEs:['contrastas','informaciones','fuente'], dEn:['checks','informations','source']},
+    {es:'Lo están retransmitiendo en directo desde el lugar.', en:'They are broadcasting it live from the scene.', dEs:['retransmiten','directos','lugares'], dEn:['broadcasts','lively','scenes']},
+    {es:'El suceso ocupa la portada de todos los periódicos.', en:'The incident is on the front page of every newspaper.', dEs:['sucesos','portadas','periódico'], dEn:['incidents','pages','newspapers']},
+    {es:'A última hora confirmaron la dimisión del ministro.', en:'At the last minute they confirmed the minister’s resignation.', dEs:['últimas','confirman','ministros'], dEn:['lastly','confirms','ministers']},
+    {es:'La prensa local lo contó antes que nadie.', en:'The local press reported it before anyone else.', dEs:['prensas','locales','cuentan'], dEn:['presses','locally','reports']},
+    {es:'Media ciudad se quedó sin luz, según informan.', en:'Half the city lost power, according to reports.', dEs:['medias','ciudades','informa'], dEn:['halves','cities','reporting']},
+    {es:'Mañana entrevistan al alcalde en la radio.', en:'Tomorrow they are interviewing the mayor on the radio.', dEs:['entrevista','alcaldes','radios'], dEn:['interviews','mayors','radios']}],
+  fills:[
+    {before:'Esa historia es falsa: un ', after:' de manual.', options:['bulo','búho','bollo'], correct:0, translation:'That story is false: textbook fake news. ("Búho" = owl; "bollo" = bun!)'},
+    {before:'El club ', after:' los rumores del fichaje.', options:['desmintió','desmentió','desmintiendo'], correct:0, translation:'The club denied the transfer rumors. (Desmentir: e changes to i!)'},
+    {before:'Lo vimos ', after:' por televisión.', options:['en directo','al directo','de directo'], correct:0, translation:'We watched it live on TV.'}],
+  choices:[
+    {prompt:'Which of these means "fake news story"?', options:['un bulo','un búho','una bula'], correct:0, note:'"Una bula" = a papal bull!'},
+    {prompt:'What does it mean?', context:'La noticia corrió como la pólvora.', options:['The news spread like wildfire.','The news ran with gunpowder.','The news exploded the building.'], correct:0, note:'"Como la pólvora" = super fast.'},
+    {prompt:'A headline says "ÚLTIMA HORA". What kind of news is it?', options:['Breaking news.','The evening news.','The final episode.'], correct:0, note:'Literally "last hour".'}],
+  types:[
+    {source:'the headlines', accepted:['los titulares'], solution:'los titulares'},
+    {source:'It turned out to be fake.', accepted:['resulto ser un bulo','resultó ser un bulo','resultó ser falso','resulto ser falso'], solution:'Resultó ser un bulo.'}]
+},
+{ title:'Tecnología y redes', en:'Phones, apps & passwords',
+  vocab:[['descargar','to download'],['la contraseña','the password'],['el enlace','the link'],['compartir','to share'],['la pantalla','the screen'],['quedarse sin batería','to run out of battery'],['el archivo','the file'],['borrar','to delete'],['actualizar','to update'],['estar enganchado','to be hooked']],
+  sentences:[
+    {es:'Me quedé sin batería en el peor momento.', en:'I ran out of battery at the worst moment.', dEs:['quedaste','baterías','momentos'], dEn:['runs','batteries','moments']},
+    {es:'No abras ese enlace; parece sospechoso.', en:'Do not open that link; it looks suspicious.', dEs:['abres','enlaces','sospechosos'], dEn:['opens','links','suspiciously']},
+    {es:'Cambia la contraseña de vez en cuando.', en:'Change your password from time to time.', dEs:['cambias','contraseñas','cuándo'], dEn:['changes','passwords','sometimes']},
+    {es:'Mi madre está enganchada a los vídeos de cocina.', en:'My mom is hooked on cooking videos.', dEs:['enganchado','vídeo','cocinas'], dEn:['hooks','video','cooked']},
+    {es:'Borra los archivos que ya no uses.', en:'Delete the files you no longer use.', dEs:['borras','archivo','usas'], dEn:['deletes','file','using']},
+    {es:'Actualiza la aplicación para que no falle.', en:'Update the app so it does not crash.', dEs:['actualizas','aplicaciones','falla'], dEn:['updates','apps','crashes']},
+    {es:'¿Me compartes tu ubicación cuando salgas?', en:'Will you share your location with me when you leave?', dEs:['comparte','ubicaciones','sales'], dEn:['shares','locations','leaves']},
+    {es:'Pasé la tarde con la pantalla a tope de brillo.', en:'I spent the afternoon with the screen at full brightness.', dEs:['pasaste','pantallas','brillos'], dEn:['spends','screens','brightly']},
+    {es:'Descarga el archivo antes de que caduque el enlace.', en:'Download the file before the link expires.', dEs:['descargas','archivos','caduca'], dEn:['downloads','files','expired']},
+    {es:'Silencié el grupo de la familia sin ningún remordimiento.', en:'I muted the family group chat without any remorse.', dEs:['silencias','grupos','remordimientos'], dEn:['mutes','groups','remorseful']}],
+  fills:[
+    {before:'No recuerdo la ', after:' del wifi.', options:['contraseña','contramano','contradanza'], correct:0, translation:'I do not remember the wifi password.'},
+    {before:'Mándame el ', after:' por mensaje.', options:['enlace','encaje','enchufe'], correct:0, translation:'Send me the link by message. ("Encaje" = lace; "enchufe" = plug!)'},
+    {before:'Estoy ', after:' a esta serie; no puedo parar.', options:['enganchado','enchufado','encajado'], correct:0, translation:'I am hooked on this show; I cannot stop.'}],
+  choices:[
+    {prompt:'Which of these means "to run out of battery"?', options:['quedarse sin batería','salirse de batería','perder la pila'], correct:0, note:'"Quedarse sin" = to run out of anything.'},
+    {prompt:'What does it mean?', context:'Consiguió el trabajo porque tiene enchufe.', options:['He got the job through connections.','He got the job because he owns a plug.','He works as an electrician.'], correct:0, note:'"Tener enchufe" = to have an inside contact!'},
+    {prompt:'Your friend says "se me ha colgado el ordenador". What happened?', options:['Their computer froze.','They hung up their computer.','Their computer is on the wall.'], correct:0, note:'"Colgarse" = to freeze/crash.'}],
+  types:[
+    {source:'the password', accepted:['la contraseña','la contrasena'], solution:'la contraseña'},
+    {source:'I ran out of battery.', accepted:['me quede sin bateria','me quedé sin batería'], solution:'Me quedé sin batería.'}]
+},
+{ title:'Medio ambiente', en:'Green living',
+  vocab:[['reciclar','to recycle'],['el envase','the container (packaging)'],['la sequía','the drought'],['el vertido','the spill (dumping)'],['renovable','renewable'],['la huella','the footprint'],['malgastar','to waste'],['el vidrio','the glass'],['concienciarse','to become aware'],['a granel','in bulk']],
+  sentences:[
+    {es:'Cada vez más gente compra a granel para ahorrar envases.', en:'More and more people buy in bulk to save on packaging.', dEs:['granos','envase','ahorran'], dEn:['peoples','bulks','packagings']},
+    {es:'La sequía de este verano ha sido histórica.', en:'This summer’s drought has been historic.', dEs:['sequías','veranos','históricos'], dEn:['droughts','summers','historically']},
+    {es:'Separa el vidrio del plástico antes de tirarlo.', en:'Separate the glass from the plastic before throwing it away.', dEs:['separas','vidrios','plásticos'], dEn:['separates','glasses','plastics']},
+    {es:'No malgastes agua; cierra el grifo al cepillarte.', en:'Do not waste water; turn off the tap while brushing your teeth.', dEs:['malgastas','aguas','grifos'], dEn:['wastes','waters','taps']},
+    {es:'Multaron a la empresa por un vertido ilegal.', en:'The company was fined for an illegal spill.', dEs:['multan','empresas','vertidos'], dEn:['fines','companies','spills']},
+    {es:'Deberíamos reducir nuestra huella de carbono.', en:'We should reduce our carbon footprint.', dEs:['deberías','huellas','carbonos'], dEn:['shoulder','footprints','coal']},
+    {es:'La energía renovable ya es más barata que el carbón.', en:'Renewable energy is already cheaper than coal.', dEs:['energías','renovables','baratas'], dEn:['energies','cheapest','coals']},
+    {es:'Hay que concienciarse desde pequeños.', en:'We must become aware from a young age.', dEs:['conciencias','pequeño','para'], dEn:['awareness','small','becoming']},
+    {es:'Este envase es cien por cien reciclable.', en:'This container is one hundred percent recyclable.', dEs:['envases','cientos','reciclables'], dEn:['containers','percents','recycled']},
+    {es:'Plantaron mil árboles para recuperar el bosque.', en:'They planted a thousand trees to restore the forest.', dEs:['plantan','árbol','bosques'], dEn:['plants','tree','forests']}],
+  fills:[
+    {before:'Compro legumbres ', after:' para no usar plástico.', options:['a granel','al granel','en granel'], correct:0, translation:'I buy legumes in bulk to avoid plastic.'},
+    {before:'No ', after:' la comida; congela lo que sobre.', options:['malgastes','malgastas','malgastarás'], correct:0, translation:'Do not waste food; freeze what is left over.'},
+    {before:'El contenedor verde es para el ', after:'.', options:['vidrio','vidente','virus'], correct:0, translation:'The green container is for glass. ("Vidente" = fortune teller!)'}],
+  choices:[
+    {prompt:'Which of these means "drought"?', options:['la sequía','la secuela','la secuoya'], correct:0, note:'"Secuela" = sequel; "secuoya" = sequoia!'},
+    {prompt:'What does it mean?', context:'No llueve a gusto de todos.', options:['You cannot please everyone.','Nobody likes rain.','It never rains enough.'], correct:0, note:'A very useful proverb.'},
+    {prompt:'The sign says "punto limpio". What is it?', options:['A recycling drop-off center.','A very clean spot.','A car wash.'], correct:0, note:'Where old TVs go to rest.'}],
+  types:[
+    {source:'to recycle', accepted:['reciclar'], solution:'reciclar'},
+    {source:'Do not waste water.', accepted:['no malgastes agua','no malgastes el agua','no desperdicies agua','no desperdicies el agua'], solution:'No malgastes agua.'}]
+},
+{ title:'Dinero y compras', en:'Bargains, bills & budgets',
+  vocab:[['el presupuesto','the budget'],['las rebajas','the sales'],['el descuento','the discount'],['pagar a plazos','to pay in installments'],['la ganga','the bargain'],['costar un riñón','to cost a fortune'],['ahorrar','to save (money)'],['la factura','the bill (invoice)'],['devolver','to return (an item)'],['apretarse el cinturón','to tighten your belt']],
+  sentences:[
+    {es:'Encontré una ganga en las rebajas de enero.', en:'I found a bargain in the January sales.', dEs:['encuentras','gangas','rebaja'], dEn:['finds','bargains','sale']},
+    {es:'Este mes toca apretarse el cinturón.', en:'This month we have to tighten our belts.', dEs:['meses','aprietas','cinturones'], dEn:['months','tights','belt']},
+    {es:'¿Se puede pagar a plazos sin intereses?', en:'Can you pay in installments without interest?', dEs:['puedes','plazo','interés'], dEn:['pays','installment','interested']},
+    {es:'Guarda el tique por si tienes que devolverlo.', en:'Keep the receipt in case you have to return it.', dEs:['guardas','tiques','devuelves'], dEn:['keeps','receipts','returns']},
+    {es:'La reforma de la cocina nos costó un riñón.', en:'The kitchen renovation cost us a fortune.', dEs:['reformas','cocinas','riñones'], dEn:['renovations','kitchens','fortunes']},
+    {es:'Con este descuento, sale casi a mitad de precio.', en:'With this discount, it comes to almost half price.', dEs:['descuentos','salen','precios'], dEn:['discounts','coming','prices']},
+    {es:'Ahorra un poco cada mes, aunque sea poco.', en:'Save a little every month, even if it is not much.', dEs:['ahorras','meses','sean'], dEn:['saves','months','less']},
+    {es:'Nos llegó una factura de la luz desorbitada.', en:'We got an outrageous electricity bill.', dEs:['llegan','facturas','luces'], dEn:['gets','bills','electric']},
+    {es:'No me llega el presupuesto para tanto capricho.', en:'My budget does not stretch to so many treats.', dEs:['llegas','presupuestos','caprichos'], dEn:['budgets','stretches','treat']},
+    {es:'Lo compré por internet y llegó al día siguiente.', en:'I bought it online and it arrived the next day.', dEs:['compras','llegan','siguientes'], dEn:['buys','arrives','following']}],
+  fills:[
+    {before:'Esa tele nueva costó ', after:'.', options:['un riñón','un codo','un talón'], correct:0, translation:'That new TV cost a fortune. (Literally "a kidney"!)'},
+    {before:'En enero empiezan ', after:'.', options:['las rebajas','los rebajos','las rebajadas'], correct:0, translation:'The sales start in January.'},
+    {before:'Prefiero pagarlo ', after:' en seis meses.', options:['a plazos','a plazas','a pasos'], correct:0, translation:'I would rather pay it in installments over six months. ("Plazas" = town squares!)'}],
+  choices:[
+    {prompt:'Which of these means "a bargain"?', options:['una ganga','una gansa','una manga'], correct:0, note:'"Gansa" = a goose; "manga" = a sleeve!'},
+    {prompt:'What does it mean?', context:'Estoy sin blanca hasta fin de mes.', options:['I am broke until the end of the month.','I have no white clothes.','I am pale this month.'], correct:0, note:'"Estar sin blanca" = flat broke.'},
+    {prompt:'The shop says "segunda unidad al 50%". What is the deal?', options:['Half price on the second item.','Everything is 50% off.','Two units for 50 euros.'], correct:0, note:'Read the fine print!'}],
+  types:[
+    {source:'the discount', accepted:['el descuento'], solution:'el descuento'},
+    {source:'It cost me a fortune.', accepted:['me costo un riñon','me costó un riñón','me costó un ojo de la cara','me costo un ojo de la cara'], solution:'Me costó un riñón.'}]
+},
+{ title:'Opinar con matices', en:'Nuanced opinions',
+  vocab:[['matizar','to qualify (a statement)'],['sin embargo','however'],['no obstante','nevertheless'],['en cuanto a','regarding'],['por un lado','on the one hand'],['en el fondo','deep down'],['al fin y al cabo','after all'],['dar en el clavo','to hit the nail on the head'],['andarse por las ramas','to beat around the bush'],['el matiz','the nuance']],
+  sentences:[
+    {es:'En el fondo, los dos queremos lo mismo.', en:'Deep down, we both want the same thing.', dEs:['fondos','quieren','mismos'], dEn:['deeply','wants','things']},
+    {es:'Tu análisis dio en el clavo.', en:'Your analysis hit the nail on the head.', dEs:['dan','clavos','cabeza'], dEn:['hits','nails','heads']},
+    {es:'No te andes por las ramas y dime qué pasó.', en:'Do not beat around the bush and tell me what happened.', dEs:['andas','rama','dices'], dEn:['beats','bushes','happens']},
+    {es:'En cuanto al precio, prefiero no opinar todavía.', en:'Regarding the price, I would rather not comment yet.', dEs:['cuantos','precios','opinas'], dEn:['regards','prices','comments']},
+    {es:'Por un lado me apetece; por otro, me da pereza.', en:'On the one hand I feel like it; on the other, I cannot be bothered.', dEs:['lados','apetecen','perezas'], dEn:['hands','feels','bothers']},
+    {es:'Es caro; no obstante, la calidad lo justifica.', en:'It is expensive; nevertheless, the quality justifies it.', dEs:['caros','calidades','justifican'], dEn:['expensively','qualities','justified']},
+    {es:'Al fin y al cabo, lo importante es intentarlo.', en:'After all, the important thing is to try.', dEs:['fines','cabos','importantes'], dEn:['ends','importantly','tried']},
+    {es:'Permíteme matizar lo que dije ayer.', en:'Allow me to qualify what I said yesterday.', dEs:['permites','matizas','digo'], dEn:['allows','qualifies','says']},
+    {es:'Entiendo tu punto; sin embargo, discrepo en un matiz.', en:'I see your point; however, I disagree on one nuance.', dEs:['entiendes','puntos','matices'], dEn:['sees','points','disagrees']},
+    {es:'Dicho esto, respeto tu decisión.', en:'That said, I respect your decision.', dEs:['dichos','respetas','decisiones'], dEn:['saying','respects','decisions']}],
+  fills:[
+    {before:'No te andes por ', after:' y ve al grano.', options:['las ramas','las armas','las camas'], correct:0, translation:'Do not beat around the bush and get to the point. ("Armas" = weapons!)'},
+    {before:'Es un buen plan; ', after:', hay riesgos.', options:['no obstante','no constante','en obstante'], correct:0, translation:'It is a good plan; nevertheless, there are risks.'},
+    {before:'Con ese comentario diste en ', after:'.', options:['el clavo','el codo','el caldo'], correct:0, translation:'With that comment you hit the nail on the head. ("Caldo" = broth!)'}],
+  choices:[
+    {prompt:'Which of these means "to beat around the bush"?', options:['andarse por las ramas','subirse a las ramas','caerse de la rama'], correct:0, note:'Literally "to walk among the branches".'},
+    {prompt:'What does it mean?', context:'Vamos al grano.', options:['Let us get to the point.','Let us go to the farm.','Let us eat some grain.'], correct:0, note:'"El grano" = the grain = the point.'},
+    {prompt:'Someone says "ahí le has dado". What are they telling you?', options:['You nailed it.','You hit them.','You knocked on the door.'], correct:0, note:'Agreement, Spanish style.'}],
+  types:[
+    {source:'however', accepted:['sin embargo'], solution:'sin embargo'},
+    {source:'after all', accepted:['al fin y al cabo','a fin de cuentas'], solution:'al fin y al cabo'}]
+},
+/* ===== SECTION 14 · Nivel leyenda ===== */
+{ title:'Refranes', en:'Proverbs & sayings',
+  vocab:[['más vale tarde que nunca','better late than never'],['no hay mal que por bien no venga','every cloud has a silver lining'],['a quien madruga, Dios le ayuda','the early bird catches the worm'],['ojos que no ven, corazón que no siente','out of sight, out of mind'],['más vale pájaro en mano','a bird in the hand'],['de tal palo, tal astilla','like father, like son'],['el hábito no hace al monje','clothes do not make the man'],['a caballo regalado no le mires el diente','do not look a gift horse in the mouth'],['quien mucho abarca, poco aprieta','do not bite off more than you can chew'],['cada maestrillo tiene su librillo','everyone has their own method']],
+  sentences:[
+    {es:'Llegaste al final, pero más vale tarde que nunca.', en:'You arrived at the end, but better late than never.', dEs:['llegas','finales','vales'], dEn:['arrives','ends','best']},
+    {es:'Perdí aquel trabajo, y mira: no hay mal que por bien no venga.', en:'I lost that job, and look: every cloud has a silver lining.', dEs:['pierdes','trabajos','vengan'], dEn:['loses','jobs','silvery']},
+    {es:'Mi hija salió igual de cabezota: de tal palo, tal astilla.', en:'My daughter turned out just as stubborn: like father, like son.', dEs:['hijas','palos','astillas'], dEn:['daughters','fathers','sons']},
+    {es:'Acepta el coche de tu tío: a caballo regalado no le mires el diente.', en:'Accept your uncle’s car: do not look a gift horse in the mouth.', dEs:['aceptas','caballos','dientes'], dEn:['accepts','horses','mouths']},
+    {es:'No cojas tres proyectos: quien mucho abarca, poco aprieta.', en:'Do not take on three projects: do not bite off more than you can chew.', dEs:['coges','proyecto','aprietan'], dEn:['takes','chews','biting']},
+    {es:'Me quedo con esta oferta: más vale pájaro en mano.', en:'I will take this offer: a bird in the hand is worth two in the bush.', dEs:['quedas','ofertas','pájaros'], dEn:['offers','birds','bushes']},
+    {es:'Va de traje, pero el hábito no hace al monje.', en:'He wears a suit, but clothes do not make the man.', dEs:['vas','trajes','monjes'], dEn:['wearing','suits','monks']},
+    {es:'Me levanté a las seis: a quien madruga, Dios le ayuda.', en:'I got up at six: the early bird catches the worm.', dEs:['levantas','siete','ayudan'], dEn:['gets','worms','catch']},
+    {es:'Desde que se mudó, ni llama: ojos que no ven, corazón que no siente.', en:'Since he moved, he does not even call: out of sight, out of mind.', dEs:['mudas','llaman','corazones'], dEn:['moves','calls','minds']},
+    {es:'Cada maestrillo tiene su librillo, así que hazlo a tu manera.', en:'Everyone has their own method, so do it your way.', dEs:['maestrillos','librillos','maneras'], dEn:['ways','doing','owns']}],
+  fills:[
+    {before:'Más vale pájaro en mano que ciento ', after:'.', options:['volando','volado','voladores'], correct:0, translation:'A bird in the hand is worth a hundred flying.'},
+    {before:'A quien madruga, Dios le ', after:'.', options:['ayuda','ayude','ayudará'], correct:0, translation:'God helps those who rise early.'},
+    {before:'Ojos que no ven, corazón que no ', after:'.', options:['siente','sienta','sentirá'], correct:0, translation:'Out of sight, out of mind.'}],
+  choices:[
+    {prompt:'Complete the proverb: "De tal palo..."', options:['tal astilla','tal palillo','tal árbol'], correct:0, note:'Literally: from such a stick, such a splinter.'},
+    {prompt:'Your friend hesitates over a great offer. Which proverb fits?', options:['Más vale pájaro en mano que ciento volando.','El hábito no hace al monje.','Ojos que no ven, corazón que no siente.'], correct:0, note:'Take the bird!'},
+    {prompt:'What does "no hay mal que por bien no venga" mean?', options:['Every cloud has a silver lining.','Bad things never come alone.','Good and evil do not mix.'], correct:0, note:'Optimism, proverb-style.'}],
+  types:[
+    {source:'Better late than never.', accepted:['mas vale tarde que nunca','más vale tarde que nunca'], solution:'Más vale tarde que nunca.'},
+    {source:'like father, like son', accepted:['de tal palo tal astilla'], solution:'De tal palo, tal astilla.'}]
+},
+{ title:'Dobles sentidos', en:'Humor & wordplay',
+  vocab:[['tener guasa','to be (ironically) funny'],['la broma','the prank'],['el chiste','the joke'],['partirse de risa','to crack up'],['tomarse a bien','to take it well'],['la ironía','the irony'],['el juego de palabras','the pun'],['quedarse con alguien','to pull someone’s leg (trick)'],['sin gracia','unfunny'],['reírse a carcajadas','to laugh out loud']],
+  sentences:[
+    {es:'Nos partimos de risa con sus imitaciones.', en:'We cracked up at his impressions.', dEs:['parten','risas','imitación'], dEn:['cracks','ups','impression']},
+    {es:'¿Me estás contando un chiste o te estás quedando conmigo?', en:'Are you telling me a joke or are you pulling my leg?', dEs:['cuentas','chistes','quedas'], dEn:['tells','jokes','legs']},
+    {es:'Se lo tomó a bien, por suerte.', en:'He took it well, luckily.', dEs:['tomas','bienes','suertes'], dEn:['takes','goodly','lucky']},
+    {es:'El chiste era malísimo, pero me reí igual.', en:'The joke was terrible, but I laughed anyway.', dEs:['chistes','malísima','ríes'], dEn:['jokes','terribly','laughs']},
+    {es:'Tiene guasa que justo hoy llueva.', en:'It is ironic that it would rain today of all days.', dEs:['guasas','llueve','justos'], dEn:['ironically','rains','daily']},
+    {es:'Era solo una broma; no te lo tomes a mal.', en:'It was just a prank; do not take it badly.', dEs:['bromas','tomas','males'], dEn:['pranks','takes','worse']},
+    {es:'Los juegos de palabras no se pueden traducir.', en:'Puns cannot be translated.', dEs:['juego','palabra','traducen'], dEn:['pun','translates','cans']},
+    {es:'Mi abuelo se ríe a carcajadas con las películas mudas.', en:'My grandfather laughs out loud at silent movies.', dEs:['abuelos','ríes','mudos'], dEn:['grandfathers','laughing','silently']},
+    {es:'Ese comentario fue totalmente sin gracia.', en:'That comment was completely unfunny.', dEs:['comentarios','gracias','para'], dEn:['comments','funny','completed']},
+    {es:'La ironía no siempre se pilla por mensaje.', en:'Irony does not always come across in texts.', dEs:['ironías','pillan','mensajes'], dEn:['ironies','text','catching']}],
+  fills:[
+    {before:'Anoche nos ', after:' de risa en el teatro.', options:['partimos','partemos','partiremos'], correct:0, translation:'Last night we cracked up at the theater.'},
+    {before:'No te enfades, era solo una ', after:'.', options:['broma','bruma','brasa'], correct:0, translation:'Do not get mad, it was just a joke. ("Bruma" = mist; "brasa" = ember!)'},
+    {before:'Se rió ', after:' con el monólogo.', options:['a carcajadas','a cascadas','a bocajarro'], correct:0, translation:'She laughed out loud at the stand-up routine.'}],
+  choices:[
+    {prompt:'Which of these means "to crack up laughing"?', options:['partirse de risa','partirse la cabeza','reírse de lado'], correct:0, note:'Literally "to split yourself with laughter".'},
+    {prompt:'What does it mean?', context:'¡Qué arte tienes!', options:['You are so talented!','You own so much art!','How artificial you are!'], correct:0, note:'A very Andalusian compliment.'},
+    {prompt:'Someone says your joke "no tiene ni pizca de gracia". What do they think?', options:['It is not funny at all.','It is missing a pinch of salt.','It is slightly funny.'], correct:0, note:'"Ni pizca" = not one bit.'}],
+  types:[
+    {source:'to crack up', accepted:['partirse de risa'], solution:'partirse de risa'},
+    {source:'It was just a joke.', accepted:['era solo una broma','era sólo una broma','fue solo una broma','solo era una broma'], solution:'Era solo una broma.'}]
+},
+{ title:'Matices del subjuntivo', en:'Subjunctive fine-tuning',
+  vocab:[['aunque llueva','even if it rains'],['cuando llegues','when you arrive'],['antes de que te vayas','before you leave'],['a menos que','unless'],['con tal de que','as long as'],['en caso de que','in case'],['sin que se dé cuenta','without them noticing'],['como si nada','as if nothing happened'],['pase lo que pase','no matter what happens'],['sea como sea','one way or another']],
+  sentences:[
+    {es:'Pase lo que pase, estaré a tu lado.', en:'No matter what happens, I will be by your side.', dEs:['pasa','pases','lados'], dEn:['happen','matters','sides']},
+    {es:'Saldremos a caminar aunque llueva.', en:'We will go out for a walk even if it rains.', dEs:['llueve','lloverá','caminas'], dEn:['rain','walks','although']},
+    {es:'Avísame antes de que se agoten las entradas.', en:'Let me know before the tickets sell out.', dEs:['avisas','agotan','entrada'], dEn:['lets','sells','ticket']},
+    {es:'Te presto el coche con tal de que lo cuides.', en:'I will lend you the car as long as you take care of it.', dEs:['prestas','coches','cuidas'], dEn:['lends','cars','cares']},
+    {es:'No iré a menos que me lo pidas tú.', en:'I will not go unless you ask me yourself.', dEs:['irás','pides','usted'], dEn:['goes','asks','yourselves']},
+    {es:'Salió de casa sin que nadie se diera cuenta.', en:'He left the house without anyone noticing.', dEs:['sales','dieran','cuentas'], dEn:['leaves','anyones','notices']},
+    {es:'Actúa como si no hubiera pasado nada.', en:'He acts as if nothing had happened.', dEs:['actúas','hubieran','pasados'], dEn:['acted','happens','anything']},
+    {es:'Lleva paraguas por si acaso llueve luego.', en:'Take an umbrella in case it rains later.', dEs:['llevas','lluvia','para'], dEn:['takes','umbrellas','rained']},
+    {es:'En caso de que surja algo, te llamo enseguida.', en:'In case anything comes up, I will call you right away.', dEs:['surge','surjan','llamas'], dEn:['cases','coming','called']},
+    {es:'Cuando tengas un rato, échale un ojo a esto.', en:'When you have a moment, take a look at this.', dEs:['tienes','ratos','ojos'], dEn:['whenever','moments','looks']}],
+  fills:[
+    {before:'Iremos a la playa aunque ', after:' nublado.', options:['esté','está','estará'], correct:0, translation:'We will go to the beach even if it is cloudy.'},
+    {before:'Cierra las ventanas antes de que ', after:' a llover.', options:['empiece','empieza','empezará'], correct:0, translation:'Close the windows before it starts raining.'},
+    {before:'Habla bajito, sin que te ', after:' los niños.', options:['oigan','oyen','oirán'], correct:0, translation:'Speak quietly, without the kids hearing you.'}],
+  choices:[
+    {prompt:'Which one ALWAYS needs the subjunctive?', options:['antes de que...','porque...','ya que...'], correct:0, note:'"Antes de que" is a subjunctive guarantee.'},
+    {prompt:'"Por si acaso" is followed by...', options:['the indicative (llueve)','the subjunctive (llueva)','the infinitive (llover)'], correct:0, note:'Surprise! "Por si" takes the indicative.'},
+    {prompt:'What does it mean?', context:'Entró como si nada.', options:['He walked in as if nothing had happened.','He entered with nothing.','He never came in.'], correct:0, note:'"Como si nada" = totally casual.'}],
+  types:[
+    {source:'no matter what happens', accepted:['pase lo que pase'], solution:'pase lo que pase'},
+    {source:'even if it rains', accepted:['aunque llueva'], solution:'aunque llueva'}]
+},
+{ title:'Hablando en plata', en:'Everyday colloquial Spanish',
+  vocab:[['hablando en plata','frankly speaking'],['molar','to be cool (slang)'],['currar','to work (slang)'],['el curro','the job (slang)'],['flipar','to be amazed'],['la pasta','the money (slang)'],['tío / tía','dude / girl'],['guay','cool'],['liarse','to get mixed up'],['ir pillado','to be short (of time or money)']],
+  sentences:[
+    {es:'Hablando en plata: esto no funciona.', en:'Frankly speaking: this is not working.', dEs:['hablas','platas','funcionan'], dEn:['frank','speaks','works']},
+    {es:'Vas a flipar cuando veas las fotos.', en:'You are going to freak out when you see the photos.', dEs:['flipas','ves','foto'], dEn:['flips','sees','photo']},
+    {es:'No puedo quedar hoy: voy pillado de tiempo.', en:'I cannot meet today: I am short on time.', dEs:['puedes','quedas','pillados'], dEn:['cans','meets','shortly']},
+    {es:'El concierto moló muchísimo.', en:'The concert was really cool.', dEs:['mola','conciertos','mucho'], dEn:['coolly','concerts','very']},
+    {es:'Me lié con las fechas y compré el billete mal.', en:'I got mixed up with the dates and bought the wrong ticket.', dEs:['lías','fecha','billetes'], dEn:['gets','date','tickets']},
+    {es:'Curro de ocho a tres y luego estudio.', en:'I work from eight to three and then I study.', dEs:['curras','ochos','estudias'], dEn:['works','eights','studies']},
+    {es:'Eso cuesta una pasta; ni de broma lo compro.', en:'That costs a fortune; no way am I buying it.', dEs:['cuestan','pastas','bromas'], dEn:['costing','fortunes','ways']},
+    {es:'¡Qué guay que vengas tú también!', en:'How cool that you are coming too!', dEs:['guays','vienes','tampoco'], dEn:['coolest','comes','either']},
+    {es:'Tía, no te imaginas lo que me pasó.', en:'Girl, you will not believe what happened to me.', dEs:['tías','imagina','pasa'], dEn:['girls','believes','happens']},
+    {es:'Encontró un curro nuevo en dos semanas.', en:'She found a new job in two weeks.', dEs:['encuentras','curros','semana'], dEn:['finds','jobs','week']}],
+  fills:[
+    {before:'', after:' en plata: no me lo puedo permitir.', options:['Hablando','Hablado','Hablar'], correct:0, translation:'Frankly speaking: I cannot afford it.'},
+    {before:'Este plan me ', after:' mucho.', options:['mola','muela','mula'], correct:0, translation:'I really like this plan. ("Muela" = molar; "mula" = mule!)'},
+    {before:'No llego a fin de mes; voy muy ', after:' de pasta.', options:['pillado','pillote','pillando'], correct:0, translation:'I cannot make ends meet; I am really short on cash.'}],
+  choices:[
+    {prompt:'Which of these means "money" in slang?', options:['la pasta','la pista','la posta'], correct:0, note:'Yes, "pasta" also means pasta.'},
+    {prompt:'What does it mean?', context:'¡Flipo contigo, tío!', options:['I cannot believe you, dude!','I am flipping you, uncle!','You make me dizzy, sir!'], correct:0, note:'"Tío" = dude (not always uncle).'},
+    {prompt:'A friend says "me piro". What are they doing?', options:['Leaving.','Getting angry.','Lighting a fire.'], correct:0, note:'"Pirarse" = to take off.'}],
+  types:[
+    {source:'frankly speaking', accepted:['hablando en plata'], solution:'hablando en plata'},
+    {source:'That is really cool!', accepted:['que guay','qué guay','mola mucho','mola un montón','mola un monton'], solution:'¡Qué guay!'}]
+},
+{ title:'La guinda del pastel', en:'Mastery mix',
+  vocab:[['la guinda del pastel','the cherry on top'],['con creces','by far (amply)'],['de pe a pa','from A to Z'],['a estas alturas','at this point'],['por los pelos','by the skin of your teeth'],['como pez en el agua','like a fish in water'],['atar cabos','to put two and two together'],['dar la talla','to measure up'],['con los brazos abiertos','with open arms'],['salirse con la suya','to get one’s way']],
+  sentences:[
+    {es:'Aprobó el examen por los pelos, pero aprobó.', en:'She passed the exam by the skin of her teeth, but she passed.', dEs:['apruebas','exámenes','pelo'], dEn:['passes','exams','skins']},
+    {es:'A estas alturas, ya nada me sorprende.', en:'At this point, nothing surprises me anymore.', dEs:['altura','sorprenden','todavía'], dEn:['points','surprised','nothings']},
+    {es:'Superó las expectativas con creces.', en:'It exceeded expectations by far.', dEs:['superas','expectativa','crece'], dEn:['exceeds','expectation','farther']},
+    {es:'Me sé la lección de pe a pa.', en:'I know the lesson from A to Z.', dEs:['sabes','lecciones','papa'], dEn:['knows','lessons','zed']},
+    {es:'En la cocina se mueve como pez en el agua.', en:'In the kitchen she is like a fish in water.', dEs:['mueves','peces','aguas'], dEn:['moves','fishes','waters']},
+    {es:'Atando cabos, entendí lo que había pasado.', en:'Putting two and two together, I understood what had happened.', dEs:['atas','cabo','entiendes'], dEn:['puts','twos','understands']},
+    {es:'Nos recibieron con los brazos abiertos.', en:'They welcomed us with open arms.', dEs:['reciben','brazo','abierto'], dEn:['welcomes','arm','opened']},
+    {es:'El nuevo entrenador dio la talla desde el primer día.', en:'The new coach measured up from day one.', dEs:['das','tallas','entrenadores'], dEn:['measures','coaches','days']},
+    {es:'Al final siempre se sale con la suya.', en:'In the end he always gets his way.', dEs:['sales','suyas','tuya'], dEn:['ends','ways','hers']},
+    {es:'Y la guinda del pastel: nos invitaron a volver.', en:'And the cherry on top: they invited us back.', dEs:['guindas','pasteles','invitan'], dEn:['cherries','tops','invites']}],
+  fills:[
+    {before:'Llegamos al tren ', after:'.', options:['por los pelos','por las plumas','por los codos'], correct:0, translation:'We caught the train by the skin of our teeth. ("Hablar por los codos" = to talk nonstop!)'},
+    {before:'Se sabe el temario ', after:'.', options:['de pe a pa','de pa a pe','de pi a po'], correct:0, translation:'He knows the syllabus from A to Z.'},
+    {before:'Aquí me siento ', after:' en el agua.', options:['como pez','como pato','como perro'], correct:0, translation:'Here I feel like a fish in water.'}],
+  choices:[
+    {prompt:'Which of these means "the cherry on top"?', options:['la guinda del pastel','la miga del pan','la nata del café'], correct:0, note:'"La guinda" = the glacé cherry.'},
+    {prompt:'What does it mean?', context:'Siempre te sales con la tuya.', options:['You always get your way.','You always leave with yours.','You always take the exit.'], correct:0, note:'Said with equal parts annoyance and admiration.'},
+    {prompt:'Someone "no da la talla". What is the problem?', options:['They do not measure up.','They forgot their size.','They refuse to be measured.'], correct:0, note:'"La talla" = clothing size, and standards.'}],
+  types:[
+    {source:'by the skin of my teeth', accepted:['por los pelos'], solution:'por los pelos'},
+    {source:'the cherry on top', accepted:['la guinda del pastel'], solution:'la guinda del pastel'}]
 }];
+
+const SECTIONS = [
+  {num:9,  es:'Habla como un local',  en:'Speak like a local',            cefr:'C1'},
+  {num:10, es:'La sobremesa',         en:'Food & table culture',          cefr:'C1'},
+  {num:11, es:'Salud y bienestar',    en:'Health & wellbeing',            cefr:'C1'},
+  {num:12, es:'De viaje otra vez',    en:'Travel like a pro',             cefr:'C1+'},
+  {num:13, es:'El mundo de hoy',      en:'News, money, tech & society',   cefr:'C1+'},
+  {num:14, es:'Nivel leyenda',        en:'Proverbs, humor & mastery',     cefr:'C2'}
+];
+const PALETTE = [['#58cc02','#58a700'],['#1cb0f6','#1899d6'],['#ce82ff','#a560e8'],['#ff9600','#e08600'],['#ff4b96','#d63384']];
 
 const LESSON_PLANS = [
   [['choice',0],['tr',0,'en2es'],['listen',1],['fill',0],['matchV',[0,1,2,3,4]],['tr',2,'es2en'],['type',0],['tr',3,'en2es'],['listen',2],['choice',1]],
@@ -464,18 +1109,19 @@ function exerciseFromRef(key) {
 }
 
 function composeLesson(nodeIdx) {
-  if (nodeIdx === 20) {
+  const sec = Math.floor(nodeIdx / 21), within = nodeIdx % 21;
+  if (within === 20) {
     return FINAL_PLAN.map(op => {
       if (op[0] === 'matchM') {
         return { type:'match', prompt:'Tap the matching pairs',
-                 pairs:FINAL_MATCHES[op[1]].map(pv => UNITS[pv[0]].vocab[pv[1]]) };
+                 pairs:FINAL_MATCHES[op[1]].map(pv => UNITS[sec * 5 + pv[0]].vocab[pv[1]]) };
       }
-      const unit = op[1];
+      const unit = sec * 5 + op[1];
       const sub = [op[0]].concat(op.slice(2));
       return buildExercise(unit, sub, true);
     });
   }
-  const unit = Math.floor(nodeIdx / 4), lesson = nodeIdx % 4;
+  const unit = sec * 5 + Math.floor(within / 4), lesson = within % 4;
   return LESSON_PLANS[lesson].map(op => buildExercise(unit, op, lesson === 3));
 }
 /*DATA-END*/
@@ -489,7 +1135,7 @@ const isSpanish = ex => (ex.type === 'translate' && ex.dir === 'en2es') || ex.ty
                         (ex.type === 'type') || ex.type === 'fillblank';
 const PRAISE = ['Nice!', 'Excellent!', 'Great job!', '¡Muy bien!', 'Amazing!', '¡Perfecto!'];
 const NODE_NAMES = ['Lesson 1', 'Lesson 2', 'Lesson 3', 'Unit Review'];
-const TOTAL_NODES = 21;
+const TOTAL_NODES = SECTIONS.length * 21;
 
 /* ============================ persistence ============================ */
 const STORE_KEY = 'seccion9_progress_v1';
@@ -579,7 +1225,8 @@ function nodeButton(i, color, shadow, label, icon) {
   const wrap = document.createElement('div'); wrap.className = 'node-wrap';
   wrap.style.setProperty('--unit-color', color); wrap.style.setProperty('--unit-shadow', shadow);
   const offs = [0, -56, 0, 56];
-  const off = i === 20 ? 0 : offs[i % 4];
+  const within = i % 21;
+  const off = within === 20 ? 0 : offs[within % 4];
   const b = document.createElement('button');
   const done = isDone(i), unlocked = isUnlocked(i);
   b.className = 'node ' + (done ? 'node-done' : unlocked ? 'node-active' : 'node-locked');
@@ -619,24 +1266,34 @@ function renderPath() {
     inner.appendChild(card);
   }
 
-  UNITS.forEach((u, ui) => {
-    const banner = document.createElement('div'); banner.className = 'unit-banner';
-    banner.style.background = u.color;
-    banner.innerHTML = '<div class="ub-label">UNIT ' + (ui + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
-    banner.querySelector('.ub-title').textContent = u.title;
-    banner.querySelector('.ub-en').textContent = u.en;
-    inner.appendChild(banner);
-    const nodes = document.createElement('div'); nodes.className = 'nodes';
-    for (let l = 0; l < 4; l++) {
-      const i = ui * 4 + l;
-      const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' : ICON_STAR;
-      nodes.appendChild(nodeButton(i, u.color, u.shadow, NODE_NAMES[l], icon));
+  SECTIONS.forEach((sec, si) => {
+    const sd = document.createElement('div'); sd.className = 'section-divider';
+    sd.innerHTML = '<div class="sd-label">SECTION ' + sec.num + ' · ' + sec.cefr + '</div><div class="sd-title"></div><div class="sd-en"></div>';
+    sd.querySelector('.sd-title').textContent = sec.es;
+    sd.querySelector('.sd-en').textContent = sec.en;
+    if (!isUnlocked(si * 21)) sd.classList.add('locked');
+    inner.appendChild(sd);
+    for (let uu = 0; uu < 5; uu++) {
+      const u = UNITS[si * 5 + uu];
+      const pal = PALETTE[uu % 5];
+      const banner = document.createElement('div'); banner.className = 'unit-banner';
+      banner.style.background = pal[0];
+      banner.innerHTML = '<div class="ub-label">UNIT ' + (uu + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
+      banner.querySelector('.ub-title').textContent = u.title;
+      banner.querySelector('.ub-en').textContent = u.en;
+      inner.appendChild(banner);
+      const nodes = document.createElement('div'); nodes.className = 'nodes';
+      for (let l = 0; l < 4; l++) {
+        const i = si * 21 + uu * 4 + l;
+        const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' : ICON_STAR;
+        nodes.appendChild(nodeButton(i, pal[0], pal[1], NODE_NAMES[l], icon));
+      }
+      inner.appendChild(nodes);
     }
-    inner.appendChild(nodes);
+    const fin = document.createElement('div'); fin.className = 'nodes final-wrap';
+    fin.appendChild(nodeButton(si * 21 + 20, '#ce82ff', '#a560e8', 'Final Challenge', '<span style="font-size:30px">👑</span>'));
+    inner.appendChild(fin);
   });
-  const fin = document.createElement('div'); fin.className = 'nodes final-wrap';
-  fin.appendChild(nodeButton(20, '#ce82ff', '#a560e8', 'Final Challenge', '<span style="font-size:30px">👑</span>'));
-  inner.appendChild(fin);
   const note = document.createElement('div'); note.className = 'path-footer-note';
   note.innerHTML = '<div style="font-size:13px;color:var(--gray-dark);font-weight:700;margin-bottom:8px;">Para la leyenda que terminó el curso 🏆</div>';
   const rl = document.createElement('button'); rl.className = 'reset-link'; rl.textContent = 'Reset all progress';
@@ -1006,8 +1663,9 @@ function quitLesson() { closeQuit(); backToPath(); }
 function xpFor(node, perfect, practice) {
   if (isMistakeReview) return 10 + (perfect ? 5 : 0);
   if (practice) return 10;
-  const base = node === 20 ? 40 : (node % 4 === 3 ? 25 : 20);
-  const bonus = perfect ? (node === 20 ? 10 : 5) : 0;
+  const within = node % 21;
+  const base = within === 20 ? 40 : (within % 4 === 3 ? 25 : 20);
+  const bonus = perfect ? (within === 20 ? 10 : 5) : 0;
   return base + bonus;
 }
 
@@ -1032,9 +1690,11 @@ function endLesson() {
     sub = sessionCleared + ' cleared from your list' + (left > 0 ? ' · ' + left + ' still to review 💪' : ' · Your mistakes list is empty! 🎉');
   } else {
     const allDone = doneCount() >= TOTAL_NODES;
-    title = (nodeIdx === 20 && first) ? 'SECTION 9 COMPLETE!' : perfect ? 'Perfect lesson!' : 'Lesson complete!';
-    sub = (nodeIdx === 20 && first) ? 'You mastered the level after the last level. ¡Eres oficialmente una leyenda! 🏆' :
-      allDone ? 'Everything is gold. ¡Impresionante!' :
+    const secDone = nodeIdx % 21 === 20 && first;
+    const secNum = SECTIONS[Math.floor(nodeIdx / 21)].num;
+    title = secDone ? 'SECTION ' + secNum + ' COMPLETE!' : perfect ? 'Perfect lesson!' : 'Lesson complete!';
+    sub = allDone ? 'All six sections gold. Eres oficialmente una leyenda del español. 🏆👑' :
+      secDone ? '¡Increíble! Section ' + (secNum + 1) + ' is now unlocked. 🎉' :
       perfect ? 'Not a single mistake. ¡Eres una leyenda!' :
       isPractice ? 'Practice makes perfect. ¡Sigue así!' :
       '¡Increíble! You just learned what the app never taught you.';
