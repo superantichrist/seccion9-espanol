@@ -29,6 +29,7 @@
   .btn:active{transform:translateY(4px); box-shadow:none !important;}
   .btn-green{background:var(--green); color:#fff; box-shadow:0 4px 0 var(--green-dark);}
   .btn-green:hover{filter:brightness(1.07);}
+  .btn-blue{background:var(--blue); color:#fff; box-shadow:0 4px 0 var(--blue-dark);}
   .btn-red{background:var(--red); color:#fff; box-shadow:0 4px 0 #d33131;}
   .btn:disabled{background:var(--gray); color:var(--gray-dark); box-shadow:none; cursor:default; transform:none;}
 
@@ -45,6 +46,14 @@
 
   .path-scroll{flex:1; overflow-y:auto;}
   .path-inner{max-width:640px; margin:0 auto; padding:20px 16px 80px;}
+
+  .practice-card{display:flex; align-items:center; gap:14px; border:2px solid var(--gray); border-bottom-width:4px;
+    border-radius:16px; padding:16px 18px; margin:6px 0 2px; background:#fff;}
+  .practice-card .pc-emoji{font-size:34px;}
+  .practice-card .pc-info{flex:1; min-width:0;}
+  .practice-card .pc-title{font-weight:900; font-size:16px;}
+  .practice-card .pc-sub{color:var(--text-soft); font-size:13px; font-weight:700; margin-top:2px;}
+  .practice-card .btn{padding:10px 18px; font-size:13px; flex:none;}
 
   .unit-banner{border-radius:16px; padding:18px 20px; color:#fff; margin:26px 0 8px; box-shadow:0 4px 0 rgba(0,0,0,.18);}
   .unit-banner .ub-label{font-size:12px; font-weight:900; letter-spacing:1.2px; opacity:.85;}
@@ -96,6 +105,7 @@
   .exercise-area{flex:1; overflow-y:auto; width:100%;}
   .exercise-inner{max-width:640px; margin:0 auto; padding:24px 16px 40px;}
   .new-word-tag{color:var(--purple); font-weight:900; font-size:14px; letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; gap:6px; margin-bottom:10px;}
+  .review-tag{color:var(--blue); font-weight:900; font-size:14px; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;}
   h2.prompt{font-size:24px; font-weight:900; margin:4px 0 22px;}
 
   .sentence-row{display:flex; align-items:flex-start; gap:14px; margin-bottom:26px;}
@@ -253,7 +263,7 @@
   <div class="modal">
     <div style="font-size:44px;">🗑️</div>
     <h3>Reset all progress?</h3>
-    <p>All XP and completed lessons will be erased. This cannot be undone.</p>
+    <p>All XP, completed lessons and saved mistakes will be erased. This cannot be undone.</p>
     <button class="btn btn-red" onclick="doReset()">Yes, reset everything</button>
     <button class="ghost" onclick="closeReset()">Cancel</button>
   </div>
@@ -421,26 +431,36 @@ function buildExercise(unit, op, isReview) {
   const kind = op[0];
   if (kind === 'choice') {
     const c = u.choices[op[1]];
-    return { type:'choice', prompt:c.prompt, context:c.context, options:c.options, correct:c.correct, note:c.note, newWord:!isReview };
+    return { type:'choice', ref:'choice:'+unit+':'+op[1], prompt:c.prompt, context:c.context, options:c.options, correct:c.correct, note:c.note, newWord:!isReview };
   }
   if (kind === 'tr') {
     const s = u.sentences[op[1]], dir = op[2];
-    if (dir === 'en2es') return { type:'translate', dir, source:s.en, answer:tokenize(s.es), distractors:s.dEs, solution:s.es };
-    return { type:'translate', dir, source:s.es, answer:tokenize(s.en), distractors:s.dEn, solution:s.en };
+    if (dir === 'en2es') return { type:'translate', ref:'tr:'+unit+':'+op[1]+':en2es', dir, source:s.en, answer:tokenize(s.es), distractors:s.dEs, solution:s.es };
+    return { type:'translate', ref:'tr:'+unit+':'+op[1]+':es2en', dir, source:s.es, answer:tokenize(s.en), distractors:s.dEn, solution:s.en };
   }
   if (kind === 'listen') {
     const s = u.sentences[op[1]];
-    return { type:'listen', sentence:s.es, answer:tokenize(s.es), distractors:s.dEs, translation:s.en };
+    return { type:'listen', ref:'listen:'+unit+':'+op[1], sentence:s.es, answer:tokenize(s.es), distractors:s.dEs, translation:s.en };
   }
-  if (kind === 'fill') { const f = u.fills[op[1]]; return Object.assign({type:'fillblank'}, f); }
+  if (kind === 'fill') { const f = u.fills[op[1]]; return Object.assign({type:'fillblank', ref:'fill:'+unit+':'+op[1]}, f); }
   if (kind === 'matchV') {
     return { type:'match', prompt:'Tap the matching pairs', pairs:op[1].map(i => u.vocab[i]) };
   }
   if (kind === 'type') {
     const t = u.types[op[1]];
-    return { type:'type', dir:'en2es', prompt:'Type this in Spanish', source:t.source, accepted:t.accepted, solution:t.solution };
+    return { type:'type', ref:'type:'+unit+':'+op[1], dir:'en2es', prompt:'Type this in Spanish', source:t.source, accepted:t.accepted, solution:t.solution };
   }
   throw new Error('bad op ' + kind);
+}
+
+function exerciseFromRef(key) {
+  const p = key.split(':');
+  const u = parseInt(p[1], 10);
+  if (!UNITS[u]) return null;
+  try {
+    if (p[0] === 'tr') return buildExercise(u, ['tr', parseInt(p[2], 10), p[3]], true);
+    return buildExercise(u, [p[0], parseInt(p[2], 10)], true);
+  } catch (e) { return null; }
 }
 
 function composeLesson(nodeIdx) {
@@ -473,16 +493,17 @@ const TOTAL_NODES = 21;
 
 /* ============================ persistence ============================ */
 const STORE_KEY = 'seccion9_progress_v1';
-let PROG = { done: {}, xp: 0 };
+let PROG = { done: {}, xp: 0, mistakes: {} };
 function loadProgress() {
   try { const raw = localStorage.getItem(STORE_KEY); if (raw) PROG = JSON.parse(raw); } catch (e) {}
-  if (!PROG || typeof PROG !== 'object') PROG = { done: {}, xp: 0 };
-  PROG.done = PROG.done || {}; PROG.xp = PROG.xp || 0;
+  if (!PROG || typeof PROG !== 'object') PROG = {};
+  PROG.done = PROG.done || {}; PROG.xp = PROG.xp || 0; PROG.mistakes = PROG.mistakes || {};
 }
 function saveProgress() { try { localStorage.setItem(STORE_KEY, JSON.stringify(PROG)); } catch (e) {} }
 const doneCount = () => Object.keys(PROG.done).length;
 const isDone = i => !!PROG.done[i];
 const isUnlocked = i => i === 0 || isDone(i - 1);
+const mistakeCount = () => Object.keys(PROG.mistakes).length;
 
 /* ============================ sound fx ============================ */
 let actx = null;
@@ -585,6 +606,19 @@ function renderPath() {
   $('#hdr-xp').textContent = PROG.xp;
   $('#hdr-crowns').textContent = doneCount();
   const inner = $('#path-inner'); inner.innerHTML = '';
+
+  const mc = mistakeCount();
+  if (mc > 0) {
+    const card = document.createElement('div'); card.className = 'practice-card';
+    card.innerHTML = '<div class="pc-emoji">💪</div>' +
+      '<div class="pc-info"><div class="pc-title">Mistakes practice</div>' +
+      '<div class="pc-sub">' + mc + (mc === 1 ? ' exercise' : ' exercises') + ' to review — fix them to clear the list!</div></div>';
+    const btn = document.createElement('button'); btn.className = 'btn btn-blue'; btn.textContent = 'Practice';
+    btn.onclick = startMistakes;
+    card.appendChild(btn);
+    inner.appendChild(card);
+  }
+
   UNITS.forEach((u, ui) => {
     const banner = document.createElement('div'); banner.className = 'unit-banner';
     banner.style.background = u.color;
@@ -618,27 +652,43 @@ function backToPath() {
   renderPath();
 }
 function closeReset() { $('#reset-modal').classList.remove('show'); }
-function doReset() { PROG = { done: {}, xp: 0 }; saveProgress(); closeReset(); renderPath(); toast('Progress reset. ¡Buena suerte!'); }
+function doReset() { PROG = { done: {}, xp: 0, mistakes: {} }; saveProgress(); closeReset(); renderPath(); toast('Progress reset. ¡Buena suerte!'); }
 
 /* ============================ lesson state ============================ */
-let CURRENT = [], nodeIdx = 0, isPractice = false;
+let CURRENT = [], nodeIdx = 0, isPractice = false, isMistakeReview = false;
 let queue = [], currentIdx = -1, phase = 'answer';
 let solved = new Set(), attempted = new Set();
 let hearts = 5, unlimited = false, mistakes = 0, firstTryCorrect = 0, startTime = 0;
 let selection = null, zoneTokens = [], matchDone = 0, matchSel = null;
+let sessionNewMistakes = new Set(), sessionCleared = 0;
 
-function startNode(i, replay) {
-  audio();
-  nodeIdx = i; isPractice = !!replay;
-  CURRENT = composeLesson(i);
+function resetLessonState() {
   queue = CURRENT.map((_, k) => k);
   solved = new Set(); attempted = new Set();
   hearts = 5; unlimited = false; mistakes = 0; firstTryCorrect = 0;
+  sessionNewMistakes = new Set(); sessionCleared = 0;
   startTime = Date.now();
   $('#heart-count').textContent = hearts;
   updateProgress();
   show('#screen-lesson');
   nextExercise();
+}
+
+function startNode(i, replay) {
+  audio();
+  nodeIdx = i; isPractice = !!replay; isMistakeReview = false;
+  CURRENT = composeLesson(i);
+  resetLessonState();
+}
+
+function startMistakes() {
+  audio();
+  const keys = Object.keys(PROG.mistakes).sort((a, b) => PROG.mistakes[a] - PROG.mistakes[b]).slice(0, 10);
+  const exs = keys.map(exerciseFromRef).filter(Boolean);
+  if (exs.length === 0) { toast('Nothing to review. ¡Perfecto!'); return; }
+  nodeIdx = -1; isPractice = false; isMistakeReview = true;
+  CURRENT = exs;
+  resetLessonState();
 }
 
 function updateProgress() { $('#progress').style.width = (solved.size / CURRENT.length * 100) + '%'; }
@@ -700,7 +750,11 @@ function renderExercise(ex) {
   const area = $('#exercise'); area.innerHTML = ''; area.className = 'exercise-inner fade-in';
   void area.offsetWidth;
 
-  if (ex.newWord && ex.type === 'choice') {
+  if (isMistakeReview) {
+    const tag = document.createElement('div'); tag.className = 'review-tag';
+    tag.textContent = '💪 PREVIOUS MISTAKE';
+    area.appendChild(tag);
+  } else if (ex.newWord && ex.type === 'choice') {
     const tag = document.createElement('div'); tag.className = 'new-word-tag';
     tag.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ce82ff"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg> NEW EXPRESSION';
     area.appendChild(tag);
@@ -856,6 +910,25 @@ function solutionOf(ex) {
     ex.type === 'choice' ? ex.options[ex.correct] : '');
 }
 
+function recordMistake(ex) {
+  if (!ex.ref) return;
+  if (isMistakeReview) return;
+  if (!PROG.mistakes[ex.ref]) {
+    PROG.mistakes[ex.ref] = Date.now();
+    sessionNewMistakes.add(ex.ref);
+    saveProgress();
+  }
+}
+
+function clearMistake(ex) {
+  if (!ex.ref || !isMistakeReview) return;
+  if (PROG.mistakes[ex.ref]) {
+    delete PROG.mistakes[ex.ref];
+    sessionCleared++;
+    saveProgress();
+  }
+}
+
 function grade() {
   const ex = CURRENT[currentIdx];
   let ok = false, accentNote = false;
@@ -874,12 +947,15 @@ function grade() {
 
   if (ok) {
     solved.add(currentIdx); updateProgress(); sfxCorrect();
+    clearMistake(ex);
     if (isSpanish(ex)) setTimeout(() => speak(solution, 'es'), 250);
     let body = ex.translation || ex.note || '';
     if (accentNote) body = 'Pay attention to the accents: ' + solution + (body ? ' — ' + body : '');
+    if (isMistakeReview) body = (body ? body + ' · ' : '') + 'Removed from your mistakes list ✔';
     showFeedback(true, PRAISE[Math.floor(Math.random() * PRAISE.length)], body);
   } else {
     mistakes++; loseHeart();
+    recordMistake(ex);
     queue.push(currentIdx);
     sfxWrong();
     const body = solution + (ex.translation ? ' — ' + ex.translation : '');
@@ -893,6 +969,7 @@ function skipExercise() {
   if (!attempted.has(currentIdx)) attempted.add(currentIdx);
   mistakes++;
   phase = 'feedback';
+  recordMistake(ex);
   queue.push(currentIdx);
   sfxWrong();
   showFeedback(false, 'Correct solution:', solutionOf(ex) + (ex.translation ? ' — ' + ex.translation : ''));
@@ -927,6 +1004,7 @@ function closeQuit() { $('#quit-modal').classList.remove('show'); }
 function quitLesson() { closeQuit(); backToPath(); }
 
 function xpFor(node, perfect, practice) {
+  if (isMistakeReview) return 10 + (perfect ? 5 : 0);
   if (practice) return 10;
   const base = node === 20 ? 40 : (node % 4 === 3 ? 25 : 20);
   const bonus = perfect ? (node === 20 ? 10 : 5) : 0;
@@ -938,22 +1016,32 @@ function endLesson() {
   const acc = Math.round(firstTryCorrect / CURRENT.length * 100);
   const perfect = mistakes === 0;
   const earned = xpFor(nodeIdx, perfect, isPractice);
-  const first = !isDone(nodeIdx);
-  PROG.done[nodeIdx] = 1;
+  const first = nodeIdx >= 0 && !isDone(nodeIdx);
+  if (!isMistakeReview && nodeIdx >= 0) PROG.done[nodeIdx] = 1;
   PROG.xp += earned;
   saveProgress();
 
   $('#stat-xp').textContent = '+' + earned;
   $('#stat-acc').textContent = acc + '%';
   $('#stat-time').textContent = Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0');
-  const allDone = doneCount() >= TOTAL_NODES;
-  $('#end-title').textContent = (nodeIdx === 20 && first) ? 'SECTION 9 COMPLETE!' :
-    perfect ? 'Perfect lesson!' : 'Lesson complete!';
-  $('#end-sub').textContent = (nodeIdx === 20 && first) ? 'You mastered the level after the last level. ¡Eres oficialmente una leyenda! 🏆' :
-    allDone ? 'Everything is gold. ¡Impresionante!' :
-    perfect ? 'Not a single mistake. ¡Eres una leyenda!' :
-    isPractice ? 'Practice makes perfect. ¡Sigue así!' :
-    '¡Increíble! You just learned what the app never taught you.';
+
+  let title, sub;
+  if (isMistakeReview) {
+    const left = mistakeCount();
+    title = perfect ? 'Mistakes crushed!' : 'Good practice!';
+    sub = sessionCleared + ' cleared from your list' + (left > 0 ? ' · ' + left + ' still to review 💪' : ' · Your mistakes list is empty! 🎉');
+  } else {
+    const allDone = doneCount() >= TOTAL_NODES;
+    title = (nodeIdx === 20 && first) ? 'SECTION 9 COMPLETE!' : perfect ? 'Perfect lesson!' : 'Lesson complete!';
+    sub = (nodeIdx === 20 && first) ? 'You mastered the level after the last level. ¡Eres oficialmente una leyenda! 🏆' :
+      allDone ? 'Everything is gold. ¡Impresionante!' :
+      perfect ? 'Not a single mistake. ¡Eres una leyenda!' :
+      isPractice ? 'Practice makes perfect. ¡Sigue así!' :
+      '¡Increíble! You just learned what the app never taught you.';
+    if (sessionNewMistakes.size > 0) sub += ' (' + sessionNewMistakes.size + ' saved to Mistakes practice 💪)';
+  }
+  $('#end-title').textContent = title;
+  $('#end-sub').textContent = sub;
   $('#owl-end').innerHTML = owlSVG(true);
   show('#screen-end');
   sfxComplete();
@@ -1005,7 +1093,7 @@ document.addEventListener('keydown', e => {
 /* ============================ init ============================ */
 loadProgress();
 renderPath();
-/*EOF-MARK*/
+/*EOF-MARK-V3*/
 </script>
 </body>
 </html>
