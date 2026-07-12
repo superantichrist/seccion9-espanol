@@ -133,6 +133,8 @@
   .chip:hover{background:#f7f7f7;}
   .chip:active{transform:translateY(2px); border-bottom-width:2px; margin-bottom:2px;}
   .chip.used{color:transparent; background:var(--gray); border-color:var(--gray); cursor:default; pointer-events:none;}
+  .chip.sel{border-color:var(--blue-border); background:var(--blue-sel); color:var(--blue-dark); transform:translateY(-2px);}
+  .zone-hint{font-size:12.5px; color:var(--gray-dark); font-weight:700; text-align:center; margin:-16px 0 18px; line-height:1.5;}
 
   .options{display:flex; flex-direction:column; gap:10px;}
   .option-card{display:flex; align-items:center; gap:14px; text-align:left; background:#fff; border:2px solid var(--gray);
@@ -1500,24 +1502,47 @@ function speakerRow(text, lang, opts) {
 function buildWordBank(area, ex) {
   const zone = document.createElement('div'); zone.className = 'answer-zone'; zone.id = 'zone';
   area.appendChild(zone);
+  const hint = document.createElement('div'); hint.className = 'zone-hint';
+  hint.textContent = 'Fix a word without starting over: tap it, then tap another word to swap — or tap a new word below to replace it. Tap it twice to remove it.';
+  area.appendChild(hint);
   const bank = document.createElement('div'); bank.className = 'word-bank';
+  let zoneSel = null;
+  const clearSel = () => { if (zoneSel) { zoneSel.classList.remove('sel'); zoneSel = null; } };
+  const syncZone = () => {
+    zoneTokens = Array.from(zone.children).map(el => ({ tok: el.dataset.tok, el: el }));
+    refreshCheck();
+  };
+  const removeZoneChip = z => { zone.removeChild(z); if (z._src) z._src.classList.remove('used'); };
+  const makeZoneChip = (tok, src) => {
+    const z = document.createElement('button'); z.className = 'chip'; z.textContent = tok;
+    z.dataset.tok = tok; z._src = src;
+    z.onclick = () => {
+      if (phase !== 'answer') return;
+      if (zoneSel === z) { clearSel(); removeZoneChip(z); syncZone(); return; }
+      if (zoneSel) {
+        const a = zoneSel, m = document.createElement('span');
+        zone.insertBefore(m, a); zone.insertBefore(a, z); zone.insertBefore(z, m); zone.removeChild(m);
+        clearSel(); tone(880, 0, 0.05, 'sine', 0.06); syncZone(); return;
+      }
+      zoneSel = z; z.classList.add('sel');
+    };
+    return z;
+  };
   const tokens = shuffle(ex.answer.concat(ex.distractors || []));
   tokens.forEach(tok => {
     const chip = document.createElement('button'); chip.className = 'chip'; chip.textContent = tok;
     chip.onclick = () => {
       if (phase !== 'answer' || chip.classList.contains('used')) return;
       chip.classList.add('used');
-      const z = document.createElement('button'); z.className = 'chip'; z.textContent = tok;
-      z.onclick = () => {
-        if (phase !== 'answer') return;
-        zone.removeChild(z); chip.classList.remove('used');
-        zoneTokens = zoneTokens.filter(e => e.el !== z);
-        refreshCheck();
-      };
-      zone.appendChild(z);
-      zoneTokens.push({ tok: tok, el: z });
+      const z = makeZoneChip(tok, chip);
+      if (zoneSel) {
+        zone.insertBefore(z, zoneSel);
+        const old = zoneSel; clearSel(); removeZoneChip(old);
+      } else {
+        zone.appendChild(z);
+      }
       tone(880, 0, 0.05, 'sine', 0.06);
-      refreshCheck();
+      syncZone();
     };
     bank.appendChild(chip);
   });
