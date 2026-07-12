@@ -163,6 +163,16 @@
   .cant-listen{background:none; border:none; color:var(--blue); font-weight:800; font-size:13px; letter-spacing:.5px;
     text-transform:uppercase; cursor:pointer; margin-top:14px; padding:4px;}
 
+  .mic-wrap{text-align:center; margin-top:10px;}
+  .mic-btn{width:80px; height:80px; border-radius:50%; border:none; cursor:pointer; margin:8px auto 12px;
+    background:var(--blue); box-shadow:0 5px 0 var(--blue-dark); display:inline-flex; align-items:center; justify-content:center;}
+  .mic-btn:active{transform:translateY(4px); box-shadow:none;}
+  .mic-btn svg{width:38px; height:38px;}
+  .mic-btn.listening{background:var(--red); box-shadow:0 5px 0 #d33131; animation:micpulse 1s ease-in-out infinite;}
+  @keyframes micpulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.09);}}
+  .speak-status{color:var(--text-soft); font-weight:700; font-size:15px; min-height:24px;}
+  .speak-heard{font-size:17px; font-weight:600; margin-top:8px; color:var(--text); min-height:22px;}
+
   .footer{border-top:2px solid var(--gray); background:#fff;}
   .footer-inner{max-width:640px; margin:0 auto; padding:20px 16px; display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:96px;}
   .footer.correct{background:var(--green-light); border-top-color:var(--green-light);}
@@ -1049,10 +1059,10 @@ const SECTIONS = [
 const PALETTE = [['#58cc02','#58a700'],['#1cb0f6','#1899d6'],['#ce82ff','#a560e8'],['#ff9600','#e08600'],['#ff4b96','#d63384']];
 
 const LESSON_PLANS = [
-  [['choice',0],['tr',0,'en2es'],['listen',1],['fill',0],['matchV',[0,1,2,3,4]],['tr',2,'es2en'],['type',0],['tr',3,'en2es'],['listen',2],['choice',1]],
-  [['fill',1],['tr',4,'en2es'],['listen',5],['tr',6,'es2en'],['matchV',[5,6,7,8,9]],['type',1],['tr',7,'en2es'],['choice',2],['listen',4],['tr',0,'es2en']],
-  [['fill',2],['tr',8,'en2es'],['listen',9],['tr',5,'es2en'],['matchV',[0,2,4,6,8]],['tr',6,'en2es'],['listen',3],['type',0],['tr',1,'es2en'],['choice',0]],
-  [['listen',0],['tr',3,'es2en'],['fill',0],['matchV',[1,3,5,7,9]],['tr',9,'en2es'],['type',1],['listen',7],['tr',2,'en2es'],['fill',2],['tr',8,'es2en'],['choice',1],['listen',6]]
+  [['choice',0],['tr',0,'en2es'],['speak',0],['listen',1],['fill',0],['matchV',[0,1,2,3,4]],['tr',2,'es2en'],['type',0],['tr',3,'en2es'],['listen',2],['choice',1]],
+  [['fill',1],['tr',4,'en2es'],['listen',5],['tr',6,'es2en'],['speak',6],['matchV',[5,6,7,8,9]],['type',1],['tr',7,'en2es'],['choice',2],['listen',4],['tr',0,'es2en']],
+  [['fill',2],['tr',8,'en2es'],['listen',9],['speak',9],['tr',5,'es2en'],['matchV',[0,2,4,6,8]],['tr',6,'en2es'],['listen',3],['type',0],['tr',1,'es2en'],['choice',0]],
+  [['listen',0],['tr',3,'es2en'],['speak',3],['fill',0],['matchV',[1,3,5,7,9]],['tr',9,'en2es'],['type',1],['listen',7],['tr',2,'en2es'],['fill',2],['tr',8,'es2en'],['choice',1],['listen',6]]
 ];
 const FINAL_MATCHES = [
   [[0,0],[1,5],[2,1],[3,1],[4,4]],
@@ -1060,11 +1070,11 @@ const FINAL_MATCHES = [
 ];
 const FINAL_PLAN = [
   ['listen',0,5],['tr',0,7,'en2es'],
-  ['tr',1,0,'es2en'],['fill',1,1],
+  ['tr',1,0,'es2en'],['fill',1,1],['speak',1,2],
   ['listen',2,6],['tr',2,2,'en2es'],
   ['matchM',0],
   ['tr',3,1,'en2es'],['fill',3,1],
-  ['listen',4,8],['tr',4,9,'en2es'],
+  ['listen',4,8],['tr',4,9,'en2es'],['speak',4,7],
   ['type',3,1],['type',4,1],
   ['matchM',1],
   ['tr',4,7,'es2en']
@@ -1087,6 +1097,10 @@ function buildExercise(unit, op, isReview) {
   if (kind === 'listen') {
     const s = u.sentences[op[1]];
     return { type:'listen', ref:'listen:'+unit+':'+op[1], sentence:s.es, answer:tokenize(s.es), distractors:s.dEs, translation:s.en };
+  }
+  if (kind === 'speak') {
+    const s = u.sentences[op[1]];
+    return { type:'speak', ref:'speak:'+unit+':'+op[1], sentence:s.es, translation:s.en };
   }
   if (kind === 'fill') { const f = u.fills[op[1]]; return Object.assign({type:'fillblank', ref:'fill:'+unit+':'+op[1]}, f); }
   if (kind === 'matchV') {
@@ -1267,6 +1281,15 @@ function renderPath() {
     inner.appendChild(card);
   }
 
+  const scard = document.createElement('div'); scard.className = 'practice-card';
+  scard.innerHTML = '<div class="pc-emoji">🎙️</div>' +
+    '<div class="pc-info"><div class="pc-title">Pronunciation studio</div>' +
+    '<div class="pc-sub">Say 8 real sentences from your lessons out loud (mic required)</div></div>';
+  const sbtn = document.createElement('button'); sbtn.className = 'btn btn-green'; sbtn.textContent = 'Speak';
+  sbtn.onclick = startSpeaking;
+  scard.appendChild(sbtn);
+  inner.appendChild(scard);
+
   SECTIONS.forEach((sec, si) => {
     const sd = document.createElement('div'); sd.className = 'section-divider';
     sd.innerHTML = '<div class="sd-label">SECTION ' + sec.num + ' · ' + sec.cefr + '</div><div class="sd-title"></div><div class="sd-en"></div>';
@@ -1305,6 +1328,7 @@ function renderPath() {
 }
 
 function backToPath() {
+  abortRecog();
   if (window.speechSynthesis) speechSynthesis.cancel();
   show('#screen-path');
   renderPath();
@@ -1313,8 +1337,9 @@ function closeReset() { $('#reset-modal').classList.remove('show'); }
 function doReset() { PROG = { done: {}, xp: 0, mistakes: {} }; saveProgress(); closeReset(); renderPath(); toast('Progress reset. ¡Buena suerte!'); }
 
 /* ============================ lesson state ============================ */
-let CURRENT = [], nodeIdx = 0, isPractice = false, isMistakeReview = false;
+let CURRENT = [], nodeIdx = 0, isPractice = false, isMistakeReview = false, isSpeakSession = false;
 let queue = [], currentIdx = -1, phase = 'answer';
+let speakTries = 0, recog = null;
 let solved = new Set(), attempted = new Set();
 let hearts = 5, unlimited = false, mistakes = 0, firstTryCorrect = 0, startTime = 0;
 let selection = null, zoneTokens = [], matchDone = 0, matchSel = null;
@@ -1334,7 +1359,7 @@ function resetLessonState() {
 
 function startNode(i, replay) {
   audio();
-  nodeIdx = i; isPractice = !!replay; isMistakeReview = false;
+  nodeIdx = i; isPractice = !!replay; isMistakeReview = false; isSpeakSession = false;
   CURRENT = composeLesson(i);
   resetLessonState();
 }
@@ -1344,19 +1369,114 @@ function startMistakes() {
   const keys = Object.keys(PROG.mistakes).sort((a, b) => PROG.mistakes[a] - PROG.mistakes[b]).slice(0, 10);
   const exs = keys.map(exerciseFromRef).filter(Boolean);
   if (exs.length === 0) { toast('Nothing to review. ¡Perfecto!'); return; }
-  nodeIdx = -1; isPractice = false; isMistakeReview = true;
+  nodeIdx = -1; isPractice = false; isMistakeReview = true; isSpeakSession = false;
   CURRENT = exs;
+  resetLessonState();
+}
+
+function unlockedUnits() {
+  const out = [];
+  for (let u = 0; u < UNITS.length; u++) {
+    const firstNode = Math.floor(u / 5) * 21 + (u % 5) * 4;
+    if (isUnlocked(firstNode)) out.push(u);
+  }
+  return out;
+}
+
+function startSpeaking() {
+  audio();
+  const pool = [];
+  unlockedUnits().forEach(u => UNITS[u].sentences.forEach((s, i) => pool.push([u, i])));
+  const pick = shuffle(pool).slice(0, 8);
+  nodeIdx = -2; isPractice = false; isMistakeReview = false; isSpeakSession = true;
+  CURRENT = pick.map(p => buildExercise(p[0], ['speak', p[1]], true));
   resetLessonState();
 }
 
 function updateProgress() { $('#progress').style.width = (solved.size / CURRENT.length * 100) + '%'; }
 
+function abortRecog() { if (recog) { try { recog.abort(); } catch (e) {} recog = null; } }
+
 function nextExercise() {
+  abortRecog();
   if (queue.length === 0) return endLesson();
   currentIdx = queue.shift();
-  phase = 'answer'; selection = null; zoneTokens = []; matchSel = null; matchDone = 0;
+  phase = 'answer'; selection = null; zoneTokens = []; matchSel = null; matchDone = 0; speakTries = 0;
   renderExercise(CURRENT[currentIdx]);
   renderFooterAnswer(CURRENT[currentIdx]);
+}
+
+/* ============================ speech recognition ============================ */
+const SRClass = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+const ICON_MIC = '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" fill="#fff"/><path d="M5 11a7 7 0 0014 0M12 18v3M8.5 21h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>';
+
+function speakSim(target, heard) {
+  const tw = stripAccents(normalize(target)).split(' ').filter(Boolean);
+  const hw = new Set(stripAccents(normalize(heard)).split(' ').filter(Boolean));
+  if (tw.length === 0) return 0;
+  let hit = 0; tw.forEach(w => { if (hw.has(w)) hit++; });
+  return hit / tw.length;
+}
+
+function startListening(ex) {
+  if (!SRClass) {
+    $('#speak-status').textContent = 'Speech recognition is not available in this browser — use “Can’t speak now”.';
+    return;
+  }
+  if (phase !== 'answer') return;
+  abortRecog();
+  try { recog = new SRClass(); } catch (e) { $('#speak-status').textContent = 'Microphone unavailable — use “Can’t speak now”.'; return; }
+  const mic = $('#mic-btn');
+  recog.lang = 'es-ES'; recog.interimResults = false; recog.maxAlternatives = 3;
+  recog.onstart = () => { if (mic) mic.classList.add('listening'); $('#speak-status').textContent = 'Listening… speak now'; };
+  recog.onend = () => { if (mic) mic.classList.remove('listening'); };
+  recog.onerror = e => {
+    if (mic) mic.classList.remove('listening');
+    const st = $('#speak-status');
+    if (!st) return;
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed')
+      st.textContent = 'Microphone blocked. Allow it in your browser, or tap “Can’t speak now”.';
+    else st.textContent = 'Did not catch that — tap the mic and try again.';
+  };
+  recog.onresult = e => {
+    const alts = Array.from(e.results[0]).map(r => r.transcript || '');
+    handleSpeechResult(ex, alts);
+  };
+  try { recog.start(); } catch (e) {}
+}
+
+function handleSpeechResult(ex, alts) {
+  if (phase !== 'answer') return;
+  let best = 0, heard = alts[0] || '';
+  alts.forEach(a => { const s = speakSim(ex.sentence, a); if (s > best) { best = s; heard = a; } });
+  const firstAttempt = !attempted.has(currentIdx) && speakTries === 0;
+  if (best >= 0.65) {
+    phase = 'feedback';
+    if (!attempted.has(currentIdx)) { attempted.add(currentIdx); if (firstAttempt) firstTryCorrect++; }
+    solved.add(currentIdx); updateProgress(); sfxCorrect();
+    showFeedback(true, PRAISE[Math.floor(Math.random() * PRAISE.length)], 'We heard: “' + heard + '”');
+  } else {
+    speakTries++;
+    attempted.add(currentIdx);
+    if (speakTries >= 2) {
+      phase = 'feedback';
+      solved.add(currentIdx); updateProgress();
+      sfxWrong();
+      showFeedback(false, 'Almost!', 'We heard: “' + heard + '” — keep practicing, ¡lo conseguirás! (No hearts lost for speaking.)');
+    } else {
+      tone(196, 0, 0.15, 'square', 0.06);
+      $('#speak-status').textContent = '¡Casi! We heard: “' + heard + '” — try once more.';
+    }
+  }
+}
+
+function speakSkip() {
+  if (phase !== 'answer') return;
+  abortRecog();
+  phase = 'feedback';
+  attempted.add(currentIdx);
+  solved.add(currentIdx); updateProgress();
+  showFeedback(true, 'No problem!', 'Speaking skipped this time. 🎙️');
 }
 
 /* ============================ exercise rendering ============================ */
@@ -1411,6 +1531,10 @@ function renderExercise(ex) {
   if (isMistakeReview) {
     const tag = document.createElement('div'); tag.className = 'review-tag';
     tag.textContent = '💪 PREVIOUS MISTAKE';
+    area.appendChild(tag);
+  } else if (isSpeakSession) {
+    const tag = document.createElement('div'); tag.className = 'review-tag';
+    tag.textContent = '🎙️ PRONUNCIATION STUDIO';
     area.appendChild(tag);
   } else if (ex.newWord && ex.type === 'choice') {
     const tag = document.createElement('div'); tag.className = 'new-word-tag';
@@ -1486,6 +1610,22 @@ function renderExercise(ex) {
     }
     area.appendChild(grid);
 
+  } else if (ex.type === 'speak') {
+    h.textContent = 'Say this sentence'; area.appendChild(h);
+    area.appendChild(speakerRow(ex.sentence, 'es', { showText: true, turtle: true }));
+    const wrap = document.createElement('div'); wrap.className = 'mic-wrap';
+    const mic = document.createElement('button'); mic.className = 'mic-btn'; mic.id = 'mic-btn';
+    mic.innerHTML = ICON_MIC;
+    mic.onclick = () => startListening(ex);
+    const status = document.createElement('div'); status.className = 'speak-status'; status.id = 'speak-status';
+    status.textContent = SRClass ? 'Tap the microphone and repeat the sentence' :
+      'Speech recognition is not available in this browser — tap “Can’t speak now” below.';
+    const trans = document.createElement('div'); trans.className = 'speak-heard';
+    trans.textContent = ex.translation ? '(' + ex.translation + ')' : '';
+    wrap.appendChild(mic); wrap.appendChild(status); wrap.appendChild(trans);
+    area.appendChild(wrap);
+    setTimeout(() => speak(ex.sentence, 'es'), 350);
+
   } else if (ex.type === 'type') {
     h.textContent = ex.prompt; area.appendChild(h);
     area.appendChild(speakerRow(ex.source, 'en', { showText: true }));
@@ -1539,7 +1679,10 @@ function handleMatch(ex, lookup, btn, col, txt) {
 function renderFooterAnswer(ex) {
   const f = $('#footer'); f.className = 'footer';
   const fb = $('#feedback'); fb.innerHTML = '';
-  if (ex.type !== 'match') {
+  if (ex.type === 'speak') {
+    const sk = document.createElement('button'); sk.className = 'skip-btn'; sk.textContent = "Can't speak now";
+    sk.onclick = speakSkip; fb.appendChild(sk);
+  } else if (ex.type !== 'match') {
     const sk = document.createElement('button'); sk.className = 'skip-btn'; sk.textContent = 'Skip';
     sk.onclick = skipExercise; fb.appendChild(sk);
   }
@@ -1662,7 +1805,7 @@ function closeQuit() { $('#quit-modal').classList.remove('show'); }
 function quitLesson() { closeQuit(); backToPath(); }
 
 function xpFor(node, perfect, practice) {
-  if (isMistakeReview) return 10 + (perfect ? 5 : 0);
+  if (isMistakeReview || isSpeakSession) return 10 + (perfect ? 5 : 0);
   if (practice) return 10;
   const within = node % 21;
   const base = within === 20 ? 40 : (within % 4 === 3 ? 25 : 20);
@@ -1685,7 +1828,10 @@ function endLesson() {
   $('#stat-time').textContent = Math.floor(secs / 60) + ':' + String(secs % 60).padStart(2, '0');
 
   let title, sub;
-  if (isMistakeReview) {
+  if (isSpeakSession) {
+    title = perfect ? '¡Qué acento!' : 'Pronunciation practiced!';
+    sub = 'You said ' + CURRENT.length + ' sentences out loud. ¡Cada día suenas más natural! 🎙️';
+  } else if (isMistakeReview) {
     const left = mistakeCount();
     title = perfect ? 'Mistakes crushed!' : 'Good practice!';
     sub = sessionCleared + ' cleared from your list' + (left > 0 ? ' · ' + left + ' still to review 💪' : ' · Your mistakes list is empty! 🎉');
