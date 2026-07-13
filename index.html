@@ -135,6 +135,10 @@
   .chip.used{color:transparent; background:var(--gray); border-color:var(--gray); cursor:default; pointer-events:none;}
   .chip.sel{border-color:var(--blue-border); background:var(--blue-sel); color:var(--blue-dark); transform:translateY(-2px);}
   .zone-hint{font-size:12.5px; color:var(--gray-dark); font-weight:700; text-align:center; margin:-16px 0 18px; line-height:1.5;}
+  .chip.dragging{position:fixed; z-index:120; pointer-events:none; margin:0; background:#fff;
+    box-shadow:0 10px 18px rgba(0,0,0,.25); transform:scale(1.07);}
+  .placeholder-chip{background:var(--gray); border-color:var(--gray); color:transparent; pointer-events:none; box-sizing:border-box;}
+  .answer-zone .chip, .word-bank .chip{touch-action:none;}
 
   .options{display:flex; flex-direction:column; gap:10px;}
   .option-card{display:flex; align-items:center; gap:14px; text-align:left; background:#fff; border:2px solid var(--gray);
@@ -1503,21 +1507,108 @@ function buildWordBank(area, ex) {
   const zone = document.createElement('div'); zone.className = 'answer-zone'; zone.id = 'zone';
   area.appendChild(zone);
   const hint = document.createElement('div'); hint.className = 'zone-hint';
-  hint.textContent = 'Fix a word without starting over: tap it, then tap another word to swap — or tap a new word below to replace it. Tap it twice to remove it.';
+  hint.textContent = 'Drag words to put them in any order — or tap a word, then tap another to swap them.';
   area.appendChild(hint);
   const bank = document.createElement('div'); bank.className = 'word-bank';
   let zoneSel = null;
+  let drag = null;
   const clearSel = () => { if (zoneSel) { zoneSel.classList.remove('sel'); zoneSel = null; } };
   const syncZone = () => {
-    zoneTokens = Array.from(zone.children).map(el => ({ tok: el.dataset.tok, el: el }));
+    zoneTokens = Array.from(zone.children)
+      .filter(c => c.classList.contains('chip') && !c.classList.contains('placeholder-chip') && !c.classList.contains('dragging'))
+      .map(el => ({ tok: el.dataset.tok, el: el }));
     refreshCheck();
   };
-  const removeZoneChip = z => { zone.removeChild(z); if (z._src) z._src.classList.remove('used'); };
+  const removeZoneChip = z => { if (z.parentNode) z.parentNode.removeChild(z); if (z._src) z._src.classList.remove('used'); };
+
+  const updatePlaceholder = (x, y) => {
+    if (!drag) return;
+    const kids = Array.from(zone.children).filter(c => c !== drag.el && c !== drag.ph);
+    let target = null;
+    for (const k of kids) {
+      const r = k.getBoundingClientRect();
+      if (y < r.top - 4) { target = k; break; }
+      if (y <= r.bottom + 4 && x < r.left + r.width / 2) { target = k; break; }
+    }
+    if (target) zone.insertBefore(drag.ph, target); else zone.appendChild(drag.ph);
+  };
+
+  const beginDrag = (el, fromBank, srcChip, x, y) => {
+    clearSel();
+    const r = el.getBoundingClientRect();
+    const ph = document.createElement('span'); ph.className = 'chip placeholder-chip';
+    ph.style.width = r.width + 'px'; ph.style.height = r.height + 'px';
+    drag = { el, ph, fromBank, srcChip, dx: x - r.left, dy: y - r.top };
+    if (el.parentNode === zone) zone.insertBefore(ph, el); else zone.appendChild(ph);
+    el.classList.add('dragging');
+    el.style.width = r.width + 'px';
+    el.style.left = (x - drag.dx) + 'px'; el.style.top = (y - drag.dy) + 'px';
+    if (el.parentNode !== zone) zone.appendChild(el);
+    updatePlaceholder(x, y);
+  };
+
+  const endDrag = (x, y) => {
+    if (!drag) return;
+    const d = drag; drag = null;
+    const zr = zone.getBoundingClientRect();
+    const inside = x > zr.left - 14 && x < zr.right + 14 && y > zr.top - 24 && y < zr.bottom + 34;
+    d.el.classList.remove('dragging');
+    d.el.style.width = ''; d.el.style.left = ''; d.el.style.top = '';
+    if (inside) {
+      zone.insertBefore(d.el, d.ph);
+      tone(880, 0, 0.05, 'sine', 0.06);
+    } else {
+      removeZoneChip(d.el);
+    }
+    if (d.ph.parentNode) d.ph.parentNode.removeChild(d.ph);
+    d.el._suppressClick = true;
+    syncZone();
+  };
+
+  const attachDrag = (el, fromBank, srcChipGetter) => {
+    el.addEventListener('pointerdown', e => {
+      if (phase !== 'answer' || drag) return;
+      if (fromBank && el.classList.contains('used')) return;
+      const sx = e.clientX, sy = e.clientY;
+      let started = false;
+      const onMove = ev => {
+        if (!started) {
+          if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) < 8) return;
+          started = true;
+          if (fromBank) {
+            el.classList.add('used');
+            const z = makeZoneChip(el.textContent, el);
+            beginDrag(z, true, el, ev.clientX, ev.clientY);
+            drag.grabbedFromBank = el;
+          } else {
+            beginDrag(el, false, null, ev.clientX, ev.clientY);
+          }
+        }
+        if (drag) {
+          drag.el.style.left = (ev.clientX - drag.dx) + 'px';
+          drag.el.style.top = (ev.clientY - drag.dy) + 'px';
+          updatePlaceholder(ev.clientX, ev.clientY);
+        }
+      };
+      const onUp = ev => {
+        el.removeEventListener('pointermove', onMove);
+        el.removeEventListener('pointerup', onUp);
+        el.removeEventListener('pointercancel', onUp);
+        if (started) { el._suppressClick = true; endDrag(ev.clientX, ev.clientY); }
+      };
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+      el.addEventListener('pointermove', onMove);
+      el.addEventListener('pointerup', onUp);
+      el.addEventListener('pointercancel', onUp);
+    });
+  };
+
   const makeZoneChip = (tok, src) => {
     const z = document.createElement('button'); z.className = 'chip'; z.textContent = tok;
     z.dataset.tok = tok; z._src = src;
     z.onclick = () => {
-      if (phase !== 'answer') return;
+      if (z._suppressClick) { z._suppressClick = false; return; }
+      if (phase !== 'answer' || drag) return;
       if (zoneSel === z) { clearSel(); removeZoneChip(z); syncZone(); return; }
       if (zoneSel) {
         const a = zoneSel, m = document.createElement('span');
@@ -1526,13 +1617,16 @@ function buildWordBank(area, ex) {
       }
       zoneSel = z; z.classList.add('sel');
     };
+    attachDrag(z, false);
     return z;
   };
+
   const tokens = shuffle(ex.answer.concat(ex.distractors || []));
   tokens.forEach(tok => {
     const chip = document.createElement('button'); chip.className = 'chip'; chip.textContent = tok;
     chip.onclick = () => {
-      if (phase !== 'answer' || chip.classList.contains('used')) return;
+      if (chip._suppressClick) { chip._suppressClick = false; return; }
+      if (phase !== 'answer' || drag || chip.classList.contains('used')) return;
       chip.classList.add('used');
       const z = makeZoneChip(tok, chip);
       if (zoneSel) {
@@ -1544,6 +1638,7 @@ function buildWordBank(area, ex) {
       tone(880, 0, 0.05, 'sine', 0.06);
       syncZone();
     };
+    attachDrag(chip, true);
     bank.appendChild(chip);
   });
   area.appendChild(bank);
