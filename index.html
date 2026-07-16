@@ -187,8 +187,9 @@
   .feedback .icon-circle{flex:none; width:56px; height:56px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center;}
   .feedback .fb-title{font-size:22px; font-weight:900;}
   .feedback .fb-body{font-size:15px; font-weight:600; margin-top:2px; overflow-wrap:anywhere;}
-  .footer.correct .fb-title,.footer.correct .fb-body{color:var(--green-dark);}
-  .footer.wrong .fb-title,.footer.wrong .fb-body{color:var(--red-dark);}
+  .feedback .fb-gram{font-size:13.5px; font-weight:700; margin-top:5px; font-style:italic; overflow-wrap:anywhere;}
+  .footer.correct .fb-title,.footer.correct .fb-body,.footer.correct .fb-gram{color:var(--green-dark);}
+  .footer.wrong .fb-title,.footer.wrong .fb-body,.footer.wrong .fb-gram{color:var(--red-dark);}
   .skip-btn{background:none; border:2px solid var(--gray); box-shadow:0 4px 0 var(--gray); color:var(--gray-dark);
     border-radius:16px; padding:14px 24px; font-size:15px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; cursor:pointer;}
 
@@ -1064,6 +1065,40 @@ const SECTIONS = [
 ];
 const PALETTE = [['#58cc02','#58a700'],['#1cb0f6','#1899d6'],['#ce82ff','#a560e8'],['#ff9600','#e08600'],['#ff4b96','#d63384']];
 
+/* Per-sentence grammar notes in Spanish, shown when the answer is wrong. GNOTES[unit][sentenceIdx]. */
+const GNOTES = [
+['Si + imperfecto de subjuntivo («tuviera») va con condicional («viajaría»).','«Se me olvidaron»: el verbo concuerda con «las llaves», no contigo.','«Llevar + tiempo + gerundio» expresa duración: llevo dos años estudiando.','«Ojalá» siempre pide subjuntivo: «pudiéramos», no «podemos».','«Echar de menos» es expresión fija; usa «a» ante personas: a mi familia.','«Tomar el pelo» es expresión fija: no cambies «pelo» ni el orden.','«Vale la pena» + infinitivo («discutir»); «por» introduce la causa.','«Ponernos al día»: el pronombre concuerda con nosotros (ponerNOS).','«Quedarse en blanco»: pretérito «me quedé» para un momento puntual.','«Por si acaso» es expresión fija e invariable.'],
+['Estilo indirecto en pasado: «comentó que estaría» (condicional de posterioridad).','«Es imprescindible que» exige subjuntivo: «estén», no «están».','«A más tardar» es fija; «te lo mando»: pronombres antes del verbo.','«Dar por hecho» es fija; tras «que» va indicativo aquí: «van».','«Quedar en + infinitivo» = acordar: quedamos en reunirNOS (nosotros).','«Hace falta que» + subjuntivo: «se encargue», no «se encarga».','«Estar hasta arriba DE» = agobiado de trabajo; la preposición es «de».','Condición irreal de pasado: «hubieras dicho» + «habría cambiado».','«Cueste lo que cueste»: subjuntivo repetido, expresión fija.','Imperativo «ten en cuenta»; «llega» es presente con valor de futuro.'],
+['«Se nos hizo tarde»: construcción con «se» + pronombre de persona.','«Menos mal que» + indicativo: «trajiste» (traer hacia aquí, no llevar).','«Por poco» + presente narra algo que casi pasó: «pierdo».','«Hacer escala» es la expresión fija de los vuelos.','«Surgió un imprevisto»: pretérito para el suceso puntual.','«¿Me echas una mano?»: expresión fija con «echar» conjugado (echas).','«Llevaba una hora esperando»: imperfecto + gerundio para duración pasada.','«A última hora» es fija, en singular.','«Te recojo»: presente con valor de futuro; «de camino a» es fija.','«Salir redondo» concuerda con «todo»: salió redondo.'],
+['«No es que» + subjuntivo («guste»); «es que» + indicativo («tengo»).','«Por mucho que» + subjuntivo: «insistas», no «insistes».','«Que yo sepa» es fija con subjuntivo; «sigue abierta» concuerda con «tienda».','«Por lo visto» es fija; «van a subir» es futuro próximo.','«Se compra»: pasiva con «se»; con «todo» el verbo va en singular.','«Aunque no me guste»: subjuntivo porque no se afirma como hecho.','«A fin de cuentas» es fija; «lo importante» lleva el neutro «lo».','«Cada vez más» es fija; «gente» es singular: «trabaja».','«Según» es invariable; imperfecto «era» para descripciones del pasado.','«Ningún sentido»: «ninguno» se acorta ante sustantivo masculino.'],
+['«Resulta que» + indicativo; «se conocían»: imperfecto para situación previa.','«Total, que» resume la historia; «nadie» pide verbo en singular: «vino».','«Irse la luz» es fija: «se fue la luz», pretérito puntual.','«En cuanto» + subjuntivo si mira al futuro: «llegue», no «llego».','«Al parecer» es fija; «mudarse» es reflexivo: se van a mudar.','«No tengo ni idea de dónde»; «están» en plural con «las tijeras».','«Hacerse el tonto» es fija; con «cuando» pasado va pretérito: «pregunté».','«Más te vale» + infinitivo (llegar): advertencia fija.','«Dar la vuelta» lleva «la»; «se me olvidó» concuerda con «el pasaporte».','Irreal de pasado: «hubiera sabido» + «habría venido».'],
+['«Deja cocer»: dejar + infinitivo; «a fuego lento» es fija.','«Mientras» + presente para acciones simultáneas: pico / pongo.','«Se me quemó» concuerda con «el arroz» (singular).','«Oler a» + sustantivo sin artículo: huele a gloria.','Imperativo «guarda»; «las sobras» se usa en plural.','Imperativos «prueba» y «dime»; «le falta sal» lleva el pronombre «le».','«Dejar que» + subjuntivo: «hierva», no «hierve».','«Al punto» = término medio; «muy hecho» = muy cocinado.','«Si no te lo vas a comer»: orden fijo de pronombres te + lo.','«Está buenísima» concuerda con «tortilla»; superlativo en -ísima.'],
+['«Ponerse en la barra» reflexivo; «pedir mesa» va sin artículo.','«Hasta los topes» es fija; «así que» introduce la consecuencia.','«Invito yo»: el sujeto al final da énfasis; «pagaste» en pretérito.','Cortesía: «¿nos trae... cuando pueda?» con subjuntivo «pueda».','«Para compartir»: «para» + infinitivo expresa finalidad.','«Es obligatorio» + infinitivo directo: dejar propina (sin «de»).','«Tanta cola que...»: consecutiva con tanto/a + sustantivo + que.','«El menú del día» es fijo; «incluye» en singular.','Imperativo con pronombre: «ponme»; «porfa» = por favor (coloquial).','«¿Qué me recomiendas?»: en España la «carta» es el menú.'],
+['«Tener buena pinta» es fija: tiene una pinta increíble.','«Empalagosa» concuerda con «tarta»; «para mi gusto» es fija.','«A la plancha» es fija; «frito» es participio usado como adjetivo.','«Faltar» funciona como «gustar»: le falta sal; «sosa» en femenino.','«Picar» sin pronombre para comida: la salsa pica.','«No hay nada como» + sustantivo; «recién hecho» es fija.','«Estar de temporada» es fija para frutas y verduras.','«Dar un toque» + adjetivo; «que me encanta» es oración de relativo.','«Crujiente» no cambia en femenino.','Condicional «repetiría» para hipótesis; «sin pensarlo» es fija.'],
+['«Alargarse» reflexivo: se alargó; las horas llevan artículo: las seis.','«Brindemos»: imperativo de nosotros; se brinda POR algo.','«Insistió en que» + imperfecto de subjuntivo: «repitiéramos».','«Ponerse las botas» es fija; «comer de más» = en exceso.','Imperativo «quédate»; «de sobra» es fija.','«En casa de» va sin artículo; «algo muy serio» con neutro.','«Antes de que» + subjuntivo: «llegue».','Pretéritos «levantó» y «gritó»: acciones puntuales de la narración.','«Estar en buena compañía» es fija; «con ustedes» es formal.','«No te vayas»: imperativo negativo = no + subjuntivo.'],
+['«Se baten»: pasiva con «se» en plural (los huevos).','«Poco a poco» es fija; «sigue removiendo» = seguir + gerundio.','«Dejar reposar» + objeto; «media hora» sin artículo.','«A ojo» es fija (= sin medir); «le salía perfecto» lleva «le».','«El truco está en» + infinitivo: precalentar.','«De madres a hijas»; «desde hace un siglo» expresa duración.','«Hasta que» + subjuntivo si mira al futuro: «espese».','Condición real: presente «se pega» + imperativo «añade».','Imperativo «hornea»; «hasta que se dore» con subjuntivo.','«Superar a»: nada supera al flan (a + el = al).'],
+['«Quería» es imperfecto de cortesía; «pedir cita» va sin artículo.','Formal: «¿desde cuándo se encuentra usted mal?» (encontrarse = sentirse).','Imperativo de usted + reflexivo: «súbase la manga».','«No es nada grave»: la doble negación es correcta en español.','«Lo mejor es» + infinitivo: descansar y beber.','«Hacerse unos análisis» reflexivo; «en ayunas» es fija.','«Cubrir» con dativo: el seguro no ME cubre.','Imperativo formal «vuelva»; «dentro de dos semanas» mira al futuro.','«Recuperarse del todo» = completamente; «en cuestión de días» fija.','Imperativos formales «guarde» y «tome»; «cada ocho horas» fija.'],
+['«Doler» concuerda con lo que duele: me duelEN las muelas.','Reflexivo + artículo: «me torcí EL tobillo» (no «mi tobillo»).','«Marearse» reflexivo: me mareo.','«No parar de» + infinitivo; «será alergia» = futuro de probabilidad.','«Para que» + subjuntivo: «se infecte».','«Salir» para lo que aparece en el cuerpo: me salió un moratón.','«No se me va»: irse con doble pronombre; «ni con» = ni siquiera con.','Reflexivo + artículo: «me quemé LA mano».','«Dar un tirón» involuntario; «al + infinitivo» = cuando.','«Ni el café» enfatiza; «quitar el dolor» es la expresión.'],
+['«No hace falta» + infinitivo; «matarse» aquí es figurado.','«Dejar DE + infinitivo» = abandonar un hábito; «hace tres años» pasado.','«Intentar» + infinitivo; «a diario» = todos los días.','El infinitivo puede ser sujeto: «trasnochar... me destroza».','Correlativa «cuanto más..., más...»; «cundir» = rendir el tiempo.','«Costar» + infinitivo: cuesta coger (= resulta difícil).','Condición real: «si no descanso, estoy...» (presente + presente).','Imperativo «muévete»; «sentado» describe el estado.','«Ni... ni... ni» niega en serie; «cuidarse» reflexivo.','Refrán fijo: «más vale prevenir que curar».'],
+['«Se vende»: pasiva con «se»; «sin receta» es fija.','Imperativo formal «tome»; «cada ocho horas» es fija.','Formal «lea»; «antes de» + infinitivo: antes de tomar.','«De guardia» es fija; superlativo relativo: la MÁS cercana.','«Dar sueño»: este jarabe me da sueño; «por la noche» fija.','Formal negativo: «no supere»; «dosis» no cambia en plural.','Imperativo «revisa»; «fecha de caducidad» es compuesto fijo.','«Se aplica»: pasiva con «se»; «dos veces al día» fija.','Condición + imperativo formal: «si nota..., consulte».','«Es mejor tomarlo»: el pronombre va pegado al infinitivo.'],
+['«Cuando» habitual + presente: cuando me agobio, salgo.','Imperativos «respira» y «cuenta»; «hasta diez» sin artículo.','«Desconectar DE» algo; «el fin de semana» con artículo.','«A pierna suelta» es fija; «por primera vez en semanas».','El infinitivo como sujeto: «hablar contigo... me anima».','«Se me nota»: se + me con verbo en singular.','El infinitivo como sujeto: «llorar... es un desahogo».','«Ser» para definir: es solo un bajón; «pasajero» = temporal.','Imperativos con pronombre: «hazte», «acuéstate».','«Poco a poco» fija; «recuperó» pretérito de logro.'],
+['«Quisiera» = cortesía (imperfecto de subjuntivo); «para el jueves».','«Incluir»: ¿la tarifa incluye...?; «facturado» participio-adjetivo.','Presente atemporal para normas: «anulan... reembolsan».','Imperativo «reserva»; «dispararse» = subir muchísimo.','«Asiento de pasillo» compuesto; «para estirar» = finalidad.','«De ida y vuelta» es fija; «salir más barato» = resultar.','«Cobrar por» + infinitivo: por elegir asiento.','«Hay que» + infinitivo: obligación impersonal.','«Tan corta...» + consecuencia; presente por futuro: no llegamos.','«Última llamada para...»: fórmula de megafonía.'],
+['«Disculpe» formal; «lo que reservamos»: relativo neutro.','«Dejar» + infinitivo: no nos deja dormir.','«¿Podría...?»: condicional de cortesía.','«Dar a» = tener vistas a: damos a un muro.','«Seguro que» + indicativo; «ahora mismo» = inmediatamente.','«De mala gana» es fija (= sin ganas).','Condición real + futuro: «si no lo arreglan, pondré»; «por escrito» fija.','«Parecer» + adjetivo: no quiero parecer grosero.','«Cambiar DE habitación»: cambiar de + sustantivo sin artículo.','«Pensar + infinitivo» = intención: no pienso hacer.'],
+['«Perderse por» + lugar; «lo mejor del viaje» con neutro «lo».','Imperativos formales «siga» y «gire»; «todo recto» es fija.','«Quedar lejos de» expresa distancia.','Relativo: «un atajo QUE te ahorra diez minutos».','«A mano derecha» es fija; «no tiene pérdida» también.','Imperativo «cruza» + futuro «verás»; «al fondo» fija.','«Tener que» en pasado: tuvimos que orientarnos (reflexivo).','«Cualquiera» como pronombre; «majo/a» = simpático (coloquial).','«Sonar» = resultar familiar: me suena; perfecto «hemos pasado».','«A la vuelta de la esquina» es fija; imperfecto descriptivo «estaba».'],
+['Comparativo «aún mejor que»; «la permanente» omite el sustantivo.','«Los domingos» en plural = todos; «gratuita» concuerda con «entrada».','«Agotarse» con «se»: se agota enseguida.','«La joya de la colección»: posesión con «de».','Imperativo «madruga»; «sin gente» = sin multitudes.','«Sacar entradas» = comprarlas; «para evitar» finalidad.','«Patrimonio de la Humanidad»: nombre fijo con mayúsculas.','«Valer la pena» en pretérito: valió; «muchísimo» intensifica.','«Está incluida» concuerda con «la audioguía».','Contraste con «pero»: pequeño pero imprescindible.'],
+['«Recorrer» = viajar por; «entera» tras el sustantivo enfatiza.','«De milagro» es fija; «conseguimos» pretérito de logro.','«Pasarlo bomba» es fija y necesita «lo»: LO pasamos bomba.','«Ser» + adjetivo valorativo en pretérito: fue inolvidable.','«Flechazo» = amor a primera vista; «al momento» = enseguida.','«Convertirse EN» + sustantivo: se convirtió en anécdota.','Imperfecto (escena) + pretérito (irrupción): cenábamos / empezó.','«Merecer la pena» concuerda: merecieron (los madrugones).','«Quedarse sin» = agotarse; «en mitad de la nada» es fija.','«El año que viene» es fija; futuro «volveremos».'],
+['Imperativo negativo = no + subjuntivo: «no te creas».','«Resultar ser»: resultó ser un bulo.','«Desmentir» cambia e→i: desmintió.','Imperativo «contrasta»; «varias fuentes» en plural.','«Estar + gerundio»: están retransmitiendo; «en directo» fija.','«Ocupar la portada»: expresión periodística.','«A última hora» fija; posesión con «de»: la dimisión DEL ministro.','«Antes que nadie» es comparativa fija.','«Según informan»: impersonal de prensa; «quedarse sin luz» fija.','Presente con valor de futuro programado: mañana entrevistan.'],
+['«Quedarse sin batería» es fija; «en el peor momento».','Imperativo negativo con subjuntivo: «no abras».','«De vez en cuando» es fija (= a veces).','«Estar enganchado A»; concuerda: mi madre está enganchadA.','Relativo con antecedente indefinido + subjuntivo: «que ya no uses».','«Para que» + subjuntivo: «no falle».','«Cuando» + subjuntivo hacia el futuro: «salgas».','«A tope de» = al máximo (coloquial).','«Antes de que» + subjuntivo: «caduque».','«Silenciar el grupo»; «sin ningún remordimiento» enfático.'],
+['«Cada vez más gente» + verbo en singular: compra; «a granel» fija.','Perfecto para un periodo reciente: «ha sido histórica».','Imperativo «separa»; «antes de tirarLO»: pronombre pegado.','Negativo «no malgastes»; «al + infinitivo» = mientras: al cepillarte.','«Multar por» + causa: por un vertido ilegal.','Condicional de consejo: «deberíamos reducir».','Comparativo: «más barata QUE el carbón».','«Hay que» + infinitivo; «desde pequeños» = desde la infancia.','«Cien por cien» es fija; adjetivos en -ble: reciclable.','Pretérito «plantaron»; «para recuperar» = finalidad.'],
+['«Ganga» = ocasión buenísima; «las rebajas de enero».','«Tocar» impersonal = corresponder: este mes toca apretarse.','«Se puede» impersonal; «a plazos» y «sin intereses» fijas.','«Por si» + INDICATIVO: por si tienes que devolverlo.','«Costar un riñón» es fija; con dativo: NOS costó.','«Salir a mitad de precio» = resultar; «casi» matiza.','Imperativo «ahorra»; concesiva con subjuntivo: «aunque sea poco».','«Llegar» con dativo: nos llegó una factura.','«No me llega» = no me alcanza (el dinero).','«Por internet»: «por» indica el medio.'],
+['«En el fondo» es fija; «lo mismo» con neutro.','«Dar en el clavo» es fija: diste en el clavo.','Negativo «no te andes»; «andarse por las ramas» fija.','«En cuanto a» = respecto a; «prefiero no opinar».','«Por un lado..., por otro...»; «dar pereza» como gustar.','«No obstante» = sin embargo (más formal).','«Al fin y al cabo» es fija; «lo importante es» + infinitivo.','«Permíteme» + infinitivo: permíteme matizar.','«Sin embargo» contrasta; «discrepar EN un matiz».','«Dicho esto»: participio absoluto, fórmula fija.'],
+['Refrán fijo: «más vale tarde que nunca», sin cambios.','Refrán con subjuntivo fijo: «no hay mal que por bien no VENGA».','«Salir igual de + adjetivo»; refrán: de tal palo, tal astilla.','Refrán con imperativo negativo: «no LE mires el diente».','Refrán: «quien mucho abarca, poco aprieta»; «quien» generaliza.','«Quedarse con» = elegir; refrán del pájaro en mano.','«Ir de traje» = vestir de; refrán del hábito y el monje.','Refrán: «a quien madruga, Dios LE ayuda» (le duplica el objeto).','Refrán: «ojos que no ven, corazón que no siente».','Refrán: «cada maestrillo tiene su librillo»; «a tu manera» fija.'],
+['«Partirse de risa» es fija y reflexiva: NOS partimos.','«Quedarse con alguien» = tomarle el pelo; estar + gerundio.','«Tomárselo a bien/mal»: dos pronombres, se + lo.','Superlativo «malísimo»; «igual» = de todas formas.','«Tiene guasa que» + subjuntivo: «llueva».','Negativo «no te lo tomes»: orden fijo te + lo.','Pasiva con «se» en plural: no SE PUEDEN traducir.','«Reírse a carcajadas» es fija; «con» introduce la causa.','«Sin gracia» es fija = nada gracioso.','«Pillar» (coloquial) = captar; «se pilla» impersonal.'],
+['«Pase lo que pase»: doble subjuntivo, expresión fija.','«Aunque» + subjuntivo cuando aún no es un hecho: «llueva».','«Antes de que» SIEMPRE lleva subjuntivo: «se agoten».','«Con tal de que» + subjuntivo: «cuides».','«A menos que» + subjuntivo: «pidas».','«Sin que» + subjuntivo; en pasado, imperfecto: «diera».','«Como si» SIEMPRE + imperfecto o pluscuamperfecto de subjuntivo.','¡Ojo! «Por si» va con INDICATIVO: por si llueve.','«En caso de que» + subjuntivo: «surja».','«Cuando» + subjuntivo hacia el futuro: «tengas»; «echar un ojo» fija.'],
+['«Hablando en plata» es fija = con toda franqueza.','«Flipar» coloquial; «cuando veas»: subjuntivo de futuro.','«Ir pillado DE» = escaso de (tiempo, dinero).','«Molar» funciona como gustar: el concierto (me) moló.','«Liarse con» = confundirse con; «mal» adverbio invariable.','«Currar» = trabajar (coloquial); «de ocho a tres» rango.','«Costar una pasta» = ser carísimo; «ni de broma» fija.','«¡Qué guay que...!» + subjuntivo: «vengas».','«Tía» vocativo coloquial; «no te imaginas» enfático.','«Curro» (coloquial) = trabajo, empleo.'],
+['«Por los pelos» es fija = por muy poco.','«A estas alturas» es fija; «ya nada me sorprende».','«Con creces» es fija = de sobra.','«De pe a pa» es fija = de principio a fin.','«Como pez en el agua» es fija; «moverse» reflexivo.','«Atar cabos» es fija; el gerundio «atando» = al hacerlo.','«Con los brazos abiertos» es fija; pretérito «recibieron».','«Dar la talla» es fija = estar a la altura.','«Salirse con la suya» es fija; presente habitual con «siempre».','«La guinda del pastel» es fija; los dos puntos introducen el remate.']
+];
+
 const LESSON_PLANS = [
   [['choice',0],['tr',0,'en2es'],['speak',0],['listen',1],['fill',0],['matchV',[0,1,2,3,4]],['tr',2,'es2en'],['type',0],['tr',3,'en2es'],['listen',2],['choice',1]],
   [['fill',1],['tr',4,'en2es'],['listen',5],['tr',6,'es2en'],['speak',6],['matchV',[5,6,7,8,9]],['type',1],['tr',7,'en2es'],['choice',2],['listen',4],['tr',0,'es2en']],
@@ -1096,13 +1131,13 @@ function buildExercise(unit, op, isReview) {
     return { type:'choice', ref:'choice:'+unit+':'+op[1], prompt:c.prompt, context:c.context, options:c.options, correct:c.correct, note:c.note, newWord:!isReview };
   }
   if (kind === 'tr') {
-    const s = u.sentences[op[1]], dir = op[2];
-    if (dir === 'en2es') return { type:'translate', ref:'tr:'+unit+':'+op[1]+':en2es', dir, source:s.en, answer:tokenize(s.es), distractors:s.dEs, solution:s.es };
-    return { type:'translate', ref:'tr:'+unit+':'+op[1]+':es2en', dir, source:s.es, answer:tokenize(s.en), distractors:s.dEn, solution:s.en };
+    const s = u.sentences[op[1]], dir = op[2], g = (GNOTES[unit] || [])[op[1]];
+    if (dir === 'en2es') return { type:'translate', ref:'tr:'+unit+':'+op[1]+':en2es', dir, source:s.en, answer:tokenize(s.es), distractors:s.dEs, solution:s.es, g:g };
+    return { type:'translate', ref:'tr:'+unit+':'+op[1]+':es2en', dir, source:s.es, answer:tokenize(s.en), distractors:s.dEn, solution:s.en, g:g };
   }
   if (kind === 'listen') {
     const s = u.sentences[op[1]];
-    return { type:'listen', ref:'listen:'+unit+':'+op[1], sentence:s.es, answer:tokenize(s.es), distractors:s.dEs, translation:s.en };
+    return { type:'listen', ref:'listen:'+unit+':'+op[1], sentence:s.es, answer:tokenize(s.es), distractors:s.dEs, translation:s.en, g:(GNOTES[unit] || [])[op[1]] };
   }
   if (kind === 'speak') {
     const s = u.sentences[op[1]];
@@ -1831,6 +1866,17 @@ function solutionOf(ex) {
     ex.type === 'choice' ? ex.options[ex.correct] : '');
 }
 
+function spanishDiff(ans, user) {
+  const n = Math.max(ans.length, user.length);
+  for (let i = 0; i < n; i++) {
+    const a = ans[i], u = user[i];
+    if (a && u && a !== u) return 'Aquí va «' + a + '», no «' + u + '».';
+    if (a && !u) return 'Te faltó «' + a + '».';
+    if (!a && u) return 'Sobra «' + u + '».';
+  }
+  return '';
+}
+
 function recordMistake(ex) {
   if (!ex.ref) return;
   if (isMistakeReview) return;
@@ -1880,7 +1926,12 @@ function grade() {
     queue.push(currentIdx);
     sfxWrong();
     const body = solution + (ex.translation ? ' — ' + ex.translation : '');
-    showFeedback(false, 'Correct solution:', body);
+    let gram = '';
+    if (ex.type === 'translate' || ex.type === 'listen') {
+      gram = spanishDiff(ex.answer, zoneTokens.map(z => z.tok));
+      if (ex.g) gram = (gram ? gram + ' ' : '') + ex.g;
+    } else if (ex.g) gram = ex.g;
+    showFeedback(false, 'Correct solution:', body, gram);
   }
 }
 
@@ -1893,16 +1944,18 @@ function skipExercise() {
   recordMistake(ex);
   queue.push(currentIdx);
   sfxWrong();
-  showFeedback(false, 'Correct solution:', solutionOf(ex) + (ex.translation ? ' — ' + ex.translation : ''));
+  showFeedback(false, 'Correct solution:', solutionOf(ex) + (ex.translation ? ' — ' + ex.translation : ''), ex.g || '');
 }
 
-function showFeedback(ok, title, body) {
+function showFeedback(ok, title, body, gram) {
   const f = $('#footer'); f.className = 'footer ' + (ok ? 'correct' : 'wrong');
   const fb = $('#feedback');
   fb.innerHTML = '<div class="icon-circle">' + (ok ? ICON_CHECK : ICON_X) + '</div>' +
-    '<div style="min-width:0"><div class="fb-title"></div><div class="fb-body"></div></div>';
+    '<div style="min-width:0"><div class="fb-title"></div><div class="fb-body"></div><div class="fb-gram"></div></div>';
   fb.querySelector('.fb-title').textContent = title;
   fb.querySelector('.fb-body').textContent = body;
+  const fg = fb.querySelector('.fb-gram');
+  if (gram) fg.textContent = '📝 ' + gram; else fg.style.display = 'none';
   const btn = $('#check-btn'); btn.textContent = 'Continue'; btn.disabled = false;
   btn.className = 'btn ' + (ok ? 'btn-green' : 'btn-red');
 }
