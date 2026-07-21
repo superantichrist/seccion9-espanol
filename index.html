@@ -94,6 +94,20 @@
   .reset-link{background:none; border:none; color:var(--gray-dark); font-size:12px; font-weight:700;
     text-decoration:underline; cursor:pointer;}
 
+  .wb-search{width:100%; border:2px solid var(--gray); border-radius:14px; padding:12px 16px; font-family:var(--font);
+    font-size:16px; outline:none; background:#f7f7f7;}
+  .wb-search:focus{border-color:var(--blue-border); background:#fff;}
+  .wb-sec{margin:26px 0 2px; font-weight:900; font-size:12.5px; letter-spacing:1.4px; color:var(--gray-dark);}
+  .wb-unit{margin:16px 0 8px; font-weight:900; font-size:15px; color:var(--text-soft); display:flex; align-items:center; gap:8px;}
+  .wb-unit .dot{width:10px; height:10px; border-radius:50%; flex:none;}
+  .wb-row{display:flex; align-items:center; gap:12px; border:2px solid var(--gray); border-bottom-width:3px; border-radius:14px;
+    padding:10px 14px; margin-bottom:8px; cursor:pointer; background:#fff;}
+  .wb-row:hover{background:#f7f7f7;}
+  .wb-es{font-weight:800; font-size:16.5px;}
+  .wb-en{color:var(--text-soft); font-size:14.5px; font-weight:600; margin-top:1px;}
+  .wb-spk{margin-left:auto; flex:none; font-size:18px;}
+  .wb-empty{text-align:center; color:var(--gray-dark); font-weight:700; margin-top:30px;}
+
   #toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:#3c3c3c; color:#fff;
     padding:12px 20px; border-radius:12px; font-weight:700; font-size:14px; opacity:0; pointer-events:none;
     transition:all .25s; z-index:60; max-width:90%; text-align:center;}
@@ -236,6 +250,21 @@
   <div class="path-scroll" id="path-scroll">
     <div class="path-inner" id="path-inner"></div>
   </div>
+</div>
+
+<div id="screen-wordbook" class="screen">
+  <div class="path-header">
+    <div class="path-header-inner">
+      <div class="ph-title"><button class="quit-x" onclick="backToPath()" title="Back">←</button>
+        <div>📖 Vocabulario<div class="ph-sub">EVERY WORD & IDIOM YOU HAVE LEARNED</div></div>
+      </div>
+      <div class="ph-stats"><span class="ph-stat ph-crown" id="wb-count"></span></div>
+    </div>
+  </div>
+  <div style="max-width:640px; margin:0 auto; width:100%; padding:12px 16px 0;">
+    <input id="wb-search" class="wb-search" placeholder="Search in Spanish or English…" oninput="renderWordbook()" autocomplete="off">
+  </div>
+  <div class="path-scroll"><div class="path-inner" id="wb-list" style="padding-top:8px;"></div></div>
 </div>
 
 <div id="screen-lesson" class="screen">
@@ -1331,6 +1360,15 @@ function renderPath() {
   scard.appendChild(sbtn);
   inner.appendChild(scard);
 
+  const wcard = document.createElement('div'); wcard.className = 'practice-card';
+  wcard.innerHTML = '<div class="pc-emoji">📖</div>' +
+    '<div class="pc-info"><div class="pc-title">Wordbook · Vocabulario</div>' +
+    '<div class="pc-sub">Every word and idiom you have learned, by unit — tap any entry to hear it</div></div>';
+  const wbtn = document.createElement('button'); wbtn.className = 'btn btn-blue'; wbtn.textContent = 'Open';
+  wbtn.onclick = showWordbook;
+  wcard.appendChild(wbtn);
+  inner.appendChild(wcard);
+
   SECTIONS.forEach((sec, si) => {
     const sd = document.createElement('div'); sd.className = 'section-divider';
     sd.innerHTML = '<div class="sd-label">SECTION ' + sec.num + ' · ' + sec.cefr + '</div><div class="sd-title"></div><div class="sd-en"></div>';
@@ -1374,6 +1412,53 @@ function backToPath() {
   show('#screen-path');
   renderPath();
 }
+/* ============================ wordbook ============================ */
+function showWordbook() {
+  $('#wb-search').value = '';
+  renderWordbook();
+  show('#screen-wordbook');
+}
+
+function renderWordbook() {
+  const q = stripAccents(normalize($('#wb-search').value || ''));
+  const list = $('#wb-list'); list.innerHTML = '';
+  let count = 0, lastSec = -1;
+  unlockedUnits().forEach(u => {
+    const entries = UNITS[u].vocab.filter(p => !q ||
+      stripAccents(normalize(p[0])).indexOf(q) !== -1 ||
+      stripAccents(normalize(p[1])).indexOf(q) !== -1);
+    if (entries.length === 0) return;
+    const sec = Math.floor(u / 5);
+    if (sec !== lastSec) {
+      lastSec = sec;
+      const sd = document.createElement('div'); sd.className = 'wb-sec';
+      sd.textContent = 'SECTION ' + SECTIONS[sec].num + ' · ' + SECTIONS[sec].es.toUpperCase();
+      list.appendChild(sd);
+    }
+    const uh = document.createElement('div'); uh.className = 'wb-unit';
+    const dot = document.createElement('span'); dot.className = 'dot';
+    dot.style.background = PALETTE[u % 5][0];
+    uh.appendChild(dot);
+    uh.appendChild(document.createTextNode(UNITS[u].title + ' — ' + UNITS[u].en));
+    list.appendChild(uh);
+    entries.forEach(p => {
+      count++;
+      const row = document.createElement('div'); row.className = 'wb-row';
+      row.innerHTML = '<div style="min-width:0"><div class="wb-es"></div><div class="wb-en"></div></div><span class="wb-spk">🔊</span>';
+      row.querySelector('.wb-es').textContent = p[0];
+      row.querySelector('.wb-en').textContent = p[1];
+      row.onclick = () => speak(p[0], 'es');
+      list.appendChild(row);
+    });
+  });
+  $('#wb-count').textContent = count + (count === 1 ? ' entry' : ' entries');
+  if (count === 0) {
+    const e = document.createElement('div'); e.className = 'wb-empty';
+    e.textContent = 'No matches — try another word.';
+    list.appendChild(e);
+  }
+}
+
 function closeReset() { $('#reset-modal').classList.remove('show'); }
 function doReset() { PROG = { done: {}, xp: 0, mistakes: {} }; saveProgress(); closeReset(); renderPath(); toast('Progress reset. ¡Buena suerte!'); }
 
