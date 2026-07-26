@@ -239,11 +239,11 @@
   <div class="path-header">
     <div class="path-header-inner">
       <div class="ph-title"><span class="ph-flag">🇪🇸</span>
-        <div>LingoQuest · Español<div class="ph-sub">SECTIONS 9–14 · THE LEVELS AFTER THE LAST LEVEL · C1 → C2</div></div>
+        <div>LingoQuest · Español<div class="ph-sub">SECTIONS 9–16 · BEYOND THE COURSE · B1 → C2</div></div>
       </div>
       <div class="ph-stats">
         <span class="ph-stat ph-xp">⚡ <span id="hdr-xp">0</span></span>
-        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/126</span>
+        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/168</span>
       </div>
     </div>
   </div>
@@ -1082,6 +1082,258 @@ const UNITS = [
   types:[
     {source:'by the skin of my teeth', accepted:['por los pelos'], solution:'por los pelos'},
     {source:'the cherry on top', accepted:['la guinda del pastel'], solution:'la guinda del pastel'}]
+},
+/* ===== SECTION 15 · Historias de cada día (B1-B2) ===== */
+{ title:'Mi familia', en:'Grandma’s big birthday — a story',
+  vocab:[['el cumpleaños','the birthday'],['la sorpresa','the surprise'],['el nieto','the grandson'],['la tarta de chocolate','the chocolate cake'],['soplar las velas','to blow out the candles'],['el regalo','the gift'],['abrazar','to hug'],['la foto de familia','the family photo'],['reunirse','to get together'],['el recuerdo','the memory']],
+  sentences:[
+    {es:'El domingo celebramos el cumpleaños de mi abuela.', en:'On Sunday we celebrated my grandmother’s birthday.', dEs:['celebran','sábado','abuelas'], dEn:['celebrates','Saturdays','grandmothers']},
+    {es:'Toda la familia se reunió en casa de mis padres.', en:'The whole family got together at my parents’ house.', dEs:['reunieron','casas','padre'], dEn:['gets','houses','parent']},
+    {es:'Mi hermana preparó una tarta de chocolate enorme.', en:'My sister made a huge chocolate cake.', dEs:['preparan','tartas','hermanas'], dEn:['prepares','cakes','sisters']},
+    {es:'La abuela sopló las velas y pidió un deseo.', en:'Grandma blew out the candles and made a wish.', dEs:['soplan','vela','pide'], dEn:['blows','candle','wishes']},
+    {es:'Los nietos le dieron un regalo muy especial.', en:'The grandchildren gave her a very special gift.', dEs:['dan','regalos','nieto'], dEn:['gives','gifts','grandchild']},
+    {es:'Era un álbum con fotos de toda su vida.', en:'It was an album with photos from her whole life.', dEs:['fue','álbumes','foto'], dEn:['is','albums','photo']},
+    {es:'Al verlo, la abuela empezó a llorar de alegría.', en:'When she saw it, grandma started to cry with joy.', dEs:['ver','empieza','tristeza'], dEn:['sees','starts','sadness']},
+    {es:'Nos abrazó uno por uno, muy despacio.', en:'She hugged us one by one, very slowly.', dEs:['abraza','unos','rápido'], dEn:['hugs','ones','quickly']},
+    {es:'Después nos hicimos la foto de familia de siempre.', en:'Afterwards we took the usual family photo.', dEs:['hacen','fotos','nunca'], dEn:['takes','photos','unusual']},
+    {es:'Fue un día que nadie va a olvidar.', en:'It was a day that nobody is going to forget.', dEs:['era','días','olvida'], dEn:['is','days','forgets']}],
+  fills:[
+    {before:'La abuela sopló ', after:' y pidió un deseo.', options:['las velas','los velos','las olas'], correct:0, translation:'Grandma blew out the candles and made a wish. (¡"Los velos" = veils; "las olas" = waves!)'},
+    {before:'Toda la familia ', after:' en casa de mis padres.', options:['se reunió','se reunieron','reunió'], correct:0, translation:'The whole family got together at my parents’ house. ("Toda la familia" is singular!)'},
+    {before:'Los nietos le ', after:' un regalo especial.', options:['dieron','daron','dio'], correct:0, translation:'The grandchildren gave her a special gift. (¡"Daron" no existe!)'}],
+  choices:[
+    {prompt:'Which of these means "to blow out the candles"?', options:['soplar las velas','soplar las telas','volar las velas'], correct:0, note:'"Las telas" = fabrics; "volar" = to fly!'},
+    {prompt:'What does it mean?', context:'Pidió un deseo.', options:['She made a wish.','She asked for dessert.','She ordered a drink.'], correct:0, note:'"Pedir un deseo" = to make a wish.'},
+    {prompt:'Your family says "¡foto de familia!". What happens next?', options:['Everyone gathers to take a group photo.','Everyone looks at old photos.','Someone buys a camera.'], correct:0, note:'And someone always blinks.'}],
+  types:[
+    {source:'the birthday', accepted:['el cumpleaños','el cumpleanos'], solution:'el cumpleaños'},
+    {source:'We celebrated grandma’s birthday.', accepted:['celebramos el cumpleaños de la abuela','celebramos el cumpleanos de la abuela','celebramos el cumpleaños de mi abuela','celebramos el cumpleanos de mi abuela'], solution:'Celebramos el cumpleaños de la abuela.'}]
+},
+{ title:'Entre amigos', en:'The surprise reunion — a story',
+  vocab:[['quedar','to meet up'],['el reencuentro','the reunion'],['contar un secreto','to tell a secret'],['la amistad','the friendship'],['apoyar','to support'],['reírse juntos','to laugh together'],['conocerse','to know each other'],['el apodo','the nickname'],['confiar en','to trust'],['dar la bienvenida','to welcome']],
+  sentences:[
+    {es:'Mi mejor amigo volvió ayer de Alemania.', en:'My best friend came back from Germany yesterday.', dEs:['volvieron','amiga','para'], dEn:['comes','friends','tomorrow']},
+    {es:'Nos conocemos desde que teníamos cinco años.', en:'We have known each other since we were five years old.', dEs:['conocen','tenemos','año'], dEn:['knows','are','year']},
+    {es:'Organizamos un reencuentro sin decirle nada.', en:'We organized a reunion without telling him anything.', dEs:['organizan','reencuentros','decir'], dEn:['organizes','reunions','saying']},
+    {es:'Cada uno trajo comida y recuerdos viejos.', en:'Each one brought food and old memories.', dEs:['trajeron','comidas','nuevo'], dEn:['brings','foods','new']},
+    {es:'Cuando entró, todos gritamos su apodo.', en:'When he came in, we all shouted his nickname.', dEs:['entra','gritan','apodos'], dEn:['enters','shouts','nicknames']},
+    {es:'Se quedó sin palabras casi un minuto.', en:'He was speechless for almost a minute.', dEs:['queda','palabra','minutos'], dEn:['stays','minutes','seconds']},
+    {es:'Nos reímos juntos como en los viejos tiempos.', en:'We laughed together like in the old times.', dEs:['ríen','junto','tiempo'], dEn:['laughs','apart','time']},
+    {es:'Me contó un secreto que guardaba desde hacía años.', en:'He told me a secret that he had kept for years.', dEs:['cuenta','secretos','guardó'], dEn:['tells','secrets','keeps']},
+    {es:'Un buen amigo te apoya incluso en los días grises.', en:'A good friend supports you even on gray days.', dEs:['apoyan','amigos','día'], dEn:['support','friends','day']},
+    {es:'La amistad así no se encuentra todos los días.', en:'Friendship like that is not found every day.', dEs:['amistades','encuentran','día'], dEn:['friendships','finds','daily']}],
+  fills:[
+    {before:'¿', after:' mañana para tomar un café?', options:['Quedamos','Quedan','Queda'], correct:0, translation:'Shall we meet up tomorrow for a coffee? ("Quedar" = to arrange to meet!)'},
+    {before:'Puedes ', after:' en mí: no diré nada.', options:['confiar','confesar','conducir'], correct:0, translation:'You can trust me: I will not say anything. ("Conducir" = to drive!)'},
+    {before:'De pequeños, todos me llamaban por mi ', after:'.', options:['apodo','apoyo','aparato'], correct:0, translation:'As kids, everyone called me by my nickname. ("Apoyo" = support; "aparato" = device!)'}],
+  choices:[
+    {prompt:'Which of these means "to meet up (by arrangement)"?', options:['quedar','quedarse','caer'], correct:0, note:'¡"Quedarse" = to stay!'},
+    {prompt:'What does it mean?', context:'Nos conocemos de toda la vida.', options:['We have known each other forever.','We met once in a lifetime.','We know everything about life.'], correct:0, note:'"De toda la vida" = since forever.'},
+    {prompt:'Your friend says "cuenta conmigo". What do they mean?', options:['You can count on me.','Tell me a story.','Count with my fingers.'], correct:0, note:'"Contar con" = to count on.'}],
+  types:[
+    {source:'the friendship', accepted:['la amistad'], solution:'la amistad'},
+    {source:'We laughed together.', accepted:['nos reimos juntos','nos reímos juntos'], solution:'Nos reímos juntos.'}]
+},
+{ title:'Deporte y domingos', en:'The Sunday match — a story',
+  vocab:[['el partido','the match'],['el equipo','the team'],['marcar un gol','to score a goal'],['el empate','the tie (draw)'],['entrenar','to train'],['el árbitro','the referee'],['la cancha','the field (court)'],['animar','to cheer'],['ganar','to win'],['perder','to lose']],
+  sentences:[
+    {es:'Cada domingo jugamos un partido en el parque.', en:'Every Sunday we play a match in the park.', dEs:['juegan','partidos','parques'], dEn:['plays','matches','parks']},
+    {es:'Nuestro equipo se llama Los Tigres del Barrio.', en:'Our team is called The Neighborhood Tigers.', dEs:['llaman','equipos','tigre'], dEn:['calls','teams','tiger']},
+    {es:'Ayer jugamos contra el equipo de la panadería.', en:'Yesterday we played against the bakery’s team.', dEs:['jugaron','panaderías','con'], dEn:['play','bakeries','with']},
+    {es:'Mi vecino marcó un gol de cabeza increíble.', en:'My neighbor scored an incredible goal with his head.', dEs:['marca','goles','pie'], dEn:['scores','goals','foot']},
+    {es:'El árbitro era el abuelo de un jugador.', en:'The referee was a player’s grandfather.', dEs:['árbitros','jugadores','nieto'], dEn:['referees','players','grandson']},
+    {es:'Íbamos perdiendo dos a uno hasta el final.', en:'We were losing two to one until the end.', dEs:['vamos','ganando','finales'], dEn:['are','winning','ends']},
+    {es:'En el último minuto empatamos el partido.', en:'In the last minute we tied the match.', dEs:['empataron','minutos','primeros'], dEn:['ties','minutes','first']},
+    {es:'Todos celebramos el empate como una victoria.', en:'We all celebrated the tie like a victory.', dEs:['celebran','empates','derrota'], dEn:['celebrates','ties','defeat']},
+    {es:'Después del partido siempre comemos churros juntos.', en:'After the match we always eat churros together.', dEs:['partidos','comen','solos'], dEn:['matches','eats','alone']},
+    {es:'Perder no importa cuando juegas con amigos.', en:'Losing does not matter when you play with friends.', dEs:['pierde','importan','juega'], dEn:['loses','mattered','plays']}],
+  fills:[
+    {before:'Nuestro delantero ', after:' dos goles ayer.', options:['marcó','marcaron','marca'], correct:0, translation:'Our striker scored two goals yesterday.'},
+    {before:'El partido terminó en ', after:': dos a dos.', options:['empate','empeño','empuje'], correct:0, translation:'The match ended in a tie: two to two. ("Empeño" = determination!)'},
+    {before:'', after:' tres veces por semana en el gimnasio.', options:['Entreno','Entrena','Entrenar'], correct:0, translation:'I train three times a week at the gym.'}],
+  choices:[
+    {prompt:'Which of these means "to score a goal"?', options:['marcar un gol','meter la pata','ganar la cancha'], correct:0, note:'Remember "meter la pata"? That is to mess up!'},
+    {prompt:'What does it mean?', context:'Vamos ganando tres a cero.', options:['We are winning three to zero.','We go to win three zeros.','We won three games.'], correct:0, note:'"Ir + gerundio" = ongoing score.'},
+    {prompt:'The crowd shouts "¡ánimo!". What are they doing?', options:['Cheering the team on.','Asking for silence.','Calling the referee.'], correct:0, note:'"¡Ánimo!" = come on, you can do it!'}],
+  types:[
+    {source:'the team', accepted:['el equipo'], solution:'el equipo'},
+    {source:'We tied the match.', accepted:['empatamos el partido'], solution:'Empatamos el partido.'}]
+},
+{ title:'Tradiciones', en:'Twelve grapes at midnight — a story',
+  vocab:[['la Nochevieja','New Year’s Eve'],['las uvas de la suerte','the lucky grapes'],['la campanada','the bell chime'],['el villancico','the Christmas carol'],['la feria','the fair'],['el traje típico','the traditional costume'],['la costumbre','the custom'],['celebrar','to celebrate'],['la fiesta popular','the local festival'],['tener suerte','to be lucky']],
+  sentences:[
+    {es:'En España hay una tradición muy curiosa en Nochevieja.', en:'In Spain there is a very curious tradition on New Year’s Eve.', dEs:['había','tradiciones','Navidad'], dEn:['was','traditions','Christmas']},
+    {es:'Hay que comer doce uvas con las doce campanadas.', en:'You have to eat twelve grapes with the twelve bell chimes.', dEs:['uva','campanada','once'], dEn:['grape','chime','eleven']},
+    {es:'Mi primera vez casi me atraganto con la tercera uva.', en:'My first time I almost choked on the third grape.', dEs:['atragantó','cuarta','primeras'], dEn:['chokes','fourth','second']},
+    {es:'Todo el mundo se ríe y nadie llega a la última.', en:'Everybody laughs and nobody makes it to the last one.', dEs:['ríen','llegan','primera'], dEn:['laugh','arrive','first']},
+    {es:'Dicen que las uvas traen suerte para el año nuevo.', en:'They say the grapes bring luck for the new year.', dEs:['dice','trae','años'], dEn:['says','brings','years']},
+    {es:'En agosto, mi pueblo celebra su fiesta popular.', en:'In August, my town celebrates its local festival.', dEs:['celebran','pueblos','fiestas'], dEn:['celebrate','towns','festivals']},
+    {es:'Las mujeres llevan trajes típicos de colores brillantes.', en:'The women wear traditional costumes in bright colors.', dEs:['lleva','traje','color'], dEn:['wears','costume','color']},
+    {es:'La plaza se llena de música y de baile.', en:'The square fills with music and dancing.', dEs:['llenan','plazas','bailes'], dEn:['fill','squares','dances']},
+    {es:'Esta costumbre pasa de padres a hijos.', en:'This custom is passed from parents to children.', dEs:['pasan','costumbres','hijo'], dEn:['passes','customs','child']},
+    {es:'Las tradiciones nos recuerdan de dónde venimos.', en:'Traditions remind us where we come from.', dEs:['recuerda','tradición','vamos'], dEn:['reminds','tradition','go']}],
+  fills:[
+    {before:'En Nochevieja comemos doce ', after:' de la suerte.', options:['uvas','ovejas','olas'], correct:0, translation:'On New Year’s Eve we eat twelve lucky grapes. (¡"Ovejas" = sheep!)'},
+    {before:'Cada región tiene sus propias ', after:'.', options:['costumbres','costuras','cortinas'], correct:0, translation:'Each region has its own customs. ("Costuras" = seams; "cortinas" = curtains!)'},
+    {before:'En diciembre cantamos ', after:' con los niños.', options:['villancicos','villanos','ventiladores'], correct:0, translation:'In December we sing carols with the kids. (¡"Villanos" = villains; "ventiladores" = fans!)'}],
+  choices:[
+    {prompt:'Which of these means "custom (tradition)"?', options:['la costumbre','el disfraz','la costura'], correct:0, note:'"El disfraz" = a party costume!'},
+    {prompt:'What does it mean?', context:'¡Que tengas suerte!', options:['Good luck!','You are lucky!','What luck you have!'], correct:0, note:'"Que + subjuntivo" for wishes.'},
+    {prompt:'At midnight on Nochevieja, Spaniards eat...', options:['Twelve grapes.','Twelve olives.','A slice of cake.'], correct:0, note:'One per bell chime — harder than it sounds!'}],
+  types:[
+    {source:'New Year’s Eve', accepted:['la nochevieja','nochevieja'], solution:'la Nochevieja'},
+    {source:'The grapes bring luck.', accepted:['las uvas traen suerte'], solution:'Las uvas traen suerte.'}]
+},
+{ title:'En la cocina de casa', en:'Paella with dad — a story',
+  vocab:[['la sartén','the frying pan'],['el ingrediente','the ingredient'],['cortar','to cut'],['freír','to fry'],['mezclar','to mix'],['el arroz','the rice'],['el aceite de oliva','the olive oil'],['el fuego','the heat (fire)'],['la cuchara de madera','the wooden spoon'],['quedar delicioso','to turn out delicious']],
+  sentences:[
+    {es:'Los sábados cocino con mi padre una paella.', en:'On Saturdays I cook a paella with my father.', dEs:['cocinan','sábado','madres'], dEn:['cooks','Saturday','mothers']},
+    {es:'Primero cortamos la verdura en trozos pequeños.', en:'First we cut the vegetables into small pieces.', dEs:['cortan','verduras','grandes'], dEn:['cuts','vegetable','big']},
+    {es:'Después freímos el pollo en aceite de oliva.', en:'Then we fry the chicken in olive oil.', dEs:['fríen','pollos','mantequilla'], dEn:['fries','chickens','butter']},
+    {es:'Mi padre dice que el secreto está en el fuego lento.', en:'My father says the secret is in the low heat.', dEs:['dicen','secretos','rápido'], dEn:['say','secrets','fast']},
+    {es:'Añadimos el arroz y lo mezclamos con la cuchara de madera.', en:'We add the rice and mix it with the wooden spoon.', dEs:['añaden','mezclan','metal'], dEn:['adds','mixes','metal']},
+    {es:'Toda la casa huele a comida rica.', en:'The whole house smells like delicious food.', dEs:['huelen','casas','mal'], dEn:['smell','houses','bad']},
+    {es:'Mi madre pone la mesa mientras esperamos.', en:'My mother sets the table while we wait.', dEs:['ponen','mesas','esperan'], dEn:['set','tables','waits']},
+    {es:'La paella quedó deliciosa, como siempre.', en:'The paella turned out delicious, as always.', dEs:['quedaron','delicioso','nunca'], dEn:['turns','never','salty']},
+    {es:'Comimos todos juntos en la terraza.', en:'We all ate together on the terrace.', dEs:['comieron','junto','cocina'], dEn:['eats','apart','kitchen']},
+    {es:'Cocinar en familia es nuestra pequeña tradición.', en:'Cooking as a family is our little tradition.', dEs:['cocina','familias','grandes'], dEn:['cooks','families','big']}],
+  fills:[
+    {before:'Fríe el pollo en la ', after:'.', options:['sartén','sillón','serpiente'], correct:0, translation:'Fry the chicken in the frying pan. (¡"Sillón" = armchair; "serpiente" = snake!)'},
+    {before:'Mezcla todo con una cuchara de ', after:'.', options:['madera','manera','moneda'], correct:0, translation:'Mix everything with a wooden spoon. ("Manera" = way; "moneda" = coin!)'},
+    {before:'La cena ', after:' deliciosa.', options:['quedó','quedaron','quedado'], correct:0, translation:'The dinner turned out delicious.'}],
+  choices:[
+    {prompt:'Which of these means "to fry"?', options:['freír','frotar','frenar'], correct:0, note:'"Frotar" = to rub; "frenar" = to brake!'},
+    {prompt:'What does it mean?', context:'Huele a gloria.', options:['It smells heavenly.','It smells like glory flowers.','Someone is called Gloria.'], correct:0, note:'You learned this in Section 10 — ¡bravo!'},
+    {prompt:'"El aceite de oliva" is...', options:['Olive oil.','Oil paint.','An olive tree.'], correct:0, note:'The heart of Spanish cooking.'}],
+  types:[
+    {source:'the rice', accepted:['el arroz'], solution:'el arroz'},
+    {source:'It turned out delicious.', accepted:['quedo delicioso','quedó delicioso','quedo deliciosa','quedó deliciosa'], solution:'Quedó delicioso.'}]
+},
+/* ===== SECTION 16 · El taller de verbos (B1-B2) ===== */
+{ title:'Ser y estar', en:'The two faces of “to be”',
+  vocab:[['soy','I am (ser)'],['estoy','I am (estar)'],['fui','I was (ser, pretérito)'],['estuve','I was (estar, pretérito)'],['era','I used to be (imperfecto)'],['sido','been (participio de ser)'],['estado','been (participio de estar)'],['siendo','being (gerundio de ser)'],['estando','being (gerundio de estar)'],['seré','I will be']],
+  sentences:[
+    {es:'Soy profesora y estoy muy contenta con mi trabajo.', en:'I am a teacher and I am very happy with my job.', dEs:['eres','estás','contento'], dEn:['is','be','happily']},
+    {es:'De pequeña era muy tímida.', en:'As a little girl I used to be very shy.', dEs:['fui','eras','tímido'], dEn:['use','being','shyly']},
+    {es:'Ayer estuve en casa de mi hermana.', en:'Yesterday I was at my sister’s house.', dEs:['estaba','estuvo','casas'], dEn:['were','am','houses']},
+    {es:'La reunión fue muy larga.', en:'The meeting was very long.', dEs:['era','fueron','largas'], dEn:['is','were','short']},
+    {es:'He sido muy feliz en esta ciudad.', en:'I have been very happy in this city.', dEs:['ha','estado','felices'], dEn:['has','being','happily']},
+    {es:'¿Has estado alguna vez en México?', en:'Have you ever been to Mexico?', dEs:['ha','sido','veces'], dEn:['has','being','never']},
+    {es:'Está siendo un año difícil, pero aprendemos mucho.', en:'It is being a difficult year, but we are learning a lot.', dEs:['es','estando','años'], dEn:['was','been','learns']},
+    {es:'La cena está preparada y la mesa está puesta.', en:'The dinner is prepared and the table is set.', dEs:['es','preparado','puestas'], dEn:['are','prepare','sets']},
+    {es:'El concierto fue cancelado por la lluvia.', en:'The concert was canceled because of the rain.', dEs:['estuvo','cancelados','lluvias'], dEn:['is','canceling','rains']},
+    {es:'Mañana seré la primera en llegar.', en:'Tomorrow I will be the first to arrive.', dEs:['será','seremos','último'], dEn:['would','am','last']}],
+  fills:[
+    {before:'Mi hermano ', after:' médico.', options:['es','está','hay'], correct:0, translation:'My brother is a doctor. (Profession → SER!)'},
+    {before:'La sopa ', after:' fría; caliéntala un poco.', options:['está','es','hay'], correct:0, translation:'The soup is cold; warm it up a bit. (Current state → ESTAR!)'},
+    {before:'El puente ', after:' construido en 1920.', options:['fue','estuvo','hizo'], correct:0, translation:'The bridge was built in 1920. (Passive → SER + participle!)'}],
+  choices:[
+    {prompt:'Profession ("She is a doctor") uses...', options:['ser (es doctora)','estar (está doctora)','haber (hay doctora)'], correct:0, note:'SER for what you are; ESTAR for how you are.'},
+    {prompt:'"La ventana está abierta" describes...', options:['A state (the window is open).','An action happening right now.','A future plan.'], correct:0, note:'ESTAR + participle = the result of an action.'},
+    {prompt:'Which sentence is PASSIVE?', options:['El libro fue escrito en 1605.','El libro es muy bueno.','Estoy escribiendo un libro.'], correct:0, note:'SER + participle + (por...) = passive voice.'}],
+  types:[
+    {source:'I have been', accepted:['he sido','he estado'], solution:'he sido'},
+    {source:'I am learning.', accepted:['estoy aprendiendo'], solution:'Estoy aprendiendo.'}]
+},
+{ title:'Tener, hacer, ir', en:'Three giants you use every day',
+  vocab:[['tengo','I have'],['tuve','I had (pretérito)'],['tenido','had (participio)'],['teniendo','having (gerundio)'],['hago','I do (I make)'],['hice','I did (I made)'],['hecho','done (made)'],['voy','I go'],['fui (de ir)','I went'],['yendo','going (gerundio)']],
+  sentences:[
+    {es:'Tengo dos hermanos y una perra que se llama Luna.', en:'I have two brothers and a dog named Luna.', dEs:['tienes','hermano','perro'], dEn:['has','brother','cat']},
+    {es:'De niño tenía el pelo muy rubio.', en:'As a child I had very blond hair.', dEs:['tuve','tenías','pelos'], dEn:['have','hairs','dark']},
+    {es:'Ayer tuve un día complicado en el trabajo.', en:'Yesterday I had a complicated day at work.', dEs:['tenía','tuviste','días'], dEn:['have','days','simple']},
+    {es:'He tenido mucha suerte con mis vecinos.', en:'I have had a lot of luck with my neighbors.', dEs:['ha','teniendo','suertes'], dEn:['has','having','lucks']},
+    {es:'Hago ejercicio antes de desayunar.', en:'I do exercise before breakfast.', dEs:['haces','ejercicios','después'], dEn:['does','exercises','after']},
+    {es:'El sábado hice una tarta para mis suegros.', en:'On Saturday I made a cake for my in-laws.', dEs:['hacía','hiciste','tartas'], dEn:['makes','cakes','from']},
+    {es:'¿Ya has hecho la maleta para el viaje?', en:'Have you already packed the suitcase for the trip?', dEs:['he','hecha','maletas'], dEn:['has','packing','trips']},
+    {es:'Voy al mercado todos los jueves por la mañana.', en:'I go to the market every Thursday morning.', dEs:['vas','mercados','tarde'], dEn:['goes','markets','evening']},
+    {es:'El verano pasado fuimos a la playa en tren.', en:'Last summer we went to the beach by train.', dEs:['fueron','playas','coche'], dEn:['goes','beaches','car']},
+    {es:'Estoy yendo a clases de baile los martes.', en:'I am going to dance classes on Tuesdays.', dEs:['vas','clase','lunes'], dEn:['is','class','Mondays']}],
+  fills:[
+    {before:'¿Qué ', after:' este fin de semana? — Nada especial.', options:['haces','hago','hacen'], correct:0, translation:'What are you doing this weekend? — Nothing special.'},
+    {before:'Nunca he ', after:' paella, pero quiero aprender.', options:['hecho','hacido','hacer'], correct:0, translation:'I have never made paella, but I want to learn. (¡"Hacido" no existe!)'},
+    {before:'Mis padres ', after:' al cine cada viernes.', options:['van','va','vamos'], correct:0, translation:'My parents go to the movies every Friday.'}],
+  choices:[
+    {prompt:'The participle of HACER is...', options:['hecho','hacido','hazado'], correct:0, note:'One of the famous irregulars — memorize it!'},
+    {prompt:'"Tener que + infinitive" means...', options:['To have to do something.','To want something.','To have something.'], correct:0, note:'Tengo que estudiar = I have to study.'},
+    {prompt:'Which one is correct?', options:['Estoy yendo a clase.','Estoy indo a clase.','Estoy vayendo a clase.'], correct:0, note:'The gerund of IR is YENDO.'}],
+  types:[
+    {source:'I have had', accepted:['he tenido'], solution:'he tenido'},
+    {source:'I made a cake.', accepted:['hice una tarta','hice un pastel'], solution:'Hice una tarta.'}]
+},
+{ title:'Verbos en -AR', en:'Hablar, trabajar & friends — all the forms',
+  vocab:[['hablo','I speak'],['hablé','I spoke'],['hablado','spoken'],['hablando','speaking'],['trabajo (verbo)','I work'],['trabajé','I worked'],['trabajando','working'],['estudiado','studied (participio)'],['caminando','walking'],['cocinado','cooked (participio)']],
+  sentences:[
+    {es:'Hablo español con mis nietos por videollamada.', en:'I speak Spanish with my grandchildren by video call.', dEs:['hablas','españoles','nieto'], dEn:['speaks','grandchild','letter']},
+    {es:'Ayer hablé con mi hija durante una hora.', en:'Yesterday I spoke with my daughter for an hour.', dEs:['hablaba','hablaste','hijas'], dEn:['speak','daughters','minutes']},
+    {es:'Hemos hablado de todo un poco.', en:'We have talked about a bit of everything.', dEs:['han','hablando','todos'], dEn:['has','talking','nothing']},
+    {es:'Está hablando por teléfono; llama más tarde.', en:'She is talking on the phone; call later.', dEs:['es','hablado','teléfonos'], dEn:['was','talked','earlier']},
+    {es:'Trabajé veinte años en una escuela.', en:'I worked twenty years at a school.', dEs:['trabajaba','trabajaste','escuelas'], dEn:['works','schools','months']},
+    {es:'Ahora estoy trabajando menos y viviendo más.', en:'Now I am working less and living more.', dEs:['estás','trabajado','vivido'], dEn:['is','worked','lived']},
+    {es:'He estudiado español durante muchos años.', en:'I have studied Spanish for many years.', dEs:['ha','estudiando','año'], dEn:['has','studying','year']},
+    {es:'Caminando media hora al día se vive mejor.', en:'By walking half an hour a day you live better.', dEs:['caminar','caminado','horas'], dEn:['walked','walks','days']},
+    {es:'La cena ya está cocinada; solo falta servirla.', en:'The dinner is already cooked; we only need to serve it.', dEs:['cocinado','están','sobran'], dEn:['cooking','needed','serves']},
+    {es:'Esta canción fue cantada por mi abuela.', en:'This song was sung by my grandmother.', dEs:['estuvo','cantado','abuelas'], dEn:['is','singing','grandfather']}],
+  fills:[
+    {before:'Ahora mismo estoy ', after:' con mi vecina.', options:['hablando','hablado','hablar'], correct:0, translation:'Right now I am talking with my neighbor. (Estar + -ANDO!)'},
+    {before:'Nunca he ', after:' en una oficina.', options:['trabajado','trabajando','trabajar'], correct:0, translation:'I have never worked in an office. (Haber + -ADO!)'},
+    {before:'La paella fue ', after:' por mi padre.', options:['cocinada','cocinando','cocinar'], correct:0, translation:'The paella was cooked by my father. (Passive: agrees with "paella"!)'}],
+  choices:[
+    {prompt:'The gerund of -AR verbs ends in...', options:['-ando (hablando)','-iendo (hablendo)','-ado (hablado)'], correct:0, note:'-AR → -ANDO. Easy as cantando.'},
+    {prompt:'"He hablado" is...', options:['Present perfect (I have spoken).','Past simple (I spoke).','Future (I will speak).'], correct:0, note:'Haber + participle = perfecto.'},
+    {prompt:'Which is PASSIVE?', options:['La carta fue escrita ayer.','Escribí la carta ayer.','Estoy escribiendo la carta.'], correct:0, note:'The subject receives the action.'}],
+  types:[
+    {source:'speaking (gerund)', accepted:['hablando'], solution:'hablando'},
+    {source:'I have worked a lot.', accepted:['he trabajado mucho'], solution:'He trabajado mucho.'}]
+},
+{ title:'Verbos en -ER / -IR', en:'Comer, vivir, escribir — all the forms',
+  vocab:[['como (verbo)','I eat'],['comí','I ate'],['comido','eaten'],['comiendo','eating'],['vivo','I live'],['viví','I lived'],['viviendo','living'],['escrito','written'],['abierto','open (participio)'],['bebiendo','drinking']],
+  sentences:[
+    {es:'Como fruta todas las mañanas.', en:'I eat fruit every morning.', dEs:['comes','frutas','noches'], dEn:['eats','fruits','nights']},
+    {es:'Anoche comí demasiado y dormí fatal.', en:'Last night I ate too much and slept terribly.', dEs:['comía','comiste','bien'], dEn:['eat','sleeps','well']},
+    {es:'¿Has comido alguna vez paella de verduras?', en:'Have you ever eaten vegetable paella?', dEs:['he','comiendo','verdura'], dEn:['has','eating','meat']},
+    {es:'Estamos comiendo mejor desde enero.', en:'We are eating better since January.', dEs:['estáis','comido','peor'], dEn:['is','eaten','worse']},
+    {es:'Vivo en un piso pequeño con mucha luz.', en:'I live in a small apartment with a lot of light.', dEs:['vives','pisos','oscuridad'], dEn:['lives','apartments','dark']},
+    {es:'Viví cinco años en Buenos Aires.', en:'I lived five years in Buenos Aires.', dEs:['vivía','viviste','año'], dEn:['lives','month','at']},
+    {es:'Mi tía ha escrito un libro de recetas.', en:'My aunt has written a recipe book.', dEs:['han','escribiendo','libros'], dEn:['have','writing','books']},
+    {es:'La puerta está abierta; pasa sin llamar.', en:'The door is open; come in without knocking.', dEs:['abierto','están','cerrada'], dEn:['opens','closed','knock']},
+    {es:'El niño está bebiendo leche con cacao.', en:'The boy is drinking milk with cocoa.', dEs:['es','bebido','leches'], dEn:['was','drunk','juice']},
+    {es:'Estas novelas fueron escritas hace un siglo.', en:'These novels were written a century ago.', dEs:['fue','escritos','siglos'], dEn:['was','writing','centuries']}],
+  fills:[
+    {before:'¿Qué estás ', after:', un zumo?', options:['bebiendo','bebido','beber'], correct:0, translation:'What are you drinking, a juice? (-ER/-IR gerund: -IENDO!)'},
+    {before:'He ', after:' una carta a mi nieta.', options:['escrito','escribido','escribiendo'], correct:0, translation:'I have written a letter to my granddaughter. (¡"Escribido" no existe!)'},
+    {before:'Las ventanas están ', after:'.', options:['abiertas','abiertos','abriendo'], correct:0, translation:'The windows are open. (Agrees: ventanas → abiertAS!)'}],
+  choices:[
+    {prompt:'The participle of ABRIR is...', options:['abierto','abrido','abriente'], correct:0, note:'Another famous irregular!'},
+    {prompt:'The gerund of -ER/-IR verbs ends in...', options:['-iendo (comiendo)','-ando (comando)','-ido (comido)'], correct:0, note:'-ER/-IR → -IENDO.'},
+    {prompt:'"Fueron escritas" tells you the subject is...', options:['Feminine plural (las novelas).','Masculine singular.','A person called Escritas.'], correct:0, note:'Passive participles agree in gender and number.'}],
+  types:[
+    {source:'eaten (participle)', accepted:['comido'], solution:'comido'},
+    {source:'I am living in Madrid.', accepted:['estoy viviendo en madrid'], solution:'Estoy viviendo en Madrid.'}]
+},
+{ title:'Repaso total', en:'Active, passive & every tense together',
+  vocab:[['activa','active (voice)'],['pasiva','passive (voice)'],['el participio','the participle'],['el gerundio','the gerund'],['el pretérito','the past (preterite)'],['el presente','the present'],['el futuro','the future'],['el imperfecto','the imperfect'],['el perfecto','the present perfect'],['la conjugación','the conjugation']],
+  sentences:[
+    {es:'Mi abuela escribió esta receta.', en:'My grandmother wrote this recipe.', dEs:['escribe','escrita','recetas'], dEn:['writes','written','recipes']},
+    {es:'Esta receta fue escrita por mi abuela.', en:'This recipe was written by my grandmother.', dEs:['escribió','escrito','abuelas'], dEn:['wrote','writing','grandmothers']},
+    {es:'El cartero trae el paquete por la mañana.', en:'The mailman brings the package in the morning.', dEs:['traen','paquetes','tarde'], dEn:['bring','packages','evening']},
+    {es:'El paquete es traído por el cartero.', en:'The package is brought by the mailman.', dEs:['está','traída','carteros'], dEn:['was','bringing','mailmen']},
+    {es:'Estoy leyendo una novela de misterio.', en:'I am reading a mystery novel.', dEs:['estás','leído','novelas'], dEn:['is','read','novels']},
+    {es:'Ya he leído cien páginas.', en:'I have already read one hundred pages.', dEs:['ha','leyendo','página'], dEn:['has','reading','page']},
+    {es:'Antes leía solo el periódico.', en:'Before, I used to read only the newspaper.', dEs:['leí','leías','periódicos'], dEn:['reads','using','newspapers']},
+    {es:'Mañana leeré el último capítulo.', en:'Tomorrow I will read the last chapter.', dEs:['leerá','leído','capítulos'], dEn:['reads','chapters','yesterday']},
+    {es:'La cena fue preparada y la mesa fue puesta.', en:'The dinner was prepared and the table was set.', dEs:['estuvo','preparadas','puestas'], dEn:['is','preparing','setting']},
+    {es:'Conjugar verbos ya no te da miedo, ¿verdad?', en:'Conjugating verbs no longer scares you, right?', dEs:['conjugando','verbo','miedos'], dEn:['conjugated','verb','scared']}],
+  fills:[
+    {before:'El pan ', after:' hecho por el panadero.', options:['fue','hizo','estará'], correct:0, translation:'The bread was made by the baker. (Passive!)'},
+    {before:'Pasado de «leo»: ', after:'.', options:['leí','leyó','leído'], correct:0, translation:'Past of "leo" (I read): leí.'},
+    {before:'Estoy ', after:' un correo.', options:['escribiendo','escrito','escribir'], correct:0, translation:'I am writing an email.'}],
+  choices:[
+    {prompt:'Turn ACTIVE into PASSIVE: «Pablo pintó el cuadro» →', options:['El cuadro fue pintado por Pablo.','El cuadro pintó a Pablo.','Pablo fue pintado por el cuadro.'], correct:0, note:'The object becomes the subject.'},
+    {prompt:'Which is the GERUND?', options:['viviendo','vivido','vivir'], correct:0, note:'Gerund = -ando / -iendo.'},
+    {prompt:'Which goes with "ayer"?', options:['Comí mucho ayer.','He comido mucho ayer.','Como mucho ayer.'], correct:0, note:'"Ayer" (closed past) → pretérito.'}],
+  types:[
+    {source:'the participle', accepted:['el participio'], solution:'el participio'},
+    {source:'The book was written by Ana.', accepted:['el libro fue escrito por ana'], solution:'El libro fue escrito por Ana.'}]
 }];
 
 const SECTIONS = [
@@ -1090,7 +1342,9 @@ const SECTIONS = [
   {num:11, es:'Salud y bienestar',    en:'Health & wellbeing',            cefr:'C1'},
   {num:12, es:'De viaje otra vez',    en:'Travel like a pro',             cefr:'C1+'},
   {num:13, es:'El mundo de hoy',      en:'News, money, tech & society',   cefr:'C1+'},
-  {num:14, es:'Nivel leyenda',        en:'Proverbs, humor & mastery',     cefr:'C2'}
+  {num:14, es:'Nivel leyenda',        en:'Proverbs, humor & mastery',     cefr:'C2'},
+  {num:15, es:'Historias de cada día', en:'Family, friends, sport & food — story lessons', cefr:'B1-B2'},
+  {num:16, es:'El taller de verbos',  en:'Ser to everything: tenses, participles & passive', cefr:'B1-B2'}
 ];
 const PALETTE = [['#58cc02','#58a700'],['#1cb0f6','#1899d6'],['#ce82ff','#a560e8'],['#ff9600','#e08600'],['#ff4b96','#d63384']];
 
@@ -1125,7 +1379,17 @@ const GNOTES = [
 ['«Partirse de risa» es fija y reflexiva: NOS partimos.','«Quedarse con alguien» = tomarle el pelo; estar + gerundio.','«Tomárselo a bien/mal»: dos pronombres, se + lo.','Superlativo «malísimo»; «igual» = de todas formas.','«Tiene guasa que» + subjuntivo: «llueva».','Negativo «no te lo tomes»: orden fijo te + lo.','Pasiva con «se» en plural: no SE PUEDEN traducir.','«Reírse a carcajadas» es fija; «con» introduce la causa.','«Sin gracia» es fija = nada gracioso.','«Pillar» (coloquial) = captar; «se pilla» impersonal.'],
 ['«Pase lo que pase»: doble subjuntivo, expresión fija.','«Aunque» + subjuntivo cuando aún no es un hecho: «llueva».','«Antes de que» SIEMPRE lleva subjuntivo: «se agoten».','«Con tal de que» + subjuntivo: «cuides».','«A menos que» + subjuntivo: «pidas».','«Sin que» + subjuntivo; en pasado, imperfecto: «diera».','«Como si» SIEMPRE + imperfecto o pluscuamperfecto de subjuntivo.','¡Ojo! «Por si» va con INDICATIVO: por si llueve.','«En caso de que» + subjuntivo: «surja».','«Cuando» + subjuntivo hacia el futuro: «tengas»; «echar un ojo» fija.'],
 ['«Hablando en plata» es fija = con toda franqueza.','«Flipar» coloquial; «cuando veas»: subjuntivo de futuro.','«Ir pillado DE» = escaso de (tiempo, dinero).','«Molar» funciona como gustar: el concierto (me) moló.','«Liarse con» = confundirse con; «mal» adverbio invariable.','«Currar» = trabajar (coloquial); «de ocho a tres» rango.','«Costar una pasta» = ser carísimo; «ni de broma» fija.','«¡Qué guay que...!» + subjuntivo: «vengas».','«Tía» vocativo coloquial; «no te imaginas» enfático.','«Curro» (coloquial) = trabajo, empleo.'],
-['«Por los pelos» es fija = por muy poco.','«A estas alturas» es fija; «ya nada me sorprende».','«Con creces» es fija = de sobra.','«De pe a pa» es fija = de principio a fin.','«Como pez en el agua» es fija; «moverse» reflexivo.','«Atar cabos» es fija; el gerundio «atando» = al hacerlo.','«Con los brazos abiertos» es fija; pretérito «recibieron».','«Dar la talla» es fija = estar a la altura.','«Salirse con la suya» es fija; presente habitual con «siempre».','«La guinda del pastel» es fija; los dos puntos introducen el remate.']
+['«Por los pelos» es fija = por muy poco.','«A estas alturas» es fija; «ya nada me sorprende».','«Con creces» es fija = de sobra.','«De pe a pa» es fija = de principio a fin.','«Como pez en el agua» es fija; «moverse» reflexivo.','«Atar cabos» es fija; el gerundio «atando» = al hacerlo.','«Con los brazos abiertos» es fija; pretérito «recibieron».','«Dar la talla» es fija = estar a la altura.','«Salirse con la suya» es fija; presente habitual con «siempre».','«La guinda del pastel» es fija; los dos puntos introducen el remate.'],
+['Pretérito «celebramos» para un hecho terminado; «el cumpleaños de» + persona.','«Toda la familia» es singular: se reunió; «en casa de» sin artículo.','Pretérito «preparó»; «una tarta de chocolate»: el material con «de».','Dos pretéritos seguidos: «sopló» y «pidió» (pedir: e→i).','«Le dieron»: «le» = a ella; «dar» en pretérito: dieron.','Imperfecto «era» para describir cómo era el regalo.','«Al + infinitivo» = cuando: al verlo; «empezar a» + infinitivo.','«Nos abrazó»: pronombre antes del verbo; «uno por uno» fijo.','«Hacerse la foto» reflexivo; «de siempre» = habitual.','«Fue» cierra la historia; «ir a» + infinitivo: va a olvidar.'],
+['Pretérito «volvió»; «volver de» + país.','«Desde que» + imperfecto «teníamos» para la edad en el pasado.','«Sin + infinitivo»: sin decirle; «le» = a él.','«Traer» irregular en pretérito: trajo.','«Cuando» + pretérito «entró»: acción puntual.','«Quedarse sin palabras» = no poder hablar; pretérito «se quedó».','«Reírse» reflexivo: nos reímos; «como en los viejos tiempos» fijo.','«Guardaba desde hacía años»: imperfecto para duración en el pasado.','Presente general: «te apoya»; «incluso» = hasta.','«No se encuentra»: pasiva con «se» + negación.'],
+['«Cada domingo» + presente habitual: jugamos.','«Llamarse»: nuestro equipo se llama...','«Jugar contra» + rival; pretérito «jugamos» con «ayer».','Pretérito «marcó»; «de cabeza» = con la cabeza.','Imperfecto «era» para describir quién era el árbitro.','«Ir + gerundio»: íbamos perdiendo (proceso en el pasado).','«En el último minuto» + pretérito «empatamos»: el giro final.','«Celebrar algo como» + sustantivo: como una victoria.','«Después de» + sustantivo; presente habitual «comemos».','El infinitivo como sujeto: «perder no importa»; «cuando» + presente.'],
+['«Hay» = existe; «en Nochevieja» sin artículo.','«Hay que» + infinitivo: obligación impersonal.','«Casi + presente» narra un pasado vivido: casi me atraganto.','«Todo el mundo» es singular: se ríe.','«Dicen que» impersonal; «traer suerte» fijo.','Presente habitual «celebra»; «su» = del pueblo.','«Llevar» = vestir; «de colores brillantes» con «de».','«Llenarse de» + sustantivo: se llena de música.','«Pasar de... a...»: de padres a hijos.','«Recordar de dónde venimos»: pregunta indirecta.'],
+['«Los sábados» = todos los sábados; presente habitual «cocino».','«Primero» ordena la receta; «cortar en trozos» con «en».','«Freír» irregular: freímos; «en aceite» con «en».','«Dice que» + indicativo; «estar en» = ser la clave.','«Lo mezclamos»: «lo» = el arroz; el instrumento con «con».','«Oler a» + sustantivo: huele a comida.','«Poner la mesa» fijo; «mientras» + presente.','«Quedar» + adjetivo = resultar: quedó deliciosa.','Pretérito «comimos»; «todos juntos» concuerda.','El infinitivo como sujeto: «cocinar en familia es...».'],
+['SER para profesión (soy profesora); ESTAR para estado (estoy contenta).','Imperfecto «era» para cómo eras antes, sin fechas.','«Estuve» (pretérito de estar) con tiempo cerrado: ayer.','«Fue» (ser) valora un evento: la reunión fue larga.','Perfecto: «he sido» = haber + participio SIDO.','Experiencias con el perfecto: ¿has estado...? + «alguna vez».','«Está siendo»: estar + gerundio SIENDO (proceso actual).','ESTAR + participio = resultado: está preparada, está puesta.','Pasiva: SER + participio: fue cancelado (concuerda con concierto).','Futuro «seré»; «la primera en» + infinitivo.'],
+['Presente «tengo»; «que se llama» para los nombres.','Imperfecto «tenía» para descripciones de la niñez.','Pretérito «tuve» con «ayer»: día cerrado.','Perfecto: «he tenido» (participio regular TENIDO).','Presente habitual «hago»; «antes de» + infinitivo.','Pretérito irregular: HICE (hacer).','Perfecto con participio irregular: HECHO; «hacer la maleta» fijo.','«Ir a» + lugar: voy AL mercado (a + el = al).','Pretérito de IR: fuimos; «en tren» = medio de transporte.','Estar + gerundio de IR: YENDO.'],
+['Presente «hablo»; «por videollamada»: el medio con «por».','Pretérito «hablé»; «durante una hora» duración cerrada.','Perfecto: hemos + HABLADO (participio -ado).','Estar + gerundio: está HABLANDO (acción en curso).','Pretérito «trabajé» + años cerrados.','Dos gerundios coordinados: trabajando y viviendo.','Perfecto con «durante»: he estudiado durante años.','Gerundio de modo: CAMINANDO se vive mejor.','ESTAR + participio (resultado): está cocinada, concuerda.','Pasiva: FUE CANTADA por + agente; concuerda con «canción».'],
+['Presente «como»; «todas las mañanas» = rutina.','Pretérito «comí» con «anoche»; «fatal» = muy mal.','Perfecto de experiencia: ¿has COMIDO alguna vez...?','Estar + gerundio -IENDO: estamos comiendo.','Presente «vivo»; «con mucha luz» descripción.','Pretérito «viví» + periodo cerrado (cinco años).','Participio irregular: ESCRITO (no «escribido»).','ESTAR + participio: la puerta está ABIERTA (resultado).','Estar + gerundio: está BEBIENDO.','Pasiva femenina plural: fueron ESCRITAS; «hace un siglo».'],
+['Voz ACTIVA: el sujeto hace la acción; pretérito «escribió».','Voz PASIVA: FUE + participio concordado (escritA) + «por».','Presente habitual activo: «trae».','Pasiva de presente: ES + traído + por el agente.','Gerundio irregular de leer: LEYENDO.','Perfecto: he LEÍDO (participio con tilde).','Imperfecto «leía» para hábitos de antes.','Futuro «leeré»; «el último capítulo».','Dos pasivas coordinadas: fue preparada / fue puesta.','«Dar miedo» funciona como gustar; «ya no» = antes sí, ahora no.']
 ];
 
 const LESSON_PLANS = [
@@ -2098,7 +2362,7 @@ function endLesson() {
     const secDone = nodeIdx % 21 === 20 && first;
     const secNum = SECTIONS[Math.floor(nodeIdx / 21)].num;
     title = secDone ? 'SECTION ' + secNum + ' COMPLETE!' : perfect ? 'Perfect lesson!' : 'Lesson complete!';
-    sub = allDone ? 'All six sections gold. Eres oficialmente una leyenda del español. 🏆👑' :
+    sub = allDone ? 'Every single section is gold. Eres oficialmente una leyenda del español. 🏆👑' :
       secDone ? '¡Increíble! Section ' + (secNum + 1) + ' is now unlocked. 🎉' :
       perfect ? 'Not a single mistake. ¡Eres una leyenda!' :
       isPractice ? 'Practice makes perfect. ¡Sigue así!' :
