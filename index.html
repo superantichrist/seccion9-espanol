@@ -190,6 +190,12 @@
   .mic-btn svg{width:38px; height:38px;}
   .mic-btn.listening{background:var(--red); box-shadow:0 5px 0 #d33131; animation:micpulse 1s ease-in-out infinite;}
   @keyframes micpulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.09);}}
+  .story-sub{color:var(--text-soft); font-weight:700; font-size:15px; margin:-14px 0 16px;}
+  .story-play{margin-bottom:18px;}
+  .story-lines{border-top:2px solid var(--gray); padding-top:14px;}
+  .story-line{display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;}
+  .sl-es{font-size:17.5px; font-weight:700; line-height:1.45;}
+  .sl-en{font-size:14.5px; color:var(--text-soft); font-weight:600; margin-top:2px;}
   .speak-status{color:var(--text-soft); font-weight:700; font-size:15px; min-height:24px;}
   .speak-heard{font-size:17px; font-weight:600; margin-top:8px; color:var(--text); min-height:22px;}
 
@@ -243,7 +249,7 @@
       </div>
       <div class="ph-stats">
         <span class="ph-stat ph-xp">⚡ <span id="hdr-xp">0</span></span>
-        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/168</span>
+        <span class="ph-stat ph-crown">👑 <span id="hdr-crowns">0</span>/<span id="hdr-total">168</span></span>
       </div>
     </div>
   </div>
@@ -1344,7 +1350,17 @@ const SECTIONS = [
   {num:13, es:'El mundo de hoy',      en:'News, money, tech & society',   cefr:'C1+'},
   {num:14, es:'Nivel leyenda',        en:'Proverbs, humor & mastery',     cefr:'C2'},
   {num:15, es:'Historias de cada día', en:'Family, friends, sport & food — story lessons', cefr:'B1-B2'},
-  {num:16, es:'El taller de verbos',  en:'Ser to everything: tenses, participles & passive', cefr:'B1-B2'}
+  {num:16, es:'El taller de verbos',  en:'Ser to everything: tenses, participles & passive', cefr:'B1-B2'},
+  {num:17, es:'Vecinos y barrio',     en:'Story mode · neighbors & the block',      cefr:'B1-B2'},
+  {num:18, es:'El trabajo nuevo',     en:'Story mode · the new job',                cefr:'B1-B2'},
+  {num:19, es:'Viajes inolvidables',  en:'Story mode · unforgettable trips',        cefr:'B1-B2'},
+  {num:20, es:'Cosas del corazón',    en:'Story mode · matters of the heart',       cefr:'B1-B2'},
+  {num:21, es:'Animales y compañía',  en:'Story mode · animals & company',          cefr:'B1-B2'},
+  {num:22, es:'La casa y las cosas',  en:'Story mode · house & small disasters',    cefr:'B1-B2'},
+  {num:23, es:'Fiestas y líos',       en:'Story mode · parties & mix-ups',          cefr:'B1-B2'},
+  {num:24, es:'Salud y despistes',    en:'Story mode · health & absent-mindedness', cefr:'B1-B2'},
+  {num:25, es:'Compras y trueques',   en:'Story mode · shopping & swapping',        cefr:'B1-B2'},
+  {num:26, es:'Sueños y planes',      en:'Story mode · dreams & plans',             cefr:'B1-B2'}
 ];
 const PALETTE = [['#58cc02','#58a700'],['#1cb0f6','#1899d6'],['#ce82ff','#a560e8'],['#ff9600','#e08600'],['#ff4b96','#d63384']];
 
@@ -1449,15 +1465,1004 @@ function buildExercise(unit, op, isReview) {
 
 function exerciseFromRef(key) {
   const p = key.split(':');
-  const u = parseInt(p[1], 10);
-  if (!UNITS[u]) return null;
+  const idx = parseInt(p[1], 10);
   try {
-    if (p[0] === 'tr') return buildExercise(u, ['tr', parseInt(p[2], 10), p[3]], true);
-    return buildExercise(u, [p[0], parseInt(p[2], 10)], true);
+    if (p[0] === 'str') return buildStoryEx(STORIES[idx], idx, ['tr', parseInt(p[2], 10), p[3]]);
+    if (p[0] === 'slis') return buildStoryEx(STORIES[idx], idx, ['listen', parseInt(p[2], 10)]);
+    if (p[0] === 'sq') return buildStoryEx(STORIES[idx], idx, ['q', parseInt(p[2], 10)]);
+    if (p[0] === 'sgr') return buildStoryEx(STORIES[idx], idx, ['gr', parseInt(p[2], 10)]);
+    if (p[0] === 'sgap') return buildStoryEx(STORIES[idx], idx, ['gap', parseInt(p[2], 10)]);
+    if (p[0] === 'ssp') return buildStoryEx(STORIES[idx], idx, ['sp', parseInt(p[2], 10)]);
+    if (!UNITS[idx]) return null;
+    if (p[0] === 'tr') return buildExercise(idx, ['tr', parseInt(p[2], 10), p[3]], true);
+    return buildExercise(idx, [p[0], parseInt(p[2], 10)], true);
   } catch (e) { return null; }
 }
 
+/* =====================================================================
+   STORY MODE (sections 17+) — episodes with listening, situational
+   multiple choice, in-story gaps, grammar questions and speaking.
+   Classic sections 9-16 above are untouched.
+   ===================================================================== */
+const STORY_NODE_NAMES = ['Escucha la historia', 'Vocabulario', 'Gramática', 'Repaso'];
+const CLASSIC_UNITS = 40;
+const CLASSIC_NODES = (CLASSIC_UNITS / 5) * 21;
+
+/* Each story: {t,en,gn,ln[8],vc[6],q[3],gr[2],gp[2]} */
+const STORIES = [
+/* ===== SECTION 17 · Vecinos y barrio ===== */
+{t:'El paquete misterioso', en:'The mysterious package', gn:'Fíjate en los pretéritos regulares: llegó, abrió, llamó.',
+ ln:[['El martes llegó un paquete enorme a mi portal.','On Tuesday a huge package arrived at my building entrance.'],
+     ['No tenía nombre, solo el número de mi piso.','It had no name, only my apartment number.'],
+     ['Mi vecina doña Rosa dijo que era para ella.','My neighbor doña Rosa said it was for her.'],
+     ['El del tercero juró que lo había pedido él.','The guy from the third floor swore that he had ordered it.'],
+     ['Estuvimos media hora discutiendo en la escalera.','We spent half an hour arguing on the stairs.'],
+     ['Al final abrimos la caja entre todos.','In the end we opened the box all together.'],
+     ['Dentro había una alfombra vieja y una nota.','Inside there was an old rug and a note.'],
+     ['La nota decía: gracias por cuidar el edificio.','The note said: thank you for taking care of the building.']],
+ vc:[['el portal','the building entrance'],['el paquete','the package'],['la escalera','the staircase'],['la caja','the box'],['la alfombra','the rug'],['la nota','the note']],
+ q:[{p:'¿Qué llegó el martes al portal?', o:['Un paquete enorme','Una carta pequeña','Un vecino nuevo'], c:0, n:'La primera frase lo cuenta todo.'},
+    {p:'¿Por qué discutieron los vecinos?', o:['Porque no sabían de quién era el paquete','Porque la escalera estaba sucia','Porque doña Rosa se mudaba'], c:0, n:'El paquete no tenía nombre.'},
+    {p:'¿Qué había dentro de la caja?', o:['Una alfombra vieja y una nota','Un pastel de cumpleaños','Un gato dormido'], c:0, n:'Y una nota muy amable.'}],
+ gr:[{p:'«Llegó» es el pretérito de...', o:['llegar','llorar','llevar'], c:0, n:'Llegar → llegó (tercera persona).'},
+     {p:'«Había pedido» es...', o:['pluscuamperfecto (una acción anterior a otra pasada)','presente','futuro'], c:0, n:'Haber en imperfecto + participio.'}],
+ gp:[{b:'El martes ', a:' un paquete enorme.', o:['llegó','llegué','llegando'], c:0, t:'On Tuesday a huge package arrived.'},
+     {b:'Al final ', a:' la caja entre todos.', o:['abrimos','abrieron','abriendo'], c:0, t:'In the end we opened the box all together.'}]},
+{t:'La fiesta del quinto', en:'The fifth-floor party', gn:'Repasa el imperfecto para describir escenas: sonaba, bailaba, había.',
+ ln:[['El sábado por la noche sonaba música en el quinto.','On Saturday night music was playing on the fifth floor.'],
+     ['Todo el edificio oía la misma canción una y otra vez.','The whole building heard the same song over and over.'],
+     ['A las dos subí en pijama a quejarme.','At two I went up in my pajamas to complain.'],
+     ['Cuando abrieron la puerta, había veinte personas bailando.','When they opened the door, there were twenty people dancing.'],
+     ['La anfitriona me miró y me ofreció un trozo de tortilla.','The host looked at me and offered me a piece of omelet.'],
+     ['Me senté cinco minutos, solo por educación.','I sat down for five minutes, just out of politeness.'],
+     ['Volví a mi casa a las seis de la mañana.','I got back home at six in the morning.'],
+     ['Ahora soy el primero en subir cada sábado.','Now I am the first one to go up every Saturday.']],
+ vc:[['la canción','the song'],['quejarse','to complain'],['el pijama','the pajamas'],['la anfitriona','the host (female)'],['el trozo','the piece'],['por educación','out of politeness']],
+ q:[{p:'¿Para qué subió el narrador al quinto?', o:['Para quejarse del ruido','Para bailar toda la noche','Para pedir sal'], c:0, n:'Subió en pijama, muy enfadado.'},
+    {p:'¿Qué le ofreció la anfitriona?', o:['Un trozo de tortilla','Un vaso de agua','Un disco antiguo'], c:0, n:'La tortilla lo cambió todo.'},
+    {p:'¿Cómo termina la historia?', o:['Ahora él sube el primero cada sábado','Llamó a la policía','Se mudó de edificio'], c:0, n:'Si no puedes con ellos, únete.'}],
+ gr:[{p:'«Había veinte personas bailando» usa...', o:['imperfecto de haber + gerundio','pretérito','futuro'], c:0, n:'«Había» describe la escena.'},
+     {p:'El gerundio de «bailar» es...', o:['bailando','bailado','bailar'], c:0, n:'Verbos en -AR → -ANDO.'}],
+ gp:[{b:'El sábado ', a:' música en el quinto.', o:['sonaba','sonó','suena'], c:0, t:'On Saturday music was playing on the fifth floor. (imperfecto de fondo)'},
+     {b:'Cuando abrieron, ', a:' veinte personas.', o:['había','habían','hubieron'], c:0, t:'When they opened, there were twenty people. («Había» es invariable.)'}]},
+{t:'La avería del ascensor', en:'The elevator breakdown', gn:'Atención a «se» accidental: se estropeó, se quedó, se abrió.',
+ ln:[['El lunes se estropeó el ascensor del edificio.','On Monday the building elevator broke down.'],
+     ['Dentro se quedaron atrapados don Julio y su perro.','Don Julio and his dog got trapped inside.'],
+     ['Todos los vecinos bajamos corriendo a ayudar.','All the neighbors ran downstairs to help.'],
+     ['Le hablábamos por la puerta para que no se asustara.','We talked to him through the door so he would not get scared.'],
+     ['Don Julio nos contestaba cantando boleros.','Don Julio answered us by singing boleros.'],
+     ['El técnico tardó dos horas en llegar.','The technician took two hours to arrive.'],
+     ['Cuando se abrió la puerta, todos aplaudimos.','When the door opened, we all applauded.'],
+     ['Don Julio salió y preguntó si había café.','Don Julio came out and asked if there was coffee.']],
+ vc:[['el ascensor','the elevator'],['estropearse','to break down'],['quedarse atrapado','to get trapped'],['asustarse','to get scared'],['el técnico','the technician'],['aplaudir','to applaud']],
+ q:[{p:'¿Quién se quedó atrapado?', o:['Don Julio y su perro','La vecina del quinto','El técnico'], c:0, n:'Con perro y todo.'},
+    {p:'¿Qué hacía don Julio dentro del ascensor?', o:['Cantaba boleros','Dormía','Lloraba'], c:0, n:'Un hombre con estilo.'},
+    {p:'¿Qué pidió al salir?', o:['Café','Un taxi','Un médico'], c:0, n:'Prioridades claras.'}],
+ gr:[{p:'«Se estropeó» expresa...', o:['algo que ocurrió sin culpable','una orden','un deseo'], c:0, n:'El «se» accidental es muy español.'},
+     {p:'«Para que no se asustara» lleva...', o:['imperfecto de subjuntivo','indicativo','infinitivo'], c:0, n:'«Para que» siempre pide subjuntivo.'}],
+ gp:[{b:'El lunes ', a:' el ascensor.', o:['se estropeó','estropeó','se estropea'], c:0, t:'On Monday the elevator broke down.'},
+     {b:'Le hablábamos para que no ', a:'.', o:['se asustara','se asusta','se asustaba'], c:0, t:'We talked to him so he would not get scared.'}]},
+{t:'El huerto de la azotea', en:'The rooftop garden', gn:'Presente de rutina + perfecto de resultados: plantamos, hemos cosechado.',
+ ln:[['Hace un año convertimos la azotea en un huerto.','A year ago we turned the roof terrace into a garden.'],
+     ['Cada vecino se ocupa de una maceta diferente.','Each neighbor takes care of a different pot.'],
+     ['Don Julio riega los tomates a las siete de la mañana.','Don Julio waters the tomatoes at seven in the morning.'],
+     ['Doña Rosa habla con sus lechugas todos los días.','Doña Rosa talks to her lettuces every day.'],
+     ['Dice que así crecen más felices y más verdes.','She says that way they grow happier and greener.'],
+     ['Este verano hemos cosechado veinte kilos de tomates.','This summer we have harvested twenty kilos of tomatoes.'],
+     ['Los repartimos entre todos los pisos del edificio.','We shared them among all the apartments in the building.'],
+     ['El edificio huele a tomate y a vecindad.','The building smells of tomato and neighborliness.']],
+ vc:[['la azotea','the roof terrace'],['el huerto','the vegetable garden'],['la maceta','the flower pot'],['regar','to water'],['la lechuga','the lettuce'],['cosechar','to harvest']],
+ q:[{p:'¿Qué hicieron con la azotea?', o:['La convirtieron en un huerto','La cerraron','La vendieron'], c:0, n:'Hace un año.'},
+    {p:'¿Qué hace doña Rosa con sus lechugas?', o:['Habla con ellas todos los días','Las regala','Las vende en el mercado'], c:0, n:'Y funciona.'},
+    {p:'¿Qué pasó con los tomates cosechados?', o:['Los repartieron entre todos los pisos','Los tiraron','Los guardaron en la azotea'], c:0, n:'Vecindad de verdad.'}],
+ gr:[{p:'«Hemos cosechado» es...', o:['pretérito perfecto (este verano)','pretérito indefinido','imperfecto'], c:0, n:'Con «este verano» usamos el perfecto.'},
+     {p:'«Se ocupa de» significa...', o:['se hace cargo de algo','se olvida de algo','se ríe de algo'], c:0, n:'Ocuparse DE + sustantivo.'}],
+ gp:[{b:'Este verano ', a:' veinte kilos de tomates.', o:['hemos cosechado','cosechamos ayer','hemos cosechando'], c:0, t:'This summer we have harvested twenty kilos of tomatoes.'},
+     {b:'Cada vecino ', a:' de una maceta.', o:['se ocupa','se ocupan','ocupa'], c:0, t:'Each neighbor takes care of one pot.'}]},
+{t:'El banco de la plaza', en:'The bench in the square', gn:'Contraste pretérito / imperfecto: se sentaba (rutina) vs. se sentó (una vez).',
+ ln:[['Durante veinte años, don Manuel se sentaba en el mismo banco.','For twenty years, don Manuel used to sit on the same bench.'],
+     ['Llegaba a las cinco y daba pan a las palomas.','He arrived at five and gave bread to the pigeons.'],
+     ['Un día de invierno el banco amaneció vacío.','One winter day the bench was empty in the morning.'],
+     ['Los del barrio preguntamos en todas las casas.','We in the neighborhood asked in every house.'],
+     ['Don Manuel estaba en el hospital con una pierna rota.','Don Manuel was in the hospital with a broken leg.'],
+     ['Fuimos a verlo con pan y con fotos de las palomas.','We went to see him with bread and photos of the pigeons.'],
+     ['Cuando volvió, encontró una placa con su nombre.','When he came back, he found a plaque with his name on it.'],
+     ['Ahora el banco se llama oficialmente el banco de Manuel.','Now the bench is officially called Manuel’s bench.']],
+ vc:[['el banco (asiento)','the bench'],['la paloma','the pigeon'],['amanecer','to wake up / dawn'],['el barrio','the neighborhood'],['la pierna','the leg'],['la placa','the plaque']],
+ q:[{p:'¿Qué hacía don Manuel cada tarde?', o:['Daba pan a las palomas','Vendía flores','Leía el periódico en casa'], c:0, n:'A las cinco en punto.'},
+    {p:'¿Por qué el banco amaneció vacío?', o:['Don Manuel estaba en el hospital','Se mudó de ciudad','Quitaron el banco'], c:0, n:'Una pierna rota.'},
+    {p:'¿Qué encontró al volver?', o:['Una placa con su nombre','Un banco nuevo','Más palomas'], c:0, n:'El barrio no lo olvidó.'}],
+ gr:[{p:'«Se sentaba» (veinte años) frente a «se sentó» (un día): la diferencia es...', o:['rutina en el pasado vs. acción única','presente vs. futuro','singular vs. plural'], c:0, n:'Imperfecto = costumbre; pretérito = una vez.'},
+     {p:'«Rota» en «una pierna rota» es...', o:['un participio usado como adjetivo','un gerundio','un infinitivo'], c:0, n:'Romper → roto/rota.'}],
+ gp:[{b:'Durante veinte años ', a:' en el mismo banco.', o:['se sentaba','se sentó','se sienta'], c:0, t:'For twenty years he used to sit on the same bench. (rutina → imperfecto)'},
+     {b:'Un día de invierno el banco ', a:' vacío.', o:['amaneció','amanecía','amanece'], c:0, t:'One winter day the bench was empty. (hecho puntual → pretérito)'}]},
+/* ===== SECTION 18 · El trabajo nuevo ===== */
+{t:'El primer día', en:'The first day', gn:'Fíjate en el contraste entre el indefinido, llegué, subí, y el imperfecto, sabía, estaba.',
+ ln:[['Llegué a la oficina veinte minutos antes de la hora.','I arrived at the office twenty minutes before the time.'],
+     ['El portero me dijo que el ascensor llevaba dos días roto.','The doorman told me that the lift had been broken for two days.'],
+     ['Subí seis pisos con la mochila y una carpeta enorme.','I went up six floors with my backpack and a huge folder.'],
+     ['Nadie sabía quién era yo ni dónde estaba mi mesa.','Nobody knew who I was or where my desk was.'],
+     ['Una chica me ofreció un taburete al lado de la ventana.','A girl offered me a stool next to the window.'],
+     ['Pasé toda la mañana sonriendo y apuntando nombres en un papel.','I spent the whole morning smiling and writing down names on a piece of paper.'],
+     ['A las dos apareció el jefe con cara de sorpresa.','At two the boss appeared with a surprised look on his face.'],
+     ['Me dijo que empezaba el lunes, no ese mismo día.','He told me that I started on Monday, not that very day.']],
+ vc:[['el ascensor','the lift'],['la mochila','the backpack'],['la carpeta','the folder'],['el taburete','the stool'],['el jefe','the boss'],['la ventana','the window']],
+ q:[{p:'¿Cómo subió el narrador hasta la oficina?', o:['A pie, porque el ascensor estaba roto','En ascensor, muy tranquilo','En bicicleta hasta el sexto piso'], c:0, n:'El portero le dio la mala noticia.'},
+    {p:'¿Qué le ofreció una compañera?', o:['Un taburete junto a la ventana','Un despacho con vistas al río','Un café con leche muy caliente'], c:0, n:'No había ninguna mesa libre para él.'},
+    {p:'¿Qué le explicó el jefe por la tarde?', o:['Que su trabajo empezaba el lunes','Que ya no lo necesitaban','Que el ascensor ya funcionaba'], c:0, n:'Se había equivocado de día.'}],
+ gr:[{p:'«Llegué» es el pretérito indefinido de...', o:['llegar, en primera persona','llorar, en primera persona','llenar, en tercera persona'], c:0, n:'Llegar hace llegué en la forma yo.'},
+     {p:'«Llevaba dos días roto» usa el imperfecto porque...', o:['describe una situación que duraba en el pasado','habla de un plan futuro','expresa una orden directa'], c:0, n:'El imperfecto describe estados y duración.'}],
+ gp:[{b:'Nadie ', a:' quién era yo ni dónde estaba mi mesa.', o:['sabía','supo','sabiendo'], c:0, t:'Nobody knew who I was or where my desk was.'},
+     {b:'Pasé toda la mañana ', a:' y apuntando nombres en un papel.', o:['sonriendo','sonreír','sonreído'], c:0, t:'I spent the whole morning smiling and writing down names on a piece of paper.'}]},
+{t:'La reunión sin café', en:'The meeting with no coffee', gn:'Repasa el condicional, duraría, y el imperfecto de subjuntivo, fuéramos.',
+ ln:[['El martes convocaron una reunión urgente a las ocho y media.','On Tuesday they called an urgent meeting at half past eight.'],
+     ['Todos entramos en la sala con los ojos medio cerrados.','We all went into the meeting room with our eyes half closed.'],
+     ['La máquina de café llevaba una semana estropeada y nadie la arreglaba.','The coffee machine had been broken for a week and nobody was fixing it.'],
+     ['Marta propuso que fuéramos a la cafetería de enfrente.','Marta suggested that we go to the cafe across the street.'],
+     ['El director dijo que la reunión duraría solo diez minutos.','The director said that the meeting would last only ten minutes.'],
+     ['A los cuarenta minutos seguíamos discutiendo sobre el color del logotipo.','Forty minutes later we were still arguing about the colour of the logo.'],
+     ['De pronto entró el becario con una bandeja llena de tazas.','Suddenly the intern came in with a tray full of cups.'],
+     ['Nos aplaudimos tanto que olvidamos por completo el tema de la reunión.','We clapped so much that we completely forgot the topic of the meeting.']],
+ vc:[['la reunión','the meeting'],['la máquina de café','the coffee machine'],['la sala','the meeting room'],['el becario','the intern'],['la bandeja','the tray'],['la taza','the cup']],
+ q:[{p:'¿Por qué no había café en la oficina?', o:['Porque la máquina llevaba una semana estropeada','Porque el director lo había prohibido','Porque el becario se lo bebió todo'], c:0, n:'Nadie la había arreglado todavía.'},
+    {p:'¿Cuánto dijo el director que duraría la reunión?', o:['Diez minutos','Dos horas','Toda la mañana'], c:0, n:'La realidad fue muy distinta.'},
+    {p:'¿Qué pasó cuando llegó el becario?', o:['Todos aplaudieron y olvidaron el tema','El director se enfadó muchísimo','Marta se marchó a la cafetería'], c:0, n:'Traía una bandeja llena de tazas.'}],
+ gr:[{p:'«Duraría» es el condicional de...', o:['durar','dormir','doler'], c:0, n:'El condicional expresa futuro dentro del pasado.'},
+     {p:'«Propuso que fuéramos» lleva subjuntivo porque...', o:['proponer expresa influencia sobre otras personas','es una pregunta indirecta','habla de un hecho seguro'], c:0, n:'Los verbos de deseo o influencia piden subjuntivo.'}],
+ gp:[{b:'La máquina de café ', a:' una semana estropeada.', o:['llevaba','llevó','llevando'], c:0, t:'The coffee machine had been broken for a week.'},
+     {b:'De pronto ', a:' el becario con una bandeja llena de tazas.', o:['entró','entré','entrando'], c:0, t:'Suddenly the intern came in with a tray full of cups.'}]},
+{t:'El correo equivocado', en:'The wrong email', gn:'Observa el pluscuamperfecto, había mandado, y los pronombres dobles, enviárselo.',
+ ln:[['Escribí un correo quejándome del ruido que hacía la impresora.','I wrote an email complaining about the noise the printer made.'],
+     ['Quería enviárselo a mi compañera Lucía, la del despacho pequeño.','I wanted to send it to my colleague Lucía, the one in the small office.'],
+     ['Pulsé enviar sin mirar y salí a comer tranquilamente.','I clicked send without looking and calmly went out for lunch.'],
+     ['Al volver tenía catorce respuestas y una llamada perdida del jefe.','When I came back I had fourteen replies and a missed call from the boss.'],
+     ['Había mandado el mensaje a toda la empresa por error.','I had sent the message to the whole company by mistake.'],
+     ['Me escondí detrás del monitor durante casi media hora.','I hid behind the monitor for almost half an hour.'],
+     ['Entonces el jefe pasó por mi mesa con una sonrisa rara.','Then the boss came by my desk with a strange smile.'],
+     ['Dijo que gracias a mí por fin comprarían una impresora nueva.','He said that thanks to me they would finally buy a new printer.']],
+ vc:[['el correo','the email'],['la impresora','the printer'],['el despacho','the private office'],['la llamada perdida','the missed call'],['el monitor','the monitor'],['la sonrisa','the smile']],
+ q:[{p:'¿De qué se quejaba el narrador en el correo?', o:['Del ruido de la impresora','Del frío que hacía en la oficina','Del café de la máquina'], c:0, n:'Era un ruido muy molesto.'},
+    {p:'¿Qué error cometió?', o:['Envió el mensaje a toda la empresa','Borró el mensaje sin querer','Escribió mal el nombre de Lucía'], c:0, n:'Pulsó enviar sin mirar.'},
+    {p:'¿Qué dijo el jefe al final?', o:['Que por fin comprarían una impresora nueva','Que estaba muy enfadado con él','Que Lucía cambiaba de despacho'], c:0, n:'Llegó con una sonrisa rara.'}],
+ gr:[{p:'«Había mandado» es...', o:['pluscuamperfecto de indicativo','presente de subjuntivo','futuro simple'], c:0, n:'Haber en imperfecto más participio.'},
+     {p:'«Enviárselo» contiene los pronombres...', o:['se y lo','me y la','te y los'], c:0, n:'Se sustituye a le delante de lo.'}],
+ gp:[{b:'Pulsé enviar sin mirar y ', a:' a comer tranquilamente.', o:['salí','salió','saliendo'], c:0, t:'I clicked send without looking and calmly went out for lunch.'},
+     {b:'Me escondí detrás del monitor ', a:' casi media hora.', o:['durante','desde','hacia'], c:0, t:'I hid behind the monitor for almost half an hour.'}]},
+{t:'El compañero misterioso', en:'The mysterious coworker', gn:'Fíjate en el imperfecto de las costumbres, encontraba, dejaba, ponían.',
+ ln:[['Cada mañana encontraba mi mesa ordenada y el ordenador ya encendido.','Every morning I found my desk tidy and the computer already switched on.'],
+     ['Alguien dejaba también una galleta pequeña sobre el teclado.','Someone also left a small biscuit on the keyboard.'],
+     ['Pregunté a mis compañeros, pero todos ponían cara de inocentes.','I asked my colleagues, but they all put on innocent faces.'],
+     ['Decidí llegar una hora antes para descubrir al misterioso ayudante.','I decided to arrive an hour earlier to discover the mysterious helper.'],
+     ['Me escondí en la cocina con un té y mucha paciencia.','I hid in the kitchen with a tea and a lot of patience.'],
+     ['A las siete apareció Ernesto, el hombre de la limpieza.','At seven Ernesto appeared, the cleaning man.'],
+     ['Ordenaba mi mesa porque decía que yo trabajaba demasiado.','He tidied my desk because he said that I worked too much.'],
+     ['Desde entonces desayunamos juntos y las galletas las traigo yo.','Since then we have breakfast together and I am the one who brings the biscuits.']],
+ vc:[['la galleta','the biscuit'],['el teclado','the keyboard'],['el ordenador','the computer'],['la cocina','the kitchen'],['la paciencia','patience'],['el compañero','the workmate']],
+ q:[{p:'¿Qué encontraba el narrador cada mañana?', o:['La mesa ordenada y una galleta','Un correo largo del jefe','La oficina completamente cerrada'], c:0, n:'También el ordenador encendido.'},
+    {p:'¿Qué hizo para descubrir al ayudante?', o:['Llegar una hora antes y esconderse','Poner una cámara sobre la mesa','Preguntar directamente al director'], c:0, n:'Esperó en la cocina con un té.'},
+    {p:'¿Quién ayudaba en secreto?', o:['Ernesto, el hombre de la limpieza','Una compañera del piso de arriba','El jefe de toda la oficina'], c:0, n:'Apareció a las siete de la mañana.'}],
+ gr:[{p:'«Encontraba» y «dejaba» están en imperfecto porque...', o:['expresan acciones habituales en el pasado','son órdenes para otra persona','indican una acción única y terminada'], c:0, n:'El imperfecto sirve para rutinas pasadas.'},
+     {p:'En «las galletas las traigo yo», el pronombre correcto es...', o:['las','les','se'], c:0, n:'Es objeto directo femenino plural.'}],
+ gp:[{b:'Decidí llegar una hora antes para ', a:' al misterioso ayudante.', o:['descubrir','descubro','descubierto'], c:0, t:'I decided to arrive an hour earlier to discover the mysterious helper.'},
+     {b:'Me escondí en la cocina con un té y ', a:' paciencia.', o:['mucha','muy','tanto'], c:0, t:'I hid in the kitchen with a tea and a lot of patience.'}]},
+{t:'Un ascenso muy pequeño', en:'A very small promotion', gn:'Repasa el condicional, subiría, y el pluscuamperfecto, había hecho.',
+ ln:[['El viernes el jefe me llamó a su despacho con voz seria.','On Friday the boss called me into his office in a serious voice.'],
+     ['Pensé que había hecho algo terrible con el archivo de clientes.','I thought I had done something terrible with the client file.'],
+     ['Me dijo que confiaba en mí y que subiría de puesto.','He told me that he trusted me and that I would be promoted.'],
+     ['Salí al pasillo dando saltos y llamé a mi madre.','I went out into the corridor jumping for joy and called my mother.'],
+     ['El lunes descubrí que el ascenso era casi invisible.','On Monday I discovered that the promotion was almost invisible.'],
+     ['Tenía una silla nueva, dos euros más y muchas más tareas.','I had a new chair, two euros more and many more tasks.'],
+     ['Sin embargo, ahora tenía la llave del armario del café.','However, now I had the key to the coffee cupboard.'],
+     ['De repente me convertí en la persona más querida de la empresa.','Suddenly I became the most loved person in the company.']],
+ vc:[['el ascenso','the promotion'],['el pasillo','the corridor'],['el puesto','the job position'],['la silla','the chair'],['la llave','the key'],['el armario','the cupboard']],
+ q:[{p:'¿Qué pensó el narrador al ir al despacho?', o:['Que había hecho algo terrible','Que le darían más vacaciones','Que la empresa iba a cerrar'], c:0, n:'El jefe tenía la voz muy seria.'},
+    {p:'¿Qué incluía realmente el ascenso?', o:['Una silla nueva, dos euros y más tareas','Un coche de empresa','Un despacho grande con ventana'], c:0, n:'Era un cambio casi invisible.'},
+    {p:'¿Por qué se volvió tan popular?', o:['Porque tenía la llave del armario del café','Porque invitó a comer a todos','Porque contaba chistes buenísimos'], c:0, n:'En esa oficina el café es sagrado.'}],
+ gr:[{p:'«Subiría» expresa...', o:['una acción futura vista desde el pasado','una orden muy amable','una acción terminada esta mañana'], c:0, n:'Es el condicional simple.'},
+     {p:'«Confiaba en mí» lleva la preposición...', o:['en','de','con'], c:0, n:'Confiar en alguien es la forma correcta.'}],
+ gp:[{b:'Pensé que ', a:' algo terrible con el archivo de clientes.', o:['había hecho','he hecho','haciendo'], c:0, t:'I thought I had done something terrible with the client file.'},
+     {b:'Salí al pasillo ', a:' saltos y llamé a mi madre.', o:['dando','dado','dar'], c:0, t:'I went out into the corridor jumping for joy and called my mother.'}]},
+/* ===== SECTION 19 · Viajes inolvidables ===== */
+{t:'El tren perdido', en:'The missed train', gn:'Fíjate en empezar a más infinitivo y en estar más gerundio.',
+ ln:[['Llegamos a la estación cinco minutos después de la salida del tren.','We got to the station five minutes after the train left.'],
+     ['Mi hermano insistía en que el reloj de casa iba retrasado.','My brother insisted that the clock at home was slow.'],
+     ['La taquillera nos miró y sonrió sin decir nada.','The ticket clerk looked at us and smiled without saying anything.'],
+     ['El siguiente tren salía cuatro horas más tarde.','The next train was leaving four hours later.'],
+     ['Compramos bocadillos y nos sentamos en un banco del andén.','We bought sandwiches and sat down on a bench on the platform.'],
+     ['Un músico empezó a tocar el acordeón junto a la máquina.','A musician started playing the accordion next to the machine.'],
+     ['Estuvimos toda la tarde escuchando canciones y hablando con desconocidos.','We spent the whole afternoon listening to songs and talking with strangers.'],
+     ['Al final, perder aquel tren fue lo mejor del viaje.','In the end, missing that train was the best part of the trip.']],
+ vc:[['la estación','the station'],['la taquillera','the ticket clerk'],['el andén','the platform'],['el bocadillo','the sandwich'],['el banco','the bench'],['el acordeón','the accordion']],
+ q:[{p:'¿Por qué perdieron el tren?', o:['Llegaron cinco minutos tarde a la estación','El tren se averió en la vía','Nadie les vendió los billetes'], c:0, n:'El reloj de casa iba retrasado.'},
+    {p:'¿Qué hicieron mientras esperaban?', o:['Comieron bocadillos y escucharon música','Volvieron a casa en taxi','Durmieron en un hotel barato'], c:0, n:'Un músico tocaba el acordeón.'},
+    {p:'¿Qué opina el narrador de aquel día?', o:['Que perder el tren fue lo mejor del viaje','Que fue el peor día de su vida','Que su hermano se enfadó mucho'], c:0, n:'La última frase lo dice claramente.'}],
+ gr:[{p:'«Estuvimos toda la tarde escuchando» combina...', o:['pretérito indefinido y gerundio','futuro simple y participio','presente e infinitivo'], c:0, n:'Estar más gerundio indica duración.'},
+     {p:'«Insistía en que el reloj iba retrasado» está en...', o:['imperfecto de indicativo','presente de subjuntivo','condicional compuesto'], c:0, n:'Describe una acción repetida en el pasado.'}],
+ gp:[{b:'El siguiente tren ', a:' cuatro horas más tarde.', o:['salía','saliendo','salir'], c:0, t:'The next train was leaving four hours later.'},
+     {b:'Un músico empezó ', a:' tocar el acordeón junto a la máquina.', o:['a','de','en'], c:0, t:'A musician started playing the accordion next to the machine.'}]},
+{t:'Las maletas cambiadas', en:'The swapped suitcases', gn:'Repasa el pretérito indefinido y los posesivos tónicos, la mía, el tuyo.',
+ ln:[['En el aeropuerto cogí una maleta azul idéntica a la mía.','At the airport I took a blue suitcase identical to mine.'],
+     ['No lo noté hasta llegar al hotel y abrirla sobre la cama.','I didn’t notice until I got to the hotel and opened it on the bed.'],
+     ['Dentro había trajes elegantes y una trompeta pequeña y dorada.','Inside there were elegant suits and a small golden trumpet.'],
+     ['Llamé al número de la etiqueta con bastante vergüenza.','I called the number on the label feeling quite embarrassed.'],
+     ['Contestó una trompetista que tocaba esa noche en la ciudad.','A trumpet player answered who was performing that night in the city.'],
+     ['Quedamos en la puerta del teatro para intercambiar las maletas.','We arranged to meet at the theatre door to swap the suitcases.'],
+     ['Ella me dio las gracias y también una entrada gratis.','She thanked me and also gave me a free ticket.'],
+     ['Aquel concierto fue el mejor recuerdo de todo el viaje.','That concert was the best memory of the whole trip.']],
+ vc:[['la maleta','the suitcase'],['la etiqueta','the label'],['el traje','the suit'],['la trompeta','the trumpet'],['la entrada','the ticket'],['el teatro','the theatre']],
+ q:[{p:'¿Cuándo se dio cuenta del error?', o:['Al abrir la maleta en el hotel','En la cinta del aeropuerto','Durante el concierto de la noche'], c:0, n:'La maleta era idéntica a la suya.'},
+    {p:'¿Qué había dentro de la maleta?', o:['Trajes elegantes y una trompeta dorada','Libros viejos y un mapa','Ropa de playa y sandalias'], c:0, n:'La abrió sobre la cama.'},
+    {p:'¿Qué recibió al devolver la maleta?', o:['Las gracias y una entrada gratis','Una maleta completamente nueva','Dinero por las molestias'], c:0, n:'Quedaron en la puerta del teatro.'}],
+ gr:[{p:'«Quedamos en la puerta del teatro» significa...', o:['acordamos vernos allí','nos quedamos a vivir allí','permanecimos quietos toda la noche'], c:0, n:'Quedar con alguien es citarse.'},
+     {p:'«Idéntica a la mía» usa un posesivo...', o:['tónico, con artículo delante','átono, delante del nombre','de segunda persona plural'], c:0, n:'La mía sustituye a mi maleta.'}],
+ gp:[{b:'No lo noté hasta ', a:' al hotel y abrirla sobre la cama.', o:['llegar','llegando','llegado'], c:0, t:'I didn’t notice until I got to the hotel and opened it on the bed.'},
+     {b:'Quedamos en la puerta del teatro para ', a:' las maletas.', o:['intercambiar','intercambio','intercambiado'], c:0, t:'We arranged to meet at the theatre door to swap the suitcases.'}]},
+{t:'Una noche en el faro', en:'A night in the lighthouse', gn:'Fíjate en el pluscuamperfecto, había entrado, y en el uso de ser para describir.',
+ ln:[['Reservamos por internet una habitación dentro de un faro antiguo.','We booked a room inside an old lighthouse over the internet.'],
+     ['El camino era estrecho y el viento movía el coche.','The road was narrow and the wind was moving the car.'],
+     ['El farero nos recibió con una sopa caliente y muchas historias.','The lighthouse keeper welcomed us with hot soup and lots of stories.'],
+     ['Nos contó que allí las noches nunca eran silenciosas.','He told us that the nights there were never silent.'],
+     ['A las tres nos despertó un ruido extraño en la escalera.','At three a strange noise on the stairs woke us up.'],
+     ['Bajamos con una linterna y el corazón muy acelerado.','We went down with a torch and our hearts racing.'],
+     ['Era una gaviota que había entrado por la ventana de la cocina.','It was a seagull that had come in through the kitchen window.'],
+     ['Le pusimos nombre y desayunó con nosotros a la mañana siguiente.','We gave it a name and it had breakfast with us the next morning.']],
+ vc:[['el faro','the lighthouse'],['el farero','the lighthouse keeper'],['la linterna','the torch'],['la gaviota','the seagull'],['el viento','the wind'],['la sopa','the soup']],
+ q:[{p:'¿Dónde durmieron los protagonistas?', o:['En una habitación dentro de un faro','En una tienda de campaña','En el coche, junto al mar'], c:0, n:'Lo habían reservado por internet.'},
+    {p:'¿Qué les despertó a las tres?', o:['Un ruido extraño en la escalera','Una tormenta muy fuerte','El teléfono del farero'], c:0, n:'Bajaron con una linterna.'},
+    {p:'¿Qué era aquel ruido?', o:['Una gaviota que había entrado por la ventana','El viento golpeando la puerta','El farero preparando el desayuno'], c:0, n:'Después desayunó con ellos.'}],
+ gr:[{p:'«Había entrado» indica...', o:['una acción anterior a otra pasada','una acción futura probable','una acción habitual del presente'], c:0, n:'Es el pluscuamperfecto de indicativo.'},
+     {p:'«Las noches nunca eran silenciosas» usa ser porque...', o:['describe una característica','indica dónde está algo','señala un cambio momentáneo'], c:0, n:'Ser se usa para cualidades.'}],
+ gp:[{b:'Bajamos con una linterna y el corazón muy ', a:'.', o:['acelerado','acelerando','acelerar'], c:0, t:'We went down with a torch and our hearts racing.'},
+     {b:'Nos contó que allí las noches nunca ', a:' silenciosas.', o:['eran','estaban','habían'], c:0, t:'He told us that the nights there were never silent.'}]},
+{t:'El mapa del hotel', en:'The map in the hotel', gn:'Practica para que más subjuntivo, encontraran, y el gerundio de modo, cantando.',
+ ln:[['Detrás del armario del hotel encontramos un mapa doblado y amarillento.','Behind the hotel wardrobe we found a folded, yellowish map.'],
+     ['Tenía una cruz roja junto a una montaña sin nombre.','It had a red cross next to a mountain with no name.'],
+     ['Mi amiga Clara juró que era un mapa del tesoro.','My friend Clara swore that it was a treasure map.'],
+     ['Alquilamos bicicletas y pedaleamos toda la mañana bajo el sol.','We rented bikes and pedalled all morning under the sun.'],
+     ['Cuando llegamos, la cruz señalaba una pequeña panadería de pueblo.','When we arrived, the cross pointed to a small village bakery.'],
+     ['La panadera nos explicó que su abuelo dibujaba mapas para clientes.','The baker explained that her grandfather used to draw maps for customers.'],
+     ['Así la gente encontraba siempre el camino hasta su pan.','That way people always found the way to his bread.'],
+     ['Compramos tres barras y volvimos cantando por la carretera.','We bought three loaves and came back singing along the road.']],
+ vc:[['el mapa','the map'],['la cruz','the cross'],['el tesoro','the treasure'],['la panadería','the bakery'],['la barra de pan','the loaf of bread'],['la carretera','the road']],
+ q:[{p:'¿Dónde encontraron el mapa?', o:['Detrás del armario del hotel','Debajo de la cama grande','En el mostrador de recepción'], c:0, n:'Estaba doblado y amarillento.'},
+    {p:'¿Qué había en el lugar de la cruz?', o:['Una pequeña panadería de pueblo','Un cofre lleno de monedas','Una cueva muy oscura'], c:0, n:'No era un tesoro normal.'},
+    {p:'¿Por qué dibujaba mapas el abuelo?', o:['Para que los clientes encontraran su pan','Para vender mapas a los turistas','Para enseñar geografía en la escuela'], c:0, n:'Era una idea muy práctica.'}],
+ gr:[{p:'«Para que los clientes encontraran» lleva subjuntivo porque...', o:['para que siempre exige subjuntivo','el verbo va en tercera persona','se trata de una pregunta'], c:0, n:'Expresa finalidad con sujeto distinto.'},
+     {p:'«Volvimos cantando» usa un gerundio que indica...', o:['el modo en que volvimos','una acción anterior al verbo','una obligación futura'], c:0, n:'El gerundio expresa manera.'}],
+ gp:[{b:'Alquilamos bicicletas y ', a:' toda la mañana bajo el sol.', o:['pedaleamos','pedaleando','pedalear'], c:0, t:'We rented bikes and pedalled all morning under the sun.'},
+     {b:'Cuando llegamos, la cruz ', a:' una pequeña panadería.', o:['señalaba','señalando','señalar'], c:0, t:'When we arrived, the cross pointed to a small bakery.'}]},
+{t:'El pueblo sin cobertura', en:'The village with no signal', gn:'Repasa las perífrasis con a, empezar a, enseñar a, y las comparaciones con más que.',
+ ln:[['Pasamos una semana en un pueblo diminuto entre montañas verdes.','We spent a week in a tiny village among green mountains.'],
+     ['Allí el móvil no tenía cobertura en ninguna esquina.','There the mobile phone had no signal on any corner.'],
+     ['Los primeros dos días miraba la pantalla cada diez minutos.','For the first two days I looked at the screen every ten minutes.'],
+     ['Después empecé a hablar con los vecinos en la plaza.','Afterwards I started talking with the neighbours in the square.'],
+     ['Doña Amparo me enseñó a hacer pan y a jugar a las cartas.','Doña Amparo taught me to make bread and to play cards.'],
+     ['Aprendí más nombres en cinco días que en todo el año.','I learnt more names in five days than in the whole year.'],
+     ['El último día encontré por fin un punto con señal.','On the last day I finally found a spot with signal.'],
+     ['Me alejé despacio de allí y guardé el móvil en la mochila.','I slowly walked away from there and put the phone in my backpack.']],
+ vc:[['la cobertura','the phone coverage'],['el móvil','the mobile phone'],['la pantalla','the screen'],['la plaza','the square'],['las cartas','the playing cards'],['la montaña','the mountain']],
+ q:[{p:'¿Qué problema tenía el móvil en el pueblo?', o:['No había cobertura en ninguna parte','Se quedaba sin batería enseguida','Se rompió durante el viaje'], c:0, n:'El pueblo estaba entre montañas.'},
+    {p:'¿Qué le enseñó doña Amparo?', o:['A hacer pan y a jugar a las cartas','A montar a caballo por el monte','A cantar canciones antiguas'], c:0, n:'Se hicieron muy amigos.'},
+    {p:'¿Qué hizo cuando encontró señal?', o:['Se alejó y guardó el móvil','Llamó a toda su familia','Se quedó allí toda la tarde'], c:0, n:'Ya no la necesitaba.'}],
+ gr:[{p:'«Empecé a hablar» necesita la preposición...', o:['a','de','en'], c:0, n:'Empezar a más infinitivo.'},
+     {p:'«Más nombres en cinco días que en todo el año» es una comparación de...', o:['superioridad','igualdad','inferioridad'], c:0, n:'Más que indica superioridad.'}],
+ gp:[{b:'Los primeros dos días ', a:' la pantalla cada diez minutos.', o:['miraba','mirando','mirar'], c:0, t:'For the first two days I looked at the screen every ten minutes.'},
+     {b:'Doña Amparo me enseñó ', a:' hacer pan y a jugar a las cartas.', o:['a','de','en'], c:0, t:'Doña Amparo taught me to make bread and to play cards.'}]},
+/* ===== SECTION 20 · Cosas del corazón ===== */
+{t:'La primera cita en la librería', en:'The first date at the bookshop', gn:'Fíjate en el pluscuamperfecto, habíamos quedado, y en los gerundios reflexivos, riéndonos.',
+ ln:[['Habíamos quedado a las seis en una librería del centro.','We had arranged to meet at six in a bookshop in the centre.'],
+     ['Yo llegué pronto y fingí leer una guía de setas.','I arrived early and pretended to read a mushroom guide.'],
+     ['Él apareció con dos cafés y una sonrisa nerviosa.','He turned up with two coffees and a nervous smile.'],
+     ['Hablamos de novelas policíacas durante casi dos horas seguidas.','We talked about crime novels for almost two hours in a row.'],
+     ['El librero nos miraba desde el mostrador con mucha paciencia.','The bookseller watched us from the counter very patiently.'],
+     ['A las ocho apagó las luces sin decir una palabra.','At eight he turned off the lights without saying a word.'],
+     ['Salimos a la calle riéndonos y seguimos hablando en un banco.','We went out into the street laughing and kept talking on a bench.'],
+     ['Al día siguiente él me regaló aquella guía de setas.','The next day he gave me that mushroom guide as a present.']],
+ vc:[['la librería','the bookshop'],['el librero','the bookseller'],['el mostrador','the counter'],['la seta','the mushroom'],['la novela policíaca','the crime novel'],['la luz','the light']],
+ q:[{p:'¿Qué fingía leer la narradora?', o:['Una guía de setas','Una novela romántica','El periódico del día'], c:0, n:'Estaba nerviosa mientras esperaba.'},
+    {p:'¿Cómo avisó el librero de que cerraba?', o:['Apagó las luces sin decir nada','Les pidió salir amablemente','Puso música muy alta'], c:0, n:'Eran las ocho en punto.'},
+    {p:'¿Qué regalo recibió ella al día siguiente?', o:['La guía de setas','Un libro de recetas','Dos entradas de cine'], c:0, n:'Un detalle con mucha gracia.'}],
+ gr:[{p:'«Habíamos quedado» es...', o:['pluscuamperfecto de indicativo','pretérito perfecto compuesto','imperfecto de subjuntivo'], c:0, n:'Marca una acción anterior al relato.'},
+     {p:'«Riéndonos» es un gerundio con pronombre porque...', o:['reírse es un verbo pronominal','lo pide el objeto directo','es una forma pasiva'], c:0, n:'El pronombre se une detrás del gerundio.'}],
+ gp:[{b:'Yo llegué pronto y ', a:' leer una guía de setas.', o:['fingí','fingiendo','fingir'], c:0, t:'I arrived early and pretended to read a mushroom guide.'},
+     {b:'Salimos a la calle ', a:' y seguimos hablando en un banco.', o:['riéndonos','reírnos','reído'], c:0, t:'We went out into the street laughing and kept talking on a bench.'}]},
+{t:'La carta que nunca envié', en:'The letter I never sent', gn:'Practica el pluscuamperfecto, había escrito, y los verbos con preposición, atreverse a.',
+ ln:[['A los diecisiete años escribí una carta larguísima a mi mejor amiga.','At seventeen I wrote a very long letter to my best friend.'],
+     ['Le contaba todo lo que nunca me atrevía a decirle.','In it I told her everything I never dared to say to her.'],
+     ['Guardé el sobre en un libro de matemáticas y lo olvidé.','I put the envelope in a maths book and forgot it.'],
+     ['Veinte años después vacié la casa de mis padres.','Twenty years later I emptied my parents’ house.'],
+     ['El libro cayó al suelo y el sobre salió volando.','The book fell on the floor and the envelope flew out.'],
+     ['Lo leí sentada en el suelo, entre cajas y polvo.','I read it sitting on the floor, among boxes and dust.'],
+     ['Aquella tarde le mandé una foto de la carta por mensaje.','That afternoon I sent her a photo of the letter by message.'],
+     ['Ella respondió que había escrito una casi igual sin enviarla.','She replied that she had written an almost identical one without sending it.']],
+ vc:[['la carta','the letter'],['el sobre','the envelope'],['el suelo','the floor'],['la caja','the box'],['el polvo','the dust'],['el mensaje','the message']],
+ q:[{p:'¿Cuándo escribió la carta la narradora?', o:['A los diecisiete años','El verano pasado','Durante un viaje largo'], c:0, n:'Fue hace muchísimo tiempo.'},
+    {p:'¿Dónde estaba escondido el sobre?', o:['Dentro de un libro de matemáticas','En un cajón de la cocina','En el bolso de su madre'], c:0, n:'Lo olvidó allí durante años.'},
+    {p:'¿Qué contestó su amiga?', o:['Que ella había escrito una carta parecida','Que no recordaba nada de aquello','Que prefería hablar en persona'], c:0, n:'Tampoco la envió nunca.'}],
+ gr:[{p:'«Me atrevía a decirle» necesita...', o:['la preposición a','la preposición de','ninguna preposición'], c:0, n:'Atreverse a hacer algo.'},
+     {p:'«Sin enviarla» lleva un infinitivo con...', o:['pronombre de objeto directo, la','pronombre reflexivo, se','un artículo determinado'], c:0, n:'La sustituye a la carta.'}],
+ gp:[{b:'Guardé el sobre en un libro de matemáticas y lo ', a:'.', o:['olvidé','olvidando','olvidar'], c:0, t:'I put the envelope in a maths book and forgot it.'},
+     {b:'Ella respondió que ', a:' una casi igual sin enviarla.', o:['había escrito','ha escrito','escribiendo'], c:0, t:'She replied that she had written an almost identical one without sending it.'}]},
+{t:'La clase de baile del sábado', en:'The Saturday dance class', gn:'Repasa el imperfecto de las costumbres y los verbos pronominales, llamarse, apuntarse.',
+ ln:[['Mi madre me apuntó a una clase de baile los sábados.','My mother signed me up for a dance class on Saturdays.'],
+     ['Yo protestaba mucho, pero ella tenía razón como siempre.','I complained a lot, but she was right as always.'],
+     ['El profesor contaba los pasos con una voz muy tranquila.','The teacher counted the steps in a very calm voice.'],
+     ['Un señor mayor bailaba solo en la esquina del salón.','An elderly man was dancing alone in the corner of the hall.'],
+     ['Se llamaba Julián y aprendía para la boda de su nieta.','His name was Julián and he was learning for his granddaughter’s wedding.'],
+     ['Cada sábado practicábamos juntos porque nadie más cambiaba de pareja.','Every Saturday we practised together because nobody else changed partners.'],
+     ['En junio bailó con su nieta delante de doscientas personas.','In June he danced with his granddaughter in front of two hundred people.'],
+     ['Me guardó un trozo de tarta y me llamó su maestra.','He saved me a piece of cake and called me his teacher.']],
+ vc:[['la clase de baile','the dance class'],['el paso','the step'],['el salón','the hall'],['la pareja','the partner'],['la boda','the wedding'],['la tarta','the cake']],
+ q:[{p:'¿Quién apuntó a la narradora a la clase?', o:['Su madre','Su nieta','El profesor de baile'], c:0, n:'Ella protestaba al principio.'},
+    {p:'¿Por qué aprendía a bailar Julián?', o:['Por la boda de su nieta','Para hacer más ejercicio','Porque le gustaba la música'], c:0, n:'Un motivo muy dulce.'},
+    {p:'¿Qué le dio Julián después de la boda?', o:['Un trozo de tarta','Un ramo de flores','Una entrada de teatro'], c:0, n:'Y también un apodo bonito.'}],
+ gr:[{p:'«Practicábamos» está en imperfecto y aquí expresa...', o:['una costumbre repetida cada sábado','una acción única y terminada','una petición educada'], c:0, n:'Cada sábado indica repetición.'},
+     {p:'«Se llamaba Julián» usa un verbo...', o:['pronominal, llamarse','impersonal, sin sujeto','en voz pasiva'], c:0, n:'Llamarse lleva siempre pronombre.'}],
+ gp:[{b:'Mi madre me ', a:' a una clase de baile los sábados.', o:['apuntó','apunté','apuntando'], c:0, t:'My mother signed me up for a dance class on Saturdays.'},
+     {b:'Cada sábado ', a:' juntos porque nadie más cambiaba de pareja.', o:['practicábamos','practicar','practicado'], c:0, t:'Every Saturday we practised together because nobody else changed partners.'}]},
+{t:'Diez años después', en:'Ten years later', gn:'Fíjate en desde hacía más tiempo y en el se involuntario, se cayó.',
+ ln:[['Entré en una cafetería de la estación para escapar de la lluvia.','I went into a cafe at the station to escape the rain.'],
+     ['Detrás del mostrador había una cara que conocía muy bien.','Behind the counter there was a face I knew very well.'],
+     ['Era Nuria, mi compañera de piso de la universidad.','It was Nuria, my flatmate from university.'],
+     ['No nos veíamos desde hacía casi diez años.','We had not seen each other for almost ten years.'],
+     ['Nos abrazamos tan fuerte que se cayó una taza al suelo.','We hugged so hard that a cup fell on the floor.'],
+     ['Me contó que había abierto la cafetería con sus ahorros.','She told me that she had opened the cafe with her savings.'],
+     ['Estuvimos hablando hasta que salió el último tren de la noche.','We kept talking until the last train of the night left.'],
+     ['Ahora desayuno allí cada martes y pago también con historias viejas.','Now I have breakfast there every Tuesday and pay with old stories too.']],
+ vc:[['la cafetería','the cafe'],['la lluvia','the rain'],['la compañera de piso','the flatmate'],['la taza','the cup'],['los ahorros','the savings'],['el mostrador','the counter']],
+ q:[{p:'¿Por qué entró en la cafetería?', o:['Para escapar de la lluvia','Porque tenía mucha hambre','Para esperar a un compañero'], c:0, n:'Hacía muy mal tiempo.'},
+    {p:'¿Quién estaba detrás del mostrador?', o:['Nuria, su compañera de piso','Su hermana mayor','Un antiguo profesor suyo'], c:0, n:'Conocía muy bien esa cara.'},
+    {p:'¿Qué hace ahora el narrador cada martes?', o:['Desayuna en esa cafetería','Coge el último tren','Trabaja detrás del mostrador'], c:0, n:'Y paga también con historias viejas.'}],
+ gr:[{p:'«No nos veíamos desde hacía diez años» expresa...', o:['una situación que duraba hasta ese momento','una acción futura muy probable','una orden dirigida a otros'], c:0, n:'Desde hacía marca duración pasada.'},
+     {p:'En «se cayó una taza», el se sirve para...', o:['indicar algo involuntario','formar una pregunta','marcar una comparación'], c:0, n:'Caerse expresa un accidente.'}],
+ gp:[{b:'Detrás del mostrador ', a:' una cara que conocía muy bien.', o:['había','habían','hubieron'], c:0, t:'Behind the counter there was a face I knew very well.'},
+     {b:'Me contó que ', a:' la cafetería con sus ahorros.', o:['había abierto','ha abierto','abriendo'], c:0, t:'She told me that she had opened the cafe with her savings.'}]},
+{t:'La boda inesperada de los vecinos', en:'The neighbours’ unexpected wedding', gn:'Repasa quedarse más adjetivo y el imperfecto para los hábitos, bajaban.',
+ ln:[['Don Paco y doña Elena discutían por el ruido desde hacía años.','Don Paco and doña Elena had been arguing about noise for years.'],
+     ['Ella se quejaba de su radio, él de sus macetas mojadas.','She complained about his radio, he about her wet flowerpots.'],
+     ['Un domingo el ascensor se quedó parado entre dos plantas.','One Sunday the lift got stuck between two floors.'],
+     ['Estuvieron allí encerrados casi tres horas, sin nada que hacer.','They were locked in there for almost three hours, with nothing to do.'],
+     ['Cuando abrimos la puerta, los dos salieron riéndose a carcajadas.','When we opened the door, the two of them came out laughing out loud.'],
+     ['Desde ese día bajaban juntos a comprar el pan.','From that day on they went down together to buy bread.'],
+     ['En primavera colgaron un cartel enorme en el portal.','In spring they hung a huge sign in the building entrance.'],
+     ['Nos invitaban a su boda y pedían silencio absoluto durante la ceremonia.','They were inviting us to their wedding and asking for total silence during the ceremony.']],
+ vc:[['la radio','the radio'],['la maceta','the flowerpot'],['el ascensor','the lift'],['el cartel','the sign'],['el portal','the building entrance'],['la ceremonia','the ceremony']],
+ q:[{p:'¿Por qué discutían don Paco y doña Elena?', o:['Por la radio y las macetas mojadas','Por el precio del alquiler','Por un perro muy ruidoso'], c:0, n:'Llevaban años así.'},
+    {p:'¿Qué pasó un domingo?', o:['Se quedaron encerrados en el ascensor','Se fueron juntos de viaje','Se mudaron al mismo piso'], c:0, n:'Casi tres horas entre dos plantas.'},
+    {p:'¿Qué anunciaba el cartel del portal?', o:['Su boda y una petición de silencio','Una fiesta de toda la escalera','La venta de un piso pequeño'], c:0, n:'Un final muy divertido.'}],
+ gr:[{p:'«Se quedó parado» usa quedarse para...', o:['expresar un cambio de estado','indicar posesión de algo','formar el futuro simple'], c:0, n:'Quedarse más adjetivo indica resultado.'},
+     {p:'«Riéndose» es el gerundio de...', o:['reírse','regar','rehacer'], c:0, n:'Reírse mantiene el pronombre detrás.'}],
+ gp:[{b:'Estuvieron allí encerrados casi tres horas, sin nada que ', a:'.', o:['hacer','haciendo','hecho'], c:0, t:'They were locked in there for almost three hours, with nothing to do.'},
+     {b:'Desde ese día ', a:' juntos a comprar el pan.', o:['bajaban','bajando','bajado'], c:0, t:'From that day on they went down together to buy bread.'}]},
+/* ===== SECTION 21 · Animales y compañía ===== */
+{t:'El gato del bar de la esquina', en:'The cat of the corner bar', gn:'Fíjate en el contraste entre el presente habitual, vive, duerme, y el pretérito, desapareció, buscamos.',
+ ln:[['En el bar de la esquina vive un gato gris muy tranquilo.','In the corner bar there lives a very calm grey cat.'],
+     ['Se llama Bigotes y duerme siempre encima de la máquina de café.','He is called Bigotes and he always sleeps on top of the coffee machine.'],
+     ['Los clientes lo saludan por la mañana antes de pedir el desayuno.','The customers say hello to him in the morning before ordering breakfast.'],
+     ['El dueño dice que el gato llegó solo hace muchos años.','The owner says that the cat turned up on his own many years ago.'],
+     ['Una tarde de invierno Bigotes desapareció y nadie sabía dónde estaba.','One winter afternoon Bigotes disappeared and nobody knew where he was.'],
+     ['Buscamos por el barrio entero, incluso preguntamos en la panadería.','We searched the whole neighbourhood, we even asked at the bakery.'],
+     ['Volvimos al bar tristes y encendimos la luz de la cocina.','We went back to the bar feeling sad and turned on the kitchen light.'],
+     ['Bigotes dormía dentro de una caja de servilletas, con tres gatitos.','Bigotes was sleeping inside a box of napkins, with three kittens.']],
+ vc:[['el gato','the cat'],['la máquina de café','the coffee machine'],['el dueño','the owner'],['el barrio','the neighbourhood'],['la panadería','the bakery'],['las servilletas','the napkins']],
+ q:[{p:'¿Dónde duerme normalmente el gato?', o:['Encima de la máquina de café','Debajo de la barra','En la panadería'], c:0, n:'Le gusta el calor del café.'},
+    {p:'¿Qué pasó una tarde de invierno?', o:['El gato desapareció','El bar cerró para siempre','El dueño se mudó'], c:0, n:'Nadie sabía dónde estaba.'},
+    {p:'¿Qué encontraron al final en la cocina?', o:['Al gato con tres gatitos','Una caja de café vacía','Al dueño dormido'], c:0, n:'Dentro de una caja de servilletas.'}],
+ gr:[{p:'«Desapareció» es el pretérito de...', o:['desaparecer','desayunar','despertar'], c:0, n:'Desaparecer → desapareció.'},
+     {p:'En «nadie sabía dónde estaba» usamos el imperfecto porque...', o:['describe una situación en el pasado','habla del futuro','da una orden'], c:0, n:'El imperfecto describe estados y situaciones.'}],
+ gp:[{b:'En el bar de la esquina ', a:' un gato gris muy tranquilo.', o:['vive','vivió','viviendo'], c:0, t:'In the corner bar there lives a very calm grey cat.'},
+     {b:'Una tarde de invierno Bigotes ', a:' y nadie sabía dónde estaba.', o:['desapareció','desaparece','desaparecido'], c:0, t:'One winter afternoon Bigotes disappeared and nobody knew where he was.'}]},
+{t:'Un loro con demasiada memoria', en:'A parrot with too good a memory', gn:'Compara el presente habitual, repite, imita, con el pretérito de los hechos puntuales, empezó, se puso.',
+ ln:[['Mi tía Carmen tiene un loro verde que se llama Pepe.','My aunt Carmen has a green parrot called Pepe.'],
+     ['Pepe repite todo lo que oye en casa, sin ningún filtro.','Pepe repeats everything he hears at home, without any filter.'],
+     ['Aprendió el timbre del microondas y ahora lo imita cada tarde.','He learned the beep of the microwave and now he copies it every afternoon.'],
+     ['También copia la voz de mi tío cuando llama por teléfono.','He also copies my uncle’s voice when he calls on the phone.'],
+     ['El domingo vinieron los vecinos a tomar café y unas pastas.','On Sunday the neighbours came over for coffee and some biscuits.'],
+     ['Pepe empezó a repetir una vieja queja sobre el perro del vecino.','Pepe started repeating an old complaint about the neighbour’s dog.'],
+     ['Mi tía se puso roja y subió el volumen de la radio.','My aunt went red and turned up the radio volume.'],
+     ['El vecino se rió y confesó que él pensaba exactamente lo mismo.','The neighbour laughed and admitted that he thought exactly the same.']],
+ vc:[['el loro','the parrot'],['el timbre','the beep'],['el microondas','the microwave'],['la queja','the complaint'],['el volumen','the volume'],['la radio','the radio']],
+ q:[{p:'¿Qué imita Pepe cada tarde?', o:['El timbre del microondas','La sirena de una ambulancia','La voz de la vecina'], c:0, n:'Un sonido de la cocina.'},
+    {p:'¿Qué repitió Pepe delante de los vecinos?', o:['Una queja sobre el perro del vecino','Una canción de la radio','El nombre de mi tío'], c:0, n:'Algo bastante privado.'},
+    {p:'¿Cómo reaccionó el vecino?', o:['Se rió y dijo que pensaba lo mismo','Se enfadó y se marchó','No dijo nada en toda la tarde'], c:0, n:'Fue un final muy amable.'}],
+ gr:[{p:'«Se puso roja» expresa...', o:['un cambio rápido de estado','una acción habitual','una orden'], c:0, n:'Ponerse más adjetivo indica cambio.'},
+     {p:'«Empezó a repetir» lleva la preposición...', o:['a','de','en'], c:0, n:'Empezar a más infinitivo.'}],
+ gp:[{b:'Pepe ', a:' todo lo que oye en casa, sin ningún filtro.', o:['repite','repitió','repetido'], c:0, t:'Pepe repeats everything he hears at home, without any filter.'},
+     {b:'Mi tía ', a:' roja y subió el volumen de la radio.', o:['se puso','se pone','poniéndose'], c:0, t:'My aunt went red and turned up the radio volume.'}]},
+{t:'El perro que juega al fútbol', en:'The dog that plays football', gn:'Practica el presente habitual y los pronombres de objeto directo: lo roba, ficharlo.',
+ ln:[['En la plaza del barrio hay un perro marrón que se llama Tuco.','In the neighbourhood square there is a brown dog called Tuco.'],
+     ['Cada tarde los niños juegan al fútbol y él siempre participa.','Every afternoon the children play football and he always joins in.'],
+     ['Tuco no chuta el balón, pero lo roba mejor que nadie.','Tuco does not kick the ball, but he steals it better than anyone.'],
+     ['Cuando alguien marca un gol, corre en círculos y ladra feliz.','When someone scores a goal, he runs in circles and barks happily.'],
+     ['El sábado pasado vino un equipo de otro barrio a jugar.','Last Saturday a team from another neighbourhood came to play.'],
+     ['Los visitantes se quejaron porque Tuco robaba siempre su balón.','The visitors complained because Tuco always stole their ball.'],
+     ['Al final decidieron ficharlo como portero del equipo contrario.','In the end they decided to sign him as the other team’s goalkeeper.'],
+     ['Ganaron ellos, pero Tuco volvió a casa con nuestros niños.','They won, but Tuco went home with our children.']],
+ vc:[['la plaza','the square'],['el balón','the ball'],['el gol','the goal'],['el equipo','the team'],['el portero','the goalkeeper'],['los niños','the children']],
+ q:[{p:'¿Qué hace Tuco durante los partidos?', o:['Roba el balón a los niños','Duerme debajo de un banco','Cuenta los goles'], c:0, n:'No chuta, pero roba.'},
+    {p:'¿Por qué se quejaron los visitantes?', o:['Porque el perro les robaba el balón','Porque la plaza era muy pequeña','Porque llovía mucho'], c:0, n:'Tuco no perdonaba a nadie.'},
+    {p:'¿Qué decidieron hacer con Tuco?', o:['Ficharlo como portero del otro equipo','Llevarlo a casa antes del partido','Prohibirle jugar en la plaza'], c:0, n:'Una solución muy divertida.'}],
+ gr:[{p:'En «lo roba mejor que nadie», «lo» sustituye a...', o:['el balón','los niños','la plaza'], c:0, n:'Pronombre de objeto directo masculino singular.'},
+     {p:'«Ficharlo» es un infinitivo con...', o:['un pronombre unido al final','un artículo delante','un adverbio'], c:0, n:'Fichar más lo se escriben juntos.'}],
+ gp:[{b:'Cada tarde los niños ', a:' al fútbol y él siempre participa.', o:['juegan','juegue','jugando'], c:0, t:'Every afternoon the children play football and he always joins in.'},
+     {b:'Al final decidieron ', a:' como portero del equipo contrario.', o:['ficharlo','lo fichar','fichándose'], c:0, t:'In the end they decided to sign him as the other team’s goalkeeper.'}]},
+{t:'Un erizo en el jardín', en:'A hedgehog in the garden', gn:'Compara el imperfecto de descripción, estaba, escuchábamos, con el pretérito de los hechos, encontró, colocamos.',
+ ln:[['Mi madre encontró un erizo pequeño debajo del limonero del jardín.','My mother found a small hedgehog under the lemon tree in the garden.'],
+     ['Estaba muy quieto entre las hojas secas y no quería moverse.','It was very still among the dry leaves and did not want to move.'],
+     ['Le pusimos un plato con agua y un poco de comida de gato.','We put out a dish with water and a bit of cat food for it.'],
+     ['Por la noche escuchábamos ruidos raros cerca de la puerta trasera.','At night we used to hear strange noises near the back door.'],
+     ['Mi padre pensaba que era un ratón y no dormía tranquilo.','My father thought it was a mouse and did not sleep peacefully.'],
+     ['Colocamos una cámara vieja para descubrir quién visitaba el jardín.','We set up an old camera to find out who was visiting the garden.'],
+     ['En el vídeo aparecía el erizo comiendo con toda la calma.','In the video the hedgehog appeared, eating very calmly.'],
+     ['Detrás de él venían cuatro erizos más, en fila india.','Behind it came four more hedgehogs, in single file.']],
+ vc:[['el erizo','the hedgehog'],['el limonero','the lemon tree'],['las hojas secas','the dry leaves'],['el plato','the dish'],['la puerta trasera','the back door'],['la cámara','the camera']],
+ q:[{p:'¿Dónde encontró mi madre al erizo?', o:['Debajo del limonero','Dentro de la casa','Junto a la puerta trasera'], c:0, n:'Entre las hojas secas.'},
+    {p:'¿Qué pensaba mi padre por la noche?', o:['Que había un ratón','Que estaba lloviendo','Que el gato entraba en casa'], c:0, n:'Por eso no dormía tranquilo.'},
+    {p:'¿Qué se veía en el vídeo?', o:['El erizo y cuatro erizos más','Un gato del vecino','La cámara rota en el suelo'], c:0, n:'Venían todos en fila.'}],
+ gr:[{p:'«Escuchábamos» es...', o:['imperfecto','pretérito perfecto simple','futuro'], c:0, n:'Acción repetida en el pasado.'},
+     {p:'En «le pusimos un plato», «le» se refiere a...', o:['el erizo','mi madre','el jardín'], c:0, n:'Pronombre de objeto indirecto.'}],
+ gp:[{b:'Mi madre ', a:' un erizo pequeño debajo del limonero del jardín.', o:['encontró','encuentra','encontrando'], c:0, t:'My mother found a small hedgehog under the lemon tree in the garden.'},
+     {b:'Por la noche ', a:' ruidos raros cerca de la puerta trasera.', o:['escuchábamos','escucharemos','escuchado'], c:0, t:'At night we used to hear strange noises near the back door.'}]},
+{t:'El caballo viejo del abuelo', en:'Grandpa’s old horse', gn:'Observa el pluscuamperfecto había cruzado y el imperfecto de costumbre iba.',
+ ln:[['Mi abuelo tenía un caballo marrón muy viejo que se llamaba Trueno.','My grandfather had a very old brown horse called Trueno.'],
+     ['Trabajaron juntos en el campo durante casi veinte años seguidos.','They worked together in the fields for almost twenty years in a row.'],
+     ['Cuando llegó el tractor, el caballo se quedó sin trabajo.','When the tractor arrived, the horse was left without a job.'],
+     ['Mi abuelo no quiso venderlo y lo llevó a un prado.','My grandfather did not want to sell him and took him to a meadow.'],
+     ['Cada domingo iba a verlo con una manzana en el bolsillo.','Every Sunday he went to see him with an apple in his pocket.'],
+     ['El verano pasado mi abuelo se rompió una pierna y no pudo ir.','Last summer my grandfather broke a leg and could not go.'],
+     ['El domingo siguiente oímos ruido de cascos delante de la casa.','The following Sunday we heard the sound of hooves in front of the house.'],
+     ['Trueno había cruzado dos campos para buscar su manzana.','Trueno had crossed two fields to look for his apple.']],
+ vc:[['el caballo','the horse'],['el campo','the countryside'],['el tractor','the tractor'],['el prado','the meadow'],['la manzana','the apple'],['los cascos','the hooves']],
+ q:[{p:'¿Por qué se quedó Trueno sin trabajo?', o:['Porque llegó un tractor','Porque estaba enfermo','Porque el abuelo lo vendió'], c:0, n:'La máquina hizo su trabajo.'},
+    {p:'¿Qué llevaba el abuelo cada domingo?', o:['Una manzana en el bolsillo','Una silla de montar','Un cubo lleno de agua'], c:0, n:'Algo pequeño y dulce.'},
+    {p:'¿Qué hizo Trueno cuando el abuelo no fue?', o:['Cruzó dos campos hasta la casa','Se quedó dormido en el prado','Siguió al tractor por el camino'], c:0, n:'Buscaba su manzana.'}],
+ gr:[{p:'«Había cruzado» expresa...', o:['una acción anterior a otra pasada','una acción futura','una orden'], c:0, n:'Es el pluscuamperfecto.'},
+     {p:'En «no quiso venderlo», «lo» se refiere a...', o:['el caballo','el prado','el tractor'], c:0, n:'Objeto directo unido al infinitivo.'}],
+ gp:[{b:'Mi abuelo ', a:' un caballo marrón muy viejo que se llamaba Trueno.', o:['tenía','tendrá','tenido'], c:0, t:'My grandfather had a very old brown horse called Trueno.'},
+     {b:'Trueno ', a:' dos campos para buscar su manzana.', o:['había cruzado','habían cruzado','cruzando'], c:0, t:'Trueno had crossed two fields to look for his apple.'}]},
+/* ===== SECTION 22 · La casa y las cosas ===== */
+{t:'Una estantería imposible', en:'An impossible bookshelf', gn:'Fíjate en el verbo sobrar, que funciona como gustar, y en los pretéritos regulares.',
+ ln:[['El sábado compramos una estantería en una caja plana muy pesada.','On Saturday we bought a shelving unit in a very heavy flat box.'],
+     ['Las instrucciones tenían dibujos raros y ninguna palabra en español.','The instructions had strange drawings and not a single word in Spanish.'],
+     ['Mi novio dijo que no necesitábamos leerlas para montar el mueble.','My boyfriend said that we did not need to read them to put the furniture together.'],
+     ['Después de dos horas nos sobraban ocho tornillos y una tabla.','After two hours we had eight screws and one board left over.'],
+     ['La estantería se movía como un barco con viento fuerte.','The shelving unit swayed like a boat in a strong wind.'],
+     ['Al final buscamos un vídeo en internet y empezamos otra vez.','In the end we looked for a video on the internet and started again.'],
+     ['Terminamos a medianoche, cansados pero muy orgullosos del resultado.','We finished at midnight, tired but very proud of the result.'],
+     ['Entonces vimos que la caja tenía dos estanterías, no una.','Then we saw that the box contained two shelving units, not one.']],
+ vc:[['la estantería','the shelving unit'],['las instrucciones','the instructions'],['el tornillo','the screw'],['la tabla','the board'],['el mueble','the piece of furniture'],['la medianoche','midnight']],
+ q:[{p:'¿Qué problema tenían las instrucciones?', o:['No tenían ninguna palabra en español','Estaban rotas y sucias','Faltaba la primera página'], c:0, n:'Solo había dibujos raros.'},
+    {p:'¿Qué les sobró después de dos horas?', o:['Ocho tornillos y una tabla','Dos cajas vacías','Un vídeo de internet'], c:0, n:'Muy mala señal.'},
+    {p:'¿Qué descubrieron al final?', o:['Que en la caja había dos estanterías','Que el mueble era del vecino','Que faltaban todos los tornillos'], c:0, n:'Una sorpresa a medianoche.'}],
+ gr:[{p:'«Nos sobraban ocho tornillos» se construye como...', o:['gustar, el verbo concuerda con la cosa','un verbo reflexivo normal','un imperativo'], c:0, n:'Sobrar funciona igual que gustar.'},
+     {p:'En «no necesitábamos leerlas», «las» sustituye a...', o:['las instrucciones','los tornillos','el mueble'], c:0, n:'Femenino plural, objeto directo.'}],
+ gp:[{b:'El sábado ', a:' una estantería en una caja plana muy pesada.', o:['compramos','compraremos','comprando'], c:0, t:'On Saturday we bought a shelving unit in a very heavy flat box.'},
+     {b:'Al final ', a:' un vídeo en internet y empezamos otra vez.', o:['buscamos','buscando','buscad'], c:0, t:'In the end we looked for a video on the internet and started again.'}]},
+{t:'El grifo que goteaba', en:'The tap that kept dripping', gn:'Repasa el imperfecto de descripción, goteaba, parecía, frente al pretérito, puse, llamé.',
+ ln:[['En mi cocina había un grifo que goteaba desde el mes de marzo.','In my kitchen there was a tap that had been dripping since March.'],
+     ['Por la noche el ruido parecía un reloj muy lento y molesto.','At night the noise sounded like a very slow and annoying clock.'],
+     ['Puse un trapo debajo, pero el sonido continuaba igual de fuerte.','I put a cloth underneath, but the sound went on just as loud.'],
+     ['Llamé a un fontanero y me dio cita para tres semanas después.','I called a plumber and he gave me an appointment three weeks later.'],
+     ['Mi hermana vino de visita y miró el grifo dos segundos.','My sister came to visit and looked at the tap for two seconds.'],
+     ['Cerró una llave pequeña que había debajo del fregadero.','She closed a small valve that was under the kitchen sink.'],
+     ['El silencio de aquella noche fue el mejor regalo del año.','The silence of that night was the best present of the year.'],
+     ['Al día siguiente empezó a gotear el grifo del baño.','The next day the bathroom tap started dripping.']],
+ vc:[['el grifo','the tap'],['el trapo','the cloth'],['el fontanero','the plumber'],['la cita','the appointment'],['el fregadero','the kitchen sink'],['el silencio','the silence']],
+ q:[{p:'¿Desde cuándo goteaba el grifo?', o:['Desde el mes de marzo','Desde el verano pasado','Desde hacía dos días'], c:0, n:'Bastante tiempo ya.'},
+    {p:'¿Qué hizo la hermana?', o:['Cerró una llave debajo del fregadero','Llamó a otro fontanero','Cambió el grifo entero'], c:0, n:'Tardó solo dos segundos.'},
+    {p:'¿Qué pasó al día siguiente?', o:['Empezó a gotear el grifo del baño','Por fin vino el fontanero','Se rompió el fregadero'], c:0, n:'La historia no termina.'}],
+ gr:[{p:'«Puse» es el pretérito de...', o:['poner','poder','pedir'], c:0, n:'Poner → puse, irregular.'},
+     {p:'«Empezó a gotear» está formado por...', o:['verbo más a más infinitivo','dos infinitivos seguidos','verbo más gerundio'], c:0, n:'Empezar a más infinitivo.'}],
+ gp:[{b:'En mi cocina había un grifo que ', a:' desde el mes de marzo.', o:['goteaba','goteó','goteando'], c:0, t:'In my kitchen there was a tap that had been dripping since March.'},
+     {b:'Cerró una llave pequeña que ', a:' debajo del fregadero.', o:['había','habían','habido'], c:0, t:'She closed a small valve that was under the kitchen sink.'}]},
+{t:'El día de la mudanza', en:'Moving day', gn:'Fíjate en el pretérito, en el verbo caber, no cabía, y en el se accidental, se rompió.',
+ ln:[['El día de la mudanza empezó a llover a las siete de la mañana.','On moving day it started raining at seven in the morning.'],
+     ['Mis amigos llegaron temprano con dos furgonetas y muchas ganas.','My friends arrived early with two vans and lots of enthusiasm.'],
+     ['Bajamos el sofá por la escalera porque no cabía en el ascensor.','We took the sofa down the stairs because it did not fit in the lift.'],
+     ['Una caja se rompió y los platos rodaron por todo el portal.','A box broke and the plates rolled all over the building entrance.'],
+     ['Solo se rompió una taza, la más fea de la casa.','Only one cup broke, the ugliest one in the house.'],
+     ['A mediodía comimos pizza sentados en el suelo del piso nuevo.','At midday we ate pizza sitting on the floor of the new flat.'],
+     ['Por la tarde busqué la caja con las sábanas y las toallas.','In the afternoon I looked for the box with the sheets and the towels.'],
+     ['Seguía en el piso viejo, encima de la nevera vacía.','It was still in the old flat, on top of the empty fridge.']],
+ vc:[['la mudanza','the house move'],['la furgoneta','the van'],['el ascensor','the lift'],['la taza','the cup'],['las sábanas','the sheets'],['la nevera','the fridge']],
+ q:[{p:'¿Por qué bajaron el sofá por la escalera?', o:['Porque no cabía en el ascensor','Porque el ascensor estaba roto','Porque así era más rápido'], c:0, n:'Era una cuestión de tamaño.'},
+    {p:'¿Qué se rompió de verdad?', o:['Una taza','Todos los platos','Una de las furgonetas'], c:0, n:'Y era la más fea.'},
+    {p:'¿Dónde estaba la caja de las sábanas?', o:['En el piso viejo, encima de la nevera','Dentro de la furgoneta','Debajo del sofá nuevo'], c:0, n:'Muy lejos del piso nuevo.'}],
+ gr:[{p:'«No cabía» viene del verbo...', o:['caber','caer','cambiar'], c:0, n:'Caber → cabía en imperfecto.'},
+     {p:'En «se rompió una taza», el «se» indica...', o:['que fue algo accidental','una orden','una acción futura'], c:0, n:'Es el se accidental o involuntario.'}],
+ gp:[{b:'Mis amigos ', a:' temprano con dos furgonetas y muchas ganas.', o:['llegaron','llegarán','llegando'], c:0, t:'My friends arrived early with two vans and lots of enthusiasm.'},
+     {b:'Bajamos el sofá por la escalera porque no ', a:' en el ascensor.', o:['cabía','cabrá','cabido'], c:0, t:'We took the sofa down the stairs because it did not fit in the lift.'}]},
+{t:'El armario del pasillo', en:'The hallway closet', gn:'Practica el pluscuamperfecto se había perdido y los pronombres dobles se las llevé.',
+ ln:[['En mi piso alquilado hay un armario estrecho al final del pasillo.','In my rented flat there is a narrow cupboard at the end of the hallway.'],
+     ['La casera me dijo que la llave se había perdido hacía años.','The landlady told me that the key had been lost years earlier.'],
+     ['Durante meses imaginé tesoros, cartas antiguas o incluso un piano.','For months I imagined treasures, old letters or even a piano.'],
+     ['Un día la puerta se abrió sola por culpa de la humedad.','One day the door opened by itself because of the damp.'],
+     ['Dentro solo había una escoba, un cubo y tres bombillas.','Inside there was only a broom, a bucket and three light bulbs.'],
+     ['Al fondo encontré una caja de galletas llena de fotografías.','At the back I found a biscuit tin full of photographs.'],
+     ['Eran fotos de la familia que vivió aquí antes que yo.','They were photos of the family who lived here before me.'],
+     ['Se las llevé a la casera y descubrí que era ella de joven.','I took them to the landlady and discovered that it was her when she was young.']],
+ vc:[['el armario','the cupboard'],['el pasillo','the hallway'],['la casera','the landlady'],['la escoba','the broom'],['la bombilla','the light bulb'],['las fotografías','the photographs']],
+ q:[{p:'¿Qué dijo la casera sobre el armario?', o:['Que la llave se había perdido','Que estaba completamente vacío','Que era de un vecino'], c:0, n:'Hacía muchos años.'},
+    {p:'¿Qué había dentro del armario?', o:['Una escoba, un cubo y tres bombillas','Un piano pequeño y viejo','Un montón de cartas de amor'], c:0, n:'Nada de tesoros.'},
+    {p:'¿Qué descubrió el narrador al final?', o:['Que la casera aparecía en las fotos','Que las fotos eran suyas','Que el armario ya no cerraba'], c:0, n:'Era ella de joven.'}],
+ gr:[{p:'«Se había perdido» es...', o:['pluscuamperfecto en forma reflexiva','presente de indicativo','condicional simple'], c:0, n:'Haber en imperfecto más participio.'},
+     {p:'En «se las llevé», «las» sustituye a...', o:['las fotografías','las bombillas','las llaves'], c:0, n:'El se sustituye aquí a le.'}],
+ gp:[{b:'La casera me dijo que la llave ', a:' hacía años.', o:['se había perdido','se habían perdido','perdiendo'], c:0, t:'The landlady told me that the key had been lost years earlier.'},
+     {b:'Un día la puerta ', a:' sola por culpa de la humedad.', o:['se abrió','se abrirá','abriendo'], c:0, t:'One day the door opened by itself because of the damp.'}]},
+{t:'La llave escondida', en:'The hidden spare key', gn:'Repasa el imperfecto de costumbre, escondían, guardaba, y la expresión desde hacía.',
+ ln:[['Mis padres siempre escondían una llave debajo de una maceta.','My parents always used to hide a key under a flowerpot.'],
+     ['Todo el barrio conocía ese truco, incluso el cartero lo sabía.','The whole neighbourhood knew that trick, even the postman knew it.'],
+     ['Un domingo salí a comprar el pan y cerré la puerta sin llaves.','One Sunday I went out to buy bread and closed the door without keys.'],
+     ['Fui a la maceta, pero alguien había cambiado las plantas de sitio.','I went to the flowerpot, but someone had moved the plants around.'],
+     ['Busqué debajo de las nueve macetas de la terraza, sin suerte.','I looked under the nine flowerpots on the terrace, with no luck.'],
+     ['Mi vecina me vio desde la ventana y bajó con un café.','My neighbour saw me from the window and came down with a coffee.'],
+     ['Me contó que ella guardaba nuestra llave desde hacía dos años.','She told me that she had been keeping our key for two years.'],
+     ['Ahora la llave vive en su cocina y tomamos café los domingos.','Now the key lives in her kitchen and we have coffee on Sundays.']],
+ vc:[['la llave','the key'],['la maceta','the flowerpot'],['el cartero','the postman'],['el pan','the bread'],['la terraza','the terrace'],['la ventana','the window']],
+ q:[{p:'¿Dónde escondían la llave sus padres?', o:['Debajo de una maceta','En casa de la vecina','Encima de la puerta'], c:0, n:'Un truco muy conocido.'},
+    {p:'¿Qué pasó aquel domingo?', o:['Salió a por el pan y se quedó fuera','Perdió el pan por la calle','La vecina se mudó de piso'], c:0, n:'Cerró la puerta sin llaves.'},
+    {p:'¿Quién tenía la llave?', o:['La vecina, desde hacía dos años','El cartero del barrio','Sus padres, en su casa'], c:0, n:'Bajó con un café.'}],
+ gr:[{p:'«Escondían» es imperfecto y aquí expresa...', o:['una costumbre del pasado','una acción única y terminada','una orden'], c:0, n:'Siempre escondían la llave.'},
+     {p:'«Había cambiado» indica...', o:['una acción anterior a otra pasada','una acción del presente','una hipótesis del futuro'], c:0, n:'Es el pluscuamperfecto.'}],
+ gp:[{b:'Mis padres siempre ', a:' una llave debajo de una maceta.', o:['escondían','esconderán','escondido'], c:0, t:'My parents always used to hide a key under a flowerpot.'},
+     {b:'Me contó que ella ', a:' nuestra llave desde hacía dos años.', o:['guardaba','guardará','guardado'], c:0, t:'She told me that she had been keeping our key for two years.'}]},
+/* ===== SECTION 23 · Fiestas y líos ===== */
+{t:'La tarta que se cayó', en:'The cake that fell', gn:'Fíjate en los pretéritos irregulares: estuve, tropecé, cogió, se quedaron.',
+ ln:[['Para el cumpleaños de mi madre preparé una tarta de tres pisos.','For my mother’s birthday I made a three layer cake.'],
+     ['Estuve toda la mañana en la cocina, con harina hasta en el pelo.','I spent the whole morning in the kitchen, with flour even in my hair.'],
+     ['La decoré con fresas, nata y unas letras de chocolate.','I decorated it with strawberries, cream and some chocolate letters.'],
+     ['Cuando entré en el salón, tropecé con la alfombra del pasillo.','When I came into the living room, I tripped on the hallway rug.'],
+     ['La tarta voló y aterrizó boca abajo sobre la mesa.','The cake flew and landed upside down on the table.'],
+     ['Todos se quedaron en silencio durante tres segundos eternos.','Everyone stayed silent for three endless seconds.'],
+     ['Mi madre cogió una cuchara y dijo que así sabía mejor.','My mother took a spoon and said that it tasted better that way.'],
+     ['Ahora cada año repetimos la tarta caída, ya es tradición familiar.','Now every year we repeat the fallen cake, it is already a family tradition.']],
+ vc:[['la tarta','the cake'],['la harina','the flour'],['las fresas','the strawberries'],['la nata','the cream'],['la cuchara','the spoon'],['el salón','the living room']],
+ q:[{p:'¿Cómo era la tarta?', o:['De tres pisos, con fresas y nata','Pequeña y de limón','Comprada en la pastelería'], c:0, n:'Trabajo de toda una mañana.'},
+    {p:'¿Por qué se cayó la tarta?', o:['Porque tropezó con la alfombra','Porque la mesa estaba mojada','Porque alguien abrió la puerta'], c:0, n:'Pasó en el pasillo.'},
+    {p:'¿Qué hizo la madre?', o:['Cogió una cuchara y la probó','Se enfadó muchísimo','Salió del salón sin hablar'], c:0, n:'Dijo que sabía mejor así.'}],
+ gr:[{p:'«Tropecé» es la primera persona del pretérito de...', o:['tropezar','trabajar','traer'], c:0, n:'Tropezar → tropecé, con c.'},
+     {p:'«Se quedaron en silencio» expresa...', o:['un cambio de estado','una acción habitual','una orden'], c:0, n:'Quedarse más complemento indica cambio.'}],
+ gp:[{b:'Cuando entré en el salón, ', a:' con la alfombra del pasillo.', o:['tropecé','tropezar','tropezando'], c:0, t:'When I came into the living room, I tripped on the hallway rug.'},
+     {b:'Mi madre ', a:' una cuchara y dijo que así sabía mejor.', o:['cogió','coge','cogiendo'], c:0, t:'My mother took a spoon and said that it tasted better that way.'}]},
+{t:'El disfraz equivocado', en:'The wrong costume', gn:'Practica tardar en más infinitivo y los pronombres unidos: ponérmelo.',
+ ln:[['Mi amigo Álvaro me invitó a una fiesta de disfraces el viernes.','My friend Álvaro invited me to a fancy dress party on Friday.'],
+     ['Alquilé un traje de dinosaurio verde, enorme y muy incómodo.','I rented a green dinosaur costume, huge and very uncomfortable.'],
+     ['Tardé cuarenta minutos en ponérmelo con ayuda de mi hermano.','It took me forty minutes to put it on with my brother’s help.'],
+     ['Cuando llegué, todos los invitados llevaban vestidos elegantes y trajes negros.','When I arrived, all the guests were wearing elegant dresses and black suits.'],
+     ['Era una cena de aniversario, no una fiesta de disfraces.','It was an anniversary dinner, not a fancy dress party.'],
+     ['Álvaro se había equivocado de mensaje al escribir la invitación.','Álvaro had sent the wrong message when he wrote the invitation.'],
+     ['Cené con la cabeza del dinosaurio encima de la silla.','I had dinner with the dinosaur head on the chair.'],
+     ['Salí en todas las fotos y ahora soy el favorito de la familia.','I appeared in all the photos and now I am the family favourite.']],
+ vc:[['el disfraz','the fancy dress costume'],['el traje','the suit'],['el dinosaurio','the dinosaur'],['los invitados','the guests'],['la invitación','the invitation'],['la silla','the chair']],
+ q:[{p:'¿Qué disfraz alquiló el narrador?', o:['Un traje de dinosaurio verde','Un traje negro elegante','Un disfraz de pirata'], c:0, n:'Enorme e incómodo.'},
+    {p:'¿Qué tipo de fiesta era en realidad?', o:['Una cena de aniversario','Una fiesta de disfraces','Un cumpleaños infantil'], c:0, n:'Todos iban muy elegantes.'},
+    {p:'¿Por qué pasó todo esto?', o:['Álvaro se equivocó al escribir la invitación','El narrador leyó mal la fecha','La fiesta cambió de día'], c:0, n:'La culpa fue del mensaje.'}],
+ gr:[{p:'En «ponérmelo», los pronombres se refieren a...', o:['a mí y al traje','a él y a la fiesta','a nosotros y a la casa'], c:0, n:'Me más lo, unidos al infinitivo.'},
+     {p:'«Se había equivocado» es...', o:['pluscuamperfecto','presente de indicativo','imperativo'], c:0, n:'Una acción anterior a la fiesta.'}],
+ gp:[{b:'Tardé cuarenta minutos en ', a:' con ayuda de mi hermano.', o:['ponérmelo','me lo poner','poniéndomelo'], c:0, t:'It took me forty minutes to put it on with my brother’s help.'},
+     {b:'Cuando llegué, todos los invitados ', a:' vestidos elegantes y trajes negros.', o:['llevaban','llevarán','llevando'], c:0, t:'When I arrived, all the guests were wearing elegant dresses and black suits.'}]},
+{t:'La cena de Nochebuena', en:'Christmas Eve dinner', gn:'Repasa la estructura tanto que para la consecuencia y el pretérito irregular trajo.',
+ ln:[['En Nochebuena mi familia se reúne siempre en casa de mi abuela.','On Christmas Eve my family always gets together at my grandmother’s house.'],
+     ['Este año éramos diecisiete personas y solo teníamos doce sillas.','This year there were seventeen of us and we only had twelve chairs.'],
+     ['Mi tío trajo dos taburetes del bar donde trabaja los sábados.','My uncle brought two stools from the bar where he works on Saturdays.'],
+     ['Mi prima preparó un pavo enorme, pero el horno se apagó.','My cousin prepared a huge turkey, but the oven went out.'],
+     ['Cenamos tortilla, jamón y todo lo que había en la nevera.','We had omelette, ham and everything that was in the fridge.'],
+     ['Nos reímos tanto que los vecinos llamaron para preguntar qué pasaba.','We laughed so much that the neighbours called to ask what was going on.'],
+     ['A medianoche mi abuela sacó el pavo terminado del horno del bar.','At midnight my grandmother took the finished turkey out of the bar’s oven.'],
+     ['Lo desayunamos al día siguiente, y estaba absolutamente perfecto.','We had it for breakfast the next day, and it was absolutely perfect.']],
+ vc:[['la Nochebuena','Christmas Eve'],['el taburete','the stool'],['el pavo','the turkey'],['el horno','the oven'],['la tortilla','the Spanish omelette'],['el jamón','the ham']],
+ q:[{p:'¿Cuántas personas y cuántas sillas había?', o:['Diecisiete personas y doce sillas','Doce personas y diecisiete sillas','Diecisiete personas y diecisiete sillas'], c:0, n:'Faltaban asientos.'},
+    {p:'¿Por qué no comieron el pavo en la cena?', o:['Porque el horno se apagó','Porque estaba quemado','Porque nadie lo compró'], c:0, n:'Un problema de cocina.'},
+    {p:'¿Cuándo comieron el pavo?', o:['En el desayuno del día siguiente','A medianoche, en la mesa','Nunca, lo tiraron'], c:0, n:'Y estaba perfecto.'}],
+ gr:[{p:'«Trajo» es el pretérito de...', o:['traer','tratar','trabajar'], c:0, n:'Traer → trajo, irregular.'},
+     {p:'En «nos reímos tanto que...», la estructura expresa...', o:['consecuencia','condición','finalidad'], c:0, n:'Tanto que introduce el resultado.'}],
+ gp:[{b:'Mi tío ', a:' dos taburetes del bar donde trabaja los sábados.', o:['trajo','traerá','traído'], c:0, t:'My uncle brought two stools from the bar where he works on Saturdays.'},
+     {b:'Mi prima preparó un pavo enorme, pero el horno ', a:'.', o:['se apagó','se apagará','apagando'], c:0, t:'My cousin prepared a huge turkey, but the oven went out.'}]},
+{t:'La noche de karaoke del pueblo', en:'Village karaoke night', gn:'Observa quedarse más adjetivo y el imperfecto de estado: sabía, tenía.',
+ ln:[['Cada agosto el pueblo organiza una noche de karaoke en la plaza.','Every August the village organises a karaoke night in the square.'],
+     ['Mi padre canta siempre la misma canción desde mil novecientos noventa.','My father always sings the same song, ever since nineteen ninety.'],
+     ['Este año mi hermana pequeña se apuntó sin decir nada a nadie.','This year my little sister signed up without telling anyone.'],
+     ['Subió al escenario con las manos temblando y el micrófono torcido.','She went up on stage with shaking hands and a crooked microphone.'],
+     ['Cuando empezó a cantar, la plaza entera se quedó completamente callada.','When she started to sing, the whole square went completely quiet.'],
+     ['Nadie sabía que ella tenía una voz tan bonita y potente.','Nobody knew that she had such a beautiful and powerful voice.'],
+     ['Ganó el primer premio: una cesta con quesos y dos entradas.','She won first prize: a basket with cheeses and two tickets.'],
+     ['Nos regaló las entradas y se quedó con todos los quesos.','She gave us the tickets and kept all the cheeses.']],
+ vc:[['el escenario','the stage'],['el micrófono','the microphone'],['la canción','the song'],['el premio','the prize'],['la cesta','the basket'],['las entradas','the tickets']],
+ q:[{p:'¿Qué pasa cada agosto en el pueblo?', o:['Hay una noche de karaoke en la plaza','Hay una feria de quesos','Cierran la plaza por obras'], c:0, n:'Una tradición de verano.'},
+    {p:'¿Cómo reaccionó la gente al oír a la hermana?', o:['Se quedó completamente callada','Empezó a bailar','Se fue pronto a casa'], c:0, n:'Nadie conocía su voz.'},
+    {p:'¿Qué hizo la hermana con el premio?', o:['Regaló las entradas y se quedó los quesos','Lo vendió todo en el mercado','Regaló los quesos a los vecinos'], c:0, n:'Fue muy lista.'}],
+ gr:[{p:'«Se quedó callada» significa...', o:['pasó a estar en silencio','habló mucho rato','cantó una segunda canción'], c:0, n:'Quedarse más adjetivo indica cambio.'},
+     {p:'En «nadie sabía que tenía una voz bonita», el imperfecto sirve para...', o:['describir un estado pasado','marcar una acción puntual','dar una orden'], c:0, n:'Saber y tener describen la situación.'}],
+ gp:[{b:'Este año mi hermana pequeña ', a:' sin decir nada a nadie.', o:['se apuntó','se apunta','apuntándose'], c:0, t:'This year my little sister signed up without telling anyone.'},
+     {b:'Cuando empezó a cantar, la plaza entera ', a:' completamente callada.', o:['se quedó','se queda','quedándose'], c:0, t:'When she started to sing, the whole square went completely quiet.'}]},
+{t:'Los fuegos que empezaron antes', en:'The fireworks that started early', gn:'Fíjate en el pretérito de los hechos y en estar más adjetivo: estaba atrasado.',
+ ln:[['Las fiestas de mi pueblo terminan siempre con fuegos artificiales a medianoche.','The festivals in my village always end with fireworks at midnight.'],
+     ['Aquel año mi familia preparó una merienda enorme en la azotea.','That year my family prepared a huge picnic on the roof terrace.'],
+     ['Subimos sillas, mantas y una tortilla que pesaba dos kilos.','We took up chairs, blankets and an omelette that weighed two kilos.'],
+     ['A las once y cuarto sonó el primer trueno de color rojo.','At a quarter past eleven the first red boom sounded.'],
+     ['Nadie estaba preparado y mi tío perdió las gafas de la emoción.','Nobody was ready and my uncle lost his glasses in the excitement.'],
+     ['Los fuegos duraron veinte minutos y llenaron el cielo de colores.','The fireworks lasted twenty minutes and filled the sky with colours.'],
+     ['Después bajamos a la plaza y todo el mundo comentaba lo mismo.','Afterwards we went down to the square and everyone was saying the same thing.'],
+     ['El reloj del ayuntamiento estaba atrasado cuarenta y cinco minutos desde marzo.','The town hall clock had been forty five minutes slow since March.']],
+ vc:[['los fuegos artificiales','the fireworks'],['la merienda','the afternoon snack'],['la azotea','the roof terrace'],['la manta','the blanket'],['las gafas','the glasses'],['el ayuntamiento','the town hall']],
+ q:[{p:'¿Dónde preparó la merienda la familia?', o:['En la azotea','En la plaza del pueblo','Dentro del ayuntamiento'], c:0, n:'Con sillas y mantas.'},
+    {p:'¿A qué hora empezaron los fuegos?', o:['A las once y cuarto','A medianoche en punto','A las diez de la noche'], c:0, n:'Antes de lo normal.'},
+    {p:'¿Cuál era la explicación final?', o:['El reloj del ayuntamiento estaba atrasado','Los fuegos se encendieron solos','La fiesta cambió de hora'], c:0, n:'Cuarenta y cinco minutos.'}],
+ gr:[{p:'«Duraron» concuerda con...', o:['los fuegos, sujeto plural','el cielo, sujeto singular','mi tío, tercera persona'], c:0, n:'Tercera persona del plural.'},
+     {p:'«Estaba atrasado» usa estar porque...', o:['expresa un estado temporal','indica una cualidad permanente','es una forma de imperativo'], c:0, n:'Estar sirve para estados y situaciones.'}],
+ gp:[{b:'A las once y cuarto ', a:' el primer trueno de color rojo.', o:['sonó','suena','sonando'], c:0, t:'At a quarter past eleven the first red boom sounded.'},
+     {b:'Los fuegos ', a:' veinte minutos y llenaron el cielo de colores.', o:['duraron','duró','durando'], c:0, t:'The fireworks lasted twenty minutes and filled the sky with colours.'}]},
+/* ===== SECTION 24 · Salud y despistes ===== */
+{t:'Las gafas perdidas', en:'The lost glasses', gn:'Fíjate en el imperfecto para describir escenas: buscaba, estaba, llevaba.',
+ ln:[['Mi padre buscaba sus gafas por toda la casa aquella mañana.','My father was looking for his glasses all over the house that morning.'],
+     ['Miró debajo del sofá, dentro del frigorífico y en el zapatero.','He looked under the sofa, inside the fridge and in the shoe rack.'],
+     ['Decía que sin ellas no podía leer ni el periódico.','He said that without them he couldn’t even read the newspaper.'],
+     ['Mi madre le preguntó si había mirado en el coche.','My mother asked him if he had looked in the car.'],
+     ['Él respondió que sí, dos veces, y muy despacio.','He answered yes, twice, and very slowly.'],
+     ['Estuvimos casi cuarenta minutos revolviendo cajones y estanterías.','We spent almost forty minutes rummaging through drawers and shelves.'],
+     ['Entonces entró mi sobrina pequeña y se echó a reír.','Then my little niece came in and burst out laughing.'],
+     ['Las gafas llevaban toda la mañana encima de su cabeza.','The glasses had been on top of his head all morning.']],
+ vc:[['las gafas','the glasses'],['el frigorífico','the fridge'],['el zapatero','the shoe rack'],['el cajón','the drawer'],['la estantería','the shelf'],['la cabeza','the head']],
+ q:[{p:'¿Qué buscaba el padre?', o:['Sus gafas','Su periódico','Las llaves del coche'], c:0, n:'Lo dice la primera frase.'},
+    {p:'¿Cuánto tiempo estuvieron buscando?', o:['Casi cuarenta minutos','Solo cinco minutos','Toda la tarde'], c:0, n:'Revolvieron cajones y estanterías.'},
+    {p:'¿Dónde estaban las gafas al final?', o:['Encima de su cabeza','Dentro del frigorífico','Debajo del sofá'], c:0, n:'Por eso se rio la sobrina.'}],
+ gr:[{p:'«Buscaba» es un...', o:['imperfecto (acción en desarrollo en el pasado)','pretérito perfecto simple','condicional'], c:0, n:'Buscar → buscaba, describe una escena pasada.'},
+     {p:'«Había mirado» se forma con...', o:['haber en imperfecto más participio','ser más gerundio','estar más infinitivo'], c:0, n:'Es el pluscuamperfecto.'}],
+ gp:[{b:'Mi padre ', a:' sus gafas por toda la casa.', o:['buscaba','buscando','buscará'], c:0, t:'My father was looking for his glasses all over the house.'},
+     {b:'Entonces ', a:' mi sobrina pequeña y se echó a reír.', o:['entró','entraba','entrando'], c:0, t:'Then my little niece came in and burst out laughing.'}]},
+{t:'El médico hablador', en:'The chatty doctor', gn:'Observa el contraste entre pretérito perfecto simple y imperfecto al narrar una visita.',
+ ln:[['Tenía cita con el médico a las cinco de la tarde.','I had an appointment with the doctor at five in the afternoon.'],
+     ['Era una revisión normal, nada importante, solo la de cada año.','It was a normal check-up, nothing important, just the yearly one.'],
+     ['El doctor me saludó y empezó a hablar de su huerto.','The doctor greeted me and started talking about his vegetable garden.'],
+     ['Me contó que sus tomates eran los mejores del barrio.','He told me that his tomatoes were the best in the neighborhood.'],
+     ['Yo asentía con la cabeza y miraba el reloj de reojo.','I nodded and glanced at the clock out of the corner of my eye.'],
+     ['Después me habló de su perro, de su hermana y del tiempo.','Then he talked to me about his dog, his sister and the weather.'],
+     ['Media hora más tarde me tomó por fin la tensión.','Half an hour later he finally took my blood pressure.'],
+     ['Al salir me regaló dos tomates y una receta de gazpacho.','On the way out he gave me two tomatoes and a gazpacho recipe.']],
+ vc:[['la cita','the appointment'],['la revisión','the check-up'],['el huerto','the vegetable garden'],['el reloj','the clock'],['la tensión','the blood pressure'],['la receta','the recipe']],
+ q:[{p:'¿Para qué iba al médico?', o:['Para una revisión normal','Porque estaba muy grave','Para pedir una baja'], c:0, n:'Era la revisión de cada año.'},
+    {p:'¿De qué hablaba el doctor todo el rato?', o:['De su huerto y su familia','De los horarios del centro','De los precios del barrio'], c:0, n:'Sus tomates eran los mejores.'},
+    {p:'¿Qué le dio el médico al final?', o:['Dos tomates y una receta','Una caja de pastillas','Otra cita urgente'], c:0, n:'Una receta de gazpacho.'}],
+ gr:[{p:'«Era una revisión normal» usa ser porque...', o:['describe una característica o definición','indica un lugar temporal','expresa un cambio de estado'], c:0, n:'Ser define y describe cualidades.'},
+     {p:'«Empezó a hablar» es una perífrasis que indica...', o:['el inicio de una acción','la repetición de una acción','el final de una acción'], c:0, n:'Empezar a más infinitivo marca el comienzo.'}],
+ gp:[{b:'El doctor me saludó y ', a:' a hablar de su huerto.', o:['empezó','empezaba','empezando'], c:0, t:'The doctor greeted me and started talking about his vegetable garden.'},
+     {b:'Media hora más tarde me ', a:' por fin la tensión.', o:['tomó','tomaba','tomando'], c:0, t:'Half an hour later he finally took my blood pressure.'}]},
+{t:'El jarabe amargo', en:'The bitter cough syrup', gn:'Repasa los pronombres de objeto directo e indirecto: me, lo, le.',
+ ln:[['Mi hijo tenía una tos leve desde el domingo por la noche.','My son had a slight cough since Sunday night.'],
+     ['En la farmacia me recomendaron un jarabe con sabor a fresa.','At the pharmacy they recommended me a syrup with strawberry flavor.'],
+     ['El niño lo probó y puso una cara imposible de describir.','The boy tried it and made a face impossible to describe.'],
+     ['Dijo que aquella fresa sabía a cartón mojado y a hierba.','He said that strawberry tasted like wet cardboard and grass.'],
+     ['Cada noche negociábamos el jarabe como si fuera un contrato.','Every night we negotiated the syrup as if it were a contract.'],
+     ['Le prometí un cuento largo a cambio de dos cucharadas.','I promised him a long story in exchange for two spoonfuls.'],
+     ['El viernes la tos ya había desaparecido casi por completo.','By Friday the cough had almost completely disappeared.'],
+     ['Entonces me pidió más jarabe, porque quería otro cuento.','Then he asked me for more syrup, because he wanted another story.']],
+ vc:[['la tos','the cough'],['la farmacia','the pharmacy'],['el jarabe','the syrup'],['la fresa','the strawberry'],['la cucharada','the spoonful'],['el cuento','the story']],
+ q:[{p:'¿Qué le pasaba al niño?', o:['Tenía una tos leve','Le dolía una muela','Se había torcido un pie'], c:0, n:'Desde el domingo por la noche.'},
+    {p:'¿Qué le parecía el sabor del jarabe?', o:['Horrible, como cartón mojado','Muy dulce y agradable','Igual que un zumo de fresa'], c:0, n:'Puso una cara imposible.'},
+    {p:'¿Por qué pidió más jarabe al final?', o:['Porque quería otro cuento','Porque le gustó el sabor','Porque seguía tosiendo mucho'], c:0, n:'El cuento era el verdadero premio.'}],
+ gr:[{p:'En «el niño lo probó», «lo» se refiere a...', o:['el jarabe','el niño','el cuento'], c:0, n:'Es un pronombre de objeto directo masculino.'},
+     {p:'«Como si fuera» va con imperfecto de subjuntivo porque...', o:['expresa una comparación irreal','indica una orden','señala un hecho seguro'], c:0, n:'Como si siempre pide subjuntivo.'}],
+ gp:[{b:'El niño ', a:' probó y puso una cara rarísima.', o:['lo','le','les'], c:0, t:'The boy tried it and made a very strange face.'},
+     {b:'Le ', a:' un cuento largo a cambio de dos cucharadas.', o:['prometí','prometido','prometiendo'], c:0, t:'I promised him a long story in exchange for two spoonfuls.'}]},
+{t:'La carrera del barrio', en:'The neighborhood fun run', gn:'Presta atención al futuro simple y a las expresiones de tiempo: llegaré, correremos.',
+ ln:[['El ayuntamiento organizó una carrera popular de cinco kilómetros.','The town hall organized a five kilometer fun run.'],
+     ['Mi hermana me apuntó sin preguntarme y pagó la inscripción.','My sister signed me up without asking me and paid the registration.'],
+     ['Yo llevaba tres años sin correr más que para coger el autobús.','I hadn’t run in three years except to catch the bus.'],
+     ['El domingo salimos con una camiseta amarilla y mucho optimismo.','On Sunday we set off with a yellow shirt and a lot of optimism.'],
+     ['En el kilómetro dos ya pensaba en el desayuno del final.','By kilometer two I was already thinking about the breakfast at the end.'],
+     ['Una señora de setenta años me adelantó saludando a todos.','A seventy year old lady overtook me while greeting everyone.'],
+     ['Llegué el penúltimo, sudando, pero con la sonrisa puesta.','I arrived second to last, sweating, but with a smile on.'],
+     ['En la meta me esperaba aquella señora con dos zumos fríos.','At the finish line that lady was waiting for me with two cold juices.']],
+ vc:[['el ayuntamiento','the town hall'],['la carrera','the race'],['la inscripción','the registration'],['la camiseta','the shirt'],['la meta','the finish line'],['el zumo','the juice']],
+ q:[{p:'¿Quién apuntó al narrador a la carrera?', o:['Su hermana','El ayuntamiento','Una vecina del portal'], c:0, n:'Y además pagó la inscripción.'},
+    {p:'¿Qué hizo la señora de setenta años?', o:['Le adelantó saludando a todos','Se sentó a descansar','Abandonó en el kilómetro dos'], c:0, n:'Iba muy animada.'},
+    {p:'¿Qué pasó en la meta?', o:['La señora le esperaba con dos zumos','Le dieron una medalla de oro','Se puso a llover fuerte'], c:0, n:'Un final muy amable.'}],
+ gr:[{p:'«Llevaba tres años sin correr» expresa...', o:['una duración hasta un momento pasado','una acción futura','una orden'], c:0, n:'Llevar más tiempo indica duración.'},
+     {p:'«Sudando» es un...', o:['gerundio','participio','infinitivo'], c:0, n:'Sudar → sudando, indica el modo.'}],
+ gp:[{b:'Mi hermana me ', a:' sin preguntarme nada.', o:['apuntó','apuntaba','apuntando'], c:0, t:'My sister signed me up without asking me anything.'},
+     {b:'Llegué el penúltimo, ', a:', pero contento.', o:['sudando','sudado','sudar'], c:0, t:'I arrived second to last, sweating, but happy.'}]},
+{t:'El susto del lunes', en:'A Monday scare', gn:'Fíjate en el pluscuamperfecto para contar lo que había pasado antes: había dejado, había sonado.',
+ ln:[['El lunes me desperté con un pitido raro dentro del oído.','On Monday I woke up with a strange beeping inside my ear.'],
+     ['Pensé que era la tensión o quizá el café de la noche.','I thought it was my blood pressure or maybe the evening coffee.'],
+     ['Llamé al centro de salud y me dieron cita para las once.','I called the health center and they gave me an appointment at eleven.'],
+     ['En la sala de espera escribí mentalmente una lista de propósitos.','In the waiting room I mentally wrote a list of resolutions.'],
+     ['La enfermera me miró el oído con una linterna diminuta.','The nurse looked in my ear with a tiny flashlight.'],
+     ['Me dijo que todo estaba perfecto y que respirara tranquilo.','She told me that everything was perfect and that I should breathe calmly.'],
+     ['Al volver a casa el pitido seguía sonando en el pasillo.','Back home the beeping was still sounding in the hallway.'],
+     ['Era el detector de humo, que había avisado desde el domingo.','It was the smoke detector, which had been warning since Sunday.']],
+ vc:[['el pitido','the beeping'],['el oído','the inner ear'],['el centro de salud','the health center'],['la sala de espera','the waiting room'],['la enfermera','the nurse'],['el detector de humo','the smoke detector']],
+ q:[{p:'¿Con qué se despertó el lunes?', o:['Con un pitido raro en el oído','Con dolor de espalda','Con mucha fiebre'], c:0, n:'Por eso pidió cita.'},
+    {p:'¿Qué dijo la enfermera?', o:['Que todo estaba perfecto','Que necesitaba unas gotas','Que volviera al día siguiente'], c:0, n:'Le pidió que respirara tranquilo.'},
+    {p:'¿De dónde venía el pitido en realidad?', o:['Del detector de humo del pasillo','De la nevera de la cocina','Del despertador del dormitorio'], c:0, n:'Llevaba avisando desde el domingo.'}],
+ gr:[{p:'«Había avisado» indica una acción...', o:['anterior a otra acción pasada','simultánea al presente','que ocurrirá mañana'], c:0, n:'Es el pluscuamperfecto de indicativo.'},
+     {p:'«Que respirara tranquilo» está en...', o:['imperfecto de subjuntivo','presente de indicativo','futuro simple'], c:0, n:'Tras un verbo de petición en pasado.'}],
+ gp:[{b:'El lunes me ', a:' con un pitido raro.', o:['desperté','despertaba','despertando'], c:0, t:'On Monday I woke up with a strange beeping.'},
+     {b:'Era el detector de humo, que ', a:' desde el domingo.', o:['había avisado','avisará','avisando'], c:0, t:'It was the smoke detector, which had been warning since Sunday.'}]},
+/* ===== SECTION 25 · Compras y trueques ===== */
+{t:'El rastro del domingo', en:'The Sunday flea market', gn:'Repasa el pretérito perfecto simple en una narración de un día concreto.',
+ ln:[['Cada domingo el rastro llena la plaza mayor de nuestro pueblo.','Every Sunday the flea market fills the main square of our town.'],
+     ['Aquel día fui con mi tía Carmen a buscar una lámpara.','That day I went with my aunt Carmen to look for a lamp.'],
+     ['Los puestos vendían discos antiguos, sillas cojas y tazas descoloridas.','The stalls sold old records, wobbly chairs and faded cups.'],
+     ['Mi tía regateó veinte minutos por un espejo con marco dorado.','My aunt haggled for twenty minutes over a mirror with a golden frame.'],
+     ['El vendedor bajó el precio a la mitad y ella sonrió.','The seller lowered the price by half and she smiled.'],
+     ['Volvimos a casa cargadas con el espejo y sin la lámpara.','We came back home loaded with the mirror and without the lamp.'],
+     ['Al colgarlo en el pasillo, mi tía se quedó muy callada.','When hanging it in the hallway, my aunt went very quiet.'],
+     ['Detrás del marco estaba su nombre, escrito por su abuela.','Behind the frame was her name, written by her grandmother.']],
+ vc:[['el rastro','the flea market'],['la plaza mayor','the main square'],['el puesto','the stall'],['el espejo','the mirror'],['el marco','the frame'],['el vendedor','the seller']],
+ q:[{p:'¿Qué buscaban en el rastro?', o:['Una lámpara','Un espejo dorado','Unos discos antiguos'], c:0, n:'Al final compraron otra cosa.'},
+    {p:'¿Cuánto tiempo regateó la tía?', o:['Veinte minutos','Cinco minutos','Toda la mañana'], c:0, n:'Consiguió la mitad del precio.'},
+    {p:'¿Qué había detrás del marco?', o:['El nombre de la tía, escrito por su abuela','Una fotografía antigua','Un billete olvidado'], c:0, n:'Por eso se quedó callada.'}],
+ gr:[{p:'«Al colgarlo» significa...', o:['cuando lo colgó','aunque lo colgó','para colgarlo'], c:0, n:'Al más infinitivo indica simultaneidad.'},
+     {p:'«Escrito» es el participio de...', o:['escribir','escuchar','escapar'], c:0, n:'Es un participio irregular.'}],
+ gp:[{b:'Mi tía ', a:' veinte minutos por un espejo.', o:['regateó','regateaba','regateando'], c:0, t:'My aunt haggled for twenty minutes over a mirror.'},
+     {b:'Detrás del marco ', a:' su nombre.', o:['estaba','era','había sido'], c:0, t:'Behind the frame was her name.'}]},
+{t:'La ganga que no lo era', en:'The bargain that was not', gn:'Observa el uso de ser y estar: era barata, estaba rota.',
+ ln:[['Vi una cafetera preciosa en una tienda del centro por diez euros.','I saw a beautiful coffee maker in a shop downtown for ten euros.'],
+     ['El cartel decía última unidad y yo no me lo pensé.','The sign said last unit and I didn’t think twice.'],
+     ['La llevé a casa muy orgulloso de mi enorme descubrimiento.','I took it home very proud of my huge discovery.'],
+     ['El primer café salió tibio y con un sabor bastante raro.','The first coffee came out lukewarm and with a rather strange taste.'],
+     ['La segunda vez la máquina hizo un ruido de tractor viejo.','The second time the machine made a noise like an old tractor.'],
+     ['Fui a un técnico y la reparación costaba treinta y cinco euros.','I went to a technician and the repair cost thirty five euros.'],
+     ['Mi compañero de piso se rio durante toda la cena.','My flatmate laughed all through dinner.'],
+     ['Ahora la cafetera es un jarrón precioso lleno de margaritas.','Now the coffee maker is a beautiful vase full of daisies.']],
+ vc:[['la cafetera','the coffee maker'],['el cartel','the sign'],['la máquina','the machine'],['el técnico','the technician'],['la reparación','the repair'],['el jarrón','the vase']],
+ q:[{p:'¿Cuánto costó la cafetera?', o:['Diez euros','Treinta y cinco euros','Veinte euros'], c:0, n:'Parecía una ganga.'},
+    {p:'¿Qué problema tenía la máquina?', o:['Hacía ruido y el café salía tibio','No cabía en la cocina','Le faltaba el cable'], c:0, n:'Sonaba como un tractor viejo.'},
+    {p:'¿Para qué sirve ahora la cafetera?', o:['Es un jarrón con margaritas','Sigue haciendo café','La devolvió a la tienda'], c:0, n:'Un final con flores.'}],
+ gr:[{p:'En «la cafetera es un jarrón» usamos ser porque...', o:['identificamos qué es la cosa','hablamos de una posición','indicamos un estado pasajero'], c:0, n:'Ser sirve para identificar.'},
+     {p:'«Se rio» lleva pronombre porque...', o:['reírse es un verbo pronominal','está en pasiva','es un imperativo'], c:0, n:'Reírse: me río, se rio.'}],
+ gp:[{b:'El primer café ', a:' tibio y con sabor raro.', o:['salió','salía','saliendo'], c:0, t:'The first coffee came out lukewarm and with a strange taste.'},
+     {b:'Ahora la cafetera ', a:' un jarrón lleno de margaritas.', o:['es','está','hay'], c:0, t:'Now the coffee maker is a vase full of daisies.'}]},
+{t:'La cola interminable', en:'The endless queue', gn:'Fíjate en los marcadores temporales con imperfecto: mientras, cada vez, todavía.',
+ ln:[['El sábado por la mañana fui a devolver unos pantalones.','On Saturday morning I went to return a pair of trousers.'],
+     ['La cola del mostrador daba la vuelta a toda la planta.','The queue at the counter went around the whole floor.'],
+     ['Delante de mí había un hombre con catorce bolsas grandes.','In front of me there was a man with fourteen big bags.'],
+     ['Mientras esperábamos, empezamos a hablar del tiempo y del fútbol.','While we were waiting, we started talking about the weather and football.'],
+     ['Cada vez que avanzaba la cola, alguien nuevo se colaba delante.','Every time the queue moved forward, someone new cut in front.'],
+     ['Después de una hora todavía quedaban seis personas por delante.','After an hour there were still six people ahead.'],
+     ['Cuando por fin llegó mi turno, saqué los pantalones de la bolsa.','When my turn finally came, I took the trousers out of the bag.'],
+     ['Eran del hombre de las catorce bolsas: nos habíamos cambiado las bolsas.','They belonged to the man with fourteen bags: we had swapped our bags.']],
+ vc:[['la cola','the queue'],['el mostrador','the counter'],['los pantalones','the trousers'],['la planta','the floor of a building'],['la bolsa','the bag'],['el turno','the turn']],
+ q:[{p:'¿Para qué fue el narrador a la tienda?', o:['Para devolver unos pantalones','Para comprar catorce bolsas','Para pedir trabajo'], c:0, n:'Era un sábado por la mañana.'},
+    {p:'¿Cuánto tiempo llevaba esperando?', o:['Más de una hora','Diez minutos','Toda la tarde'], c:0, n:'Y aún quedaban seis personas.'},
+    {p:'¿Qué descubrió al llegar su turno?', o:['Que llevaba la bolsa del otro hombre','Que la tienda ya cerraba','Que había perdido el tique'], c:0, n:'Se habían cambiado las bolsas.'}],
+ gr:[{p:'«Mientras esperábamos» usa imperfecto porque...', o:['describe una acción en desarrollo','indica una acción única y acabada','habla del futuro'], c:0, n:'Mientras suele pedir imperfecto.'},
+     {p:'«Nos habíamos cambiado» es...', o:['pluscuamperfecto con pronombre reflexivo','presente de subjuntivo','condicional compuesto'], c:0, n:'Haber en imperfecto más participio.'}],
+ gp:[{b:'Mientras ', a:', hablamos del tiempo y del fútbol.', o:['esperábamos','esperamos','esperando'], c:0, t:'While we were waiting, we talked about the weather and football.'},
+     {b:'Cuando por fin ', a:' mi turno, saqué los pantalones.', o:['llegó','llegaba','llegando'], c:0, t:'When my turn finally came, I took out the trousers.'}]},
+{t:'La fiesta del trueque', en:'The swap party', gn:'Repasa el presente de subjuntivo tras expresiones de deseo: quiero que traigas.',
+ ln:[['La asociación del barrio organizó una fiesta de trueque en el patio.','The neighborhood association organized a swap party in the courtyard.'],
+     ['La norma era sencilla: traer algo útil y llevarse otra cosa.','The rule was simple: bring something useful and take something else.'],
+     ['Yo llevé una tostadora que nunca había usado en cuatro años.','I brought a toaster that I had never used in four years.'],
+     ['Doña Pilar quería que todos trajéramos también algo de comer.','Doña Pilar wanted us all to bring something to eat as well.'],
+     ['Cambié la tostadora por una bicicleta estática bastante ruidosa.','I swapped the toaster for a rather noisy exercise bike.'],
+     ['Mi vecino cambió la bicicleta por un juego de sartenes.','My neighbor swapped the bike for a set of frying pans.'],
+     ['Al final de la tarde nadie sabía de quién era cada cosa.','At the end of the afternoon nobody knew whose each thing was.'],
+     ['Yo volví a casa con mi tostadora y una tarta de manzana.','I went home with my own toaster and an apple tart.']],
+ vc:[['el trueque','the swap'],['el patio','the courtyard'],['la tostadora','the toaster'],['la bicicleta estática','the exercise bike'],['la sartén','the frying pan'],['la tarta','the tart']],
+ q:[{p:'¿Cuál era la norma de la fiesta?', o:['Traer algo útil y llevarse otra cosa','Pagar dos euros por objeto','Solo mirar sin tocar nada'], c:0, n:'Era una fiesta de trueque.'},
+    {p:'¿Qué llevó el narrador?', o:['Una tostadora sin usar','Una bicicleta estática','Un juego de sartenes'], c:0, n:'Llevaba cuatro años guardada.'},
+    {p:'¿Con qué volvió a casa?', o:['Con su tostadora y una tarta','Con las sartenes nuevas','Sin nada en las manos'], c:0, n:'La tostadora dio la vuelta entera.'}],
+ gr:[{p:'«Quería que todos trajéramos» lleva subjuntivo porque...', o:['expresa un deseo sobre otras personas','es una pregunta indirecta','indica certeza'], c:0, n:'Querer que más subjuntivo.'},
+     {p:'«Nunca había usado» expresa...', o:['una experiencia anterior a un momento pasado','una acción futura','una orden'], c:0, n:'Pluscuamperfecto de indicativo.'}],
+ gp:[{b:'Yo ', a:' una tostadora que nunca había usado.', o:['llevé','llevaba','llevando'], c:0, t:'I brought a toaster that I had never used.'},
+     {b:'Doña Pilar quería que todos ', a:' algo de comer.', o:['trajéramos','traemos','trayendo'], c:0, t:'Doña Pilar wanted us all to bring something to eat.'}]},
+{t:'La lista desaparecida', en:'The vanished shopping list', gn:'Fíjate en la construcción impersonal con se y en los pronombres se me.',
+ ln:[['Escribí la lista de la compra con mucho cuidado el jueves.','I wrote the shopping list very carefully on Thursday.'],
+     ['Tenía dieciocho productos, ordenados por pasillos del supermercado.','It had eighteen products, arranged by supermarket aisles.'],
+     ['Al llegar a la entrada, se me cayó el papel entre los carros.','On reaching the entrance, the paper fell out of my hand among the trolleys.'],
+     ['Decidí comprar de memoria, convencido de que me acordaba de todo.','I decided to shop from memory, convinced that I remembered everything.'],
+     ['Metí en el carro tres tipos de queso y ningún huevo.','I put three kinds of cheese in the trolley and no eggs.'],
+     ['En la caja pagué cuarenta euros y salí muy satisfecho.','At the checkout I paid forty euros and left very pleased.'],
+     ['En casa descubrí que faltaban catorce cosas de la lista.','At home I discovered that fourteen things from the list were missing.'],
+     ['La lista estaba en mi bolsillo, doblada junto al tique.','The list was in my pocket, folded next to the receipt.']],
+ vc:[['la lista de la compra','the shopping list'],['el pasillo','the aisle'],['el carro','the trolley'],['el queso','the cheese'],['la caja','the checkout'],['el bolsillo','the pocket']],
+ q:[{p:'¿Cuántos productos tenía la lista?', o:['Dieciocho','Catorce','Tres'], c:0, n:'Estaban ordenados por pasillos.'},
+    {p:'¿Qué compró de más?', o:['Tres tipos de queso','Muchos huevos','Dos carros llenos de fruta'], c:0, n:'Compró de memoria.'},
+    {p:'¿Dónde apareció la lista?', o:['En su bolsillo, junto al tique','Debajo de un carro','En la caja del supermercado'], c:0, n:'Nunca se había caído del todo.'}],
+ gr:[{p:'«Se me cayó el papel» expresa...', o:['un suceso involuntario','una acción planeada','una orden'], c:0, n:'Se más pronombre indica accidente.'},
+     {p:'«Doblada» concuerda con...', o:['la lista, en femenino singular','el tique, en masculino','el bolsillo, en masculino'], c:0, n:'El participio concuerda con el sustantivo.'}],
+ gp:[{b:'Al llegar a la entrada, se me ', a:' el papel.', o:['cayó','caía','cayendo'], c:0, t:'On reaching the entrance, the paper fell out of my hand.'},
+     {b:'En casa descubrí que ', a:' catorce cosas.', o:['faltaban','faltaron','faltando'], c:0, t:'At home I discovered that fourteen things were missing.'}]},
+/* ===== SECTION 26 · Sueños y planes ===== */
+{t:'Alfarería a los sesenta', en:'Pottery at sixty', gn:'Observa el contraste entre imperfecto de costumbre y pretérito de acción puntual.',
+ ln:[['Mi madre se apuntó a un taller de alfarería al jubilarse.','My mother signed up for a pottery workshop when she retired.'],
+     ['Siempre decía que de joven no había tenido tiempo para nada.','She always said that when young she hadn’t had time for anything.'],
+     ['La primera tarde volvió con las manos llenas de barro seco.','The first afternoon she came back with her hands covered in dry clay.'],
+     ['Su primer cuenco salió torcido y con el borde muy grueso.','Her first bowl came out crooked and with a very thick rim.'],
+     ['Nosotros le dijimos que era moderno y original.','We told her that it was modern and original.'],
+     ['Cada semana traía piezas nuevas: platos, tazas y jarrones raros.','Every week she brought new pieces: plates, cups and odd vases.'],
+     ['En junio el taller organizó una pequeña exposición en el centro cívico.','In June the workshop organized a small exhibition at the community center.'],
+     ['La pieza más admirada fue aquel primer cuenco torcido.','The most admired piece was that first crooked bowl.']],
+ vc:[['la alfarería','pottery'],['el taller','the workshop'],['el barro','the clay'],['el cuenco','the bowl'],['el jarrón','the vase'],['la exposición','the exhibition']],
+ q:[{p:'¿Cuándo se apuntó la madre al taller?', o:['Al jubilarse','De joven','En junio'], c:0, n:'Antes nunca había tenido tiempo.'},
+    {p:'¿Cómo era su primer cuenco?', o:['Torcido y con el borde grueso','Perfecto y muy fino','Pequeño y azul'], c:0, n:'La familia dijo que era original.'},
+    {p:'¿Qué pieza gustó más en la exposición?', o:['El primer cuenco torcido','Un plato grande','Un jarrón nuevo'], c:0, n:'La más imperfecta de todas.'}],
+ gr:[{p:'«Siempre decía» usa imperfecto porque...', o:['expresa una costumbre en el pasado','indica una acción única','habla del presente'], c:0, n:'El imperfecto marca la repetición.'},
+     {p:'«Al jubilarse» equivale a...', o:['cuando se jubiló','antes de jubilarse','para jubilarse'], c:0, n:'Al más infinitivo indica el momento.'}],
+ gp:[{b:'Su primer cuenco ', a:' torcido y muy grueso.', o:['salió','salía','saliendo'], c:0, t:'Her first bowl came out crooked and very thick.'},
+     {b:'Cada semana ', a:' piezas nuevas al salón.', o:['traía','trajo','trayendo'], c:0, t:'Every week she brought new pieces to the living room.'}]},
+{t:'La bicicleta nueva', en:'The new bicycle', gn:'Repasa el futuro simple y el condicional para hablar de planes: iré, iría.',
+ ln:[['Ahorré durante ocho meses para comprarme una bicicleta de segunda mano.','I saved for eight months to buy myself a second hand bicycle.'],
+     ['Pensaba que con ella iría al trabajo todos los días.','I thought that with it I would go to work every day.'],
+     ['El vendedor me aseguró que aquel modelo subía cualquier cuesta.','The seller assured me that that model climbed any hill.'],
+     ['El primer lunes salí a las siete y media muy decidido.','The first Monday I set off at half past seven very determined.'],
+     ['La cuesta de la calle Mayor resultó bastante más larga de lo previsto.','The hill on Calle Mayor turned out much longer than expected.'],
+     ['Llegué tarde, colorado y con la camisa completamente arrugada.','I arrived late, red faced and with my shirt completely wrinkled.'],
+     ['Mis compañeros me aplaudieron desde la ventana de la oficina.','My colleagues applauded me from the office window.'],
+     ['Ahora vamos cuatro en bici y bajamos juntos por otra calle.','Now four of us go by bike and we ride down together along another street.']],
+ vc:[['la bicicleta','the bicycle'],['la cuesta','the hill'],['el vendedor','the seller'],['la camisa','the shirt'],['la oficina','the office'],['la ventana','the window']],
+ q:[{p:'¿Cuánto tiempo ahorró para la bici?', o:['Ocho meses','Dos semanas','Un año entero'], c:0, n:'Era de segunda mano.'},
+    {p:'¿Cómo llegó al trabajo el primer lunes?', o:['Tarde, colorado y arrugado','Puntual y descansado','En autobús'], c:0, n:'La cuesta era larga.'},
+    {p:'¿Qué pasa ahora?', o:['Van cuatro compañeros en bici','Ha vendido la bicicleta','Va siempre andando'], c:0, n:'Bajan juntos por otra calle.'}],
+ gr:[{p:'«Iría» es un...', o:['condicional simple','futuro simple','imperfecto'], c:0, n:'Se usa para un futuro visto desde el pasado.'},
+     {p:'«Más larga de lo previsto» compara...', o:['con una expectativa anterior','dos personas distintas','dos lugares iguales'], c:0, n:'De lo previsto significa de lo esperado.'}],
+ gp:[{b:'Pensaba que con ella ', a:' al trabajo todos los días.', o:['iría','iré','yendo'], c:0, t:'I thought that with it I would go to work every day.'},
+     {b:'Mis compañeros me ', a:' desde la ventana.', o:['aplaudieron','aplaudían','aplaudiendo'], c:0, t:'My colleagues applauded me from the window.'}]},
+{t:'El viaje soñado', en:'The long dreamed trip', gn:'Fíjate en el subjuntivo tras cuando con valor de futuro: cuando tenga, cuando pueda.',
+ ln:[['Durante años dijimos que iríamos a Galicia cuando tuviéramos vacaciones.','For years we said that we would go to Galicia when we had holidays.'],
+     ['Cada verano aparecía una obra en casa o una boda lejana.','Every summer a home repair or a distant wedding came up.'],
+     ['Este año compramos los billetes en enero, sin pensarlo dos veces.','This year we bought the tickets in January, without thinking twice.'],
+     ['Preparamos una lista larguísima de pueblos, playas y miradores.','We prepared a very long list of villages, beaches and viewpoints.'],
+     ['Llegamos un martes y llovía con una constancia impresionante.','We arrived on a Tuesday and it was raining with impressive persistence.'],
+     ['Nos refugiamos en un bar pequeño con las ventanas empañadas.','We took shelter in a small bar with steamy windows.'],
+     ['Allí pasamos cinco horas hablando con la dueña y sus vecinos.','There we spent five hours talking with the owner and her neighbors.'],
+     ['De todo el viaje, ese día de lluvia fue nuestro favorito.','Of the whole trip, that rainy day was our favorite.']],
+ vc:[['las vacaciones','the holidays'],['el billete','the ticket'],['el mirador','the viewpoint'],['la lluvia','the rain'],['la dueña','the owner'],['la ventana','the window']],
+ q:[{p:'¿Por qué no viajaban antes?', o:['Siempre surgía una obra o una boda','No tenían dinero nunca','No les gustaba Galicia'], c:0, n:'Cada verano pasaba algo.'},
+    {p:'¿Qué tiempo hizo al llegar?', o:['Llovió con mucha constancia','Hizo un sol espléndido','Nevó toda la semana'], c:0, n:'Llegaron un martes.'},
+    {p:'¿Cuál fue su día favorito?', o:['El día de lluvia en el bar','El día de la playa','El último día del viaje'], c:0, n:'Estuvieron cinco horas charlando.'}],
+ gr:[{p:'«Cuando tuviéramos vacaciones» va en subjuntivo porque...', o:['habla de un futuro visto desde el pasado','indica un hecho seguro y pasado','es una orden directa'], c:0, n:'Cuando con idea de futuro pide subjuntivo.'},
+     {p:'«Empañadas» funciona como...', o:['participio con valor de adjetivo','gerundio','infinitivo'], c:0, n:'Concuerda con ventanas en femenino plural.'}],
+ gp:[{b:'Dijimos que iríamos a Galicia cuando ', a:' vacaciones.', o:['tuviéramos','tenemos','teniendo'], c:0, t:'We said that we would go to Galicia when we had holidays.'},
+     {b:'Allí ', a:' cinco horas hablando con la dueña.', o:['pasamos','pasábamos','pasando'], c:0, t:'There we spent five hours talking with the owner.'}]},
+{t:'El huerto del balcón', en:'The balcony garden', gn:'Repasa las perífrasis de obligación y proceso: hay que regar, empezar a crecer.',
+ ln:[['En marzo decidí convertir mi balcón en un huerto en miniatura.','In March I decided to turn my balcony into a miniature garden.'],
+     ['Compré tres macetas, tierra y semillas de tomate y albahaca.','I bought three pots, soil and tomato and basil seeds.'],
+     ['El dependiente me explicó que hay que regar por la tarde.','The shop assistant explained to me that you have to water in the afternoon.'],
+     ['Durante dos semanas no pasó absolutamente nada en las macetas.','For two weeks absolutely nothing happened in the pots.'],
+     ['Luego empezaron a crecer unas hojas verdes y muy alegres.','Then some green and very cheerful leaves started to grow.'],
+     ['En julio recogí exactamente cuatro tomates pequeños y algo blandos.','In July I harvested exactly four small and rather soft tomatoes.'],
+     ['Mi vecina del quinto me pidió la receta de mi ensalada.','My neighbor from the fifth floor asked me for my salad recipe.'],
+     ['Ahora ella tiene ocho macetas y yo riego las suyas los sábados.','Now she has eight pots and I water hers on Saturdays.']],
+ vc:[['el balcón','the balcony'],['la maceta','the flowerpot'],['la tierra','the soil'],['la semilla','the seed'],['la hoja','the leaf'],['la ensalada','the salad']],
+ q:[{p:'¿Qué compró para empezar?', o:['Macetas, tierra y semillas','Un árbol pequeño','Una regadera automática'], c:0, n:'Tomate y albahaca.'},
+    {p:'¿Cuántos tomates recogió en julio?', o:['Cuatro','Ocho','Ninguno'], c:0, n:'Pequeños y algo blandos.'},
+    {p:'¿Qué hace ahora los sábados?', o:['Riega las macetas de su vecina','Vende tomates en el mercado','Planta albahaca nueva'], c:0, n:'Ella tiene ocho macetas.'}],
+ gr:[{p:'«Hay que regar» expresa...', o:['obligación impersonal','deseo personal','probabilidad'], c:0, n:'Hay que más infinitivo.'},
+     {p:'«Empezaron a crecer» indica...', o:['el comienzo de un proceso','el final de una acción','una acción habitual'], c:0, n:'Empezar a más infinitivo.'}],
+ gp:[{b:'El dependiente me explicó que hay que ', a:' por la tarde.', o:['regar','riego','regando'], c:0, t:'The shop assistant explained to me that you have to water in the afternoon.'},
+     {b:'En julio ', a:' exactamente cuatro tomates.', o:['recogí','recogía','recogiendo'], c:0, t:'In July I harvested exactly four tomatoes.'}]},
+{t:'Carta a mi yo futuro', en:'A letter to my future self', gn:'Fíjate en el futuro simple para hacer predicciones: tendré, viviré, seré.',
+ ln:[['En el instituto la profesora nos mandó escribir una carta especial.','At high school the teacher had us write a special letter.'],
+     ['Debíamos contarle a nuestro yo de treinta años cómo éramos.','We had to tell our thirty year old self what we were like.'],
+     ['Yo escribí que tendría un perro enorme y viviría junto al mar.','I wrote that I would have a huge dog and would live by the sea.'],
+     ['También prometí que nunca me levantaría antes de las nueve.','I also promised that I would never get up before nine.'],
+     ['El instituto guardó las cartas en una caja durante quince años.','The school kept the letters in a box for fifteen years.'],
+     ['El mes pasado me llegó el sobre con mi letra torcida.','Last month the envelope arrived with my crooked handwriting.'],
+     ['Vivo en una ciudad sin mar y me levanto a las siete.','I live in a city with no sea and I get up at seven.'],
+     ['Pero al abrir la puerta, mi perro enorme me estaba esperando.','But when I opened the door, my huge dog was waiting for me.']],
+ vc:[['el instituto','the high school'],['la carta','the letter'],['la caja','the box'],['el sobre','the envelope'],['la letra','the handwriting'],['el mar','the sea']],
+ q:[{p:'¿Qué mandó escribir la profesora?', o:['Una carta al yo futuro','Un poema sobre el mar','Una redacción sobre perros'], c:0, n:'Para el yo de treinta años.'},
+    {p:'¿Qué prometió el narrador?', o:['No levantarse antes de las nueve','Estudiar cada tarde','Escribir cada mes'], c:0, n:'Ahora se levanta a las siete.'},
+    {p:'¿Qué parte de la carta se cumplió?', o:['Lo del perro enorme','Lo de vivir junto al mar','Lo de dormir hasta tarde'], c:0, n:'Le esperaba en la puerta.'}],
+ gr:[{p:'«Tendría» y «viviría» son...', o:['condicionales que expresan futuro en el pasado','presentes de indicativo','imperativos'], c:0, n:'Se usan tras un verbo en pasado.'},
+     {p:'«Me estaba esperando» es una perífrasis que indica...', o:['una acción en desarrollo en el pasado','una acción terminada','una obligación'], c:0, n:'Estar en imperfecto más gerundio.'}],
+ gp:[{b:'Yo escribí que ', a:' un perro enorme.', o:['tendría','tendré','teniendo'], c:0, t:'I wrote that I would have a huge dog.'},
+     {b:'Al abrir la puerta, mi perro me ', a:' esperando.', o:['estaba','estuvo','estando'], c:0, t:'When I opened the door, my dog was waiting for me.'}]}
+];
+
+const STORY_PLANS = [
+  [['story'],['listen',0],['q',0],['tr',1,'es2en'],['q',1],['gap',0],['mv',[0,1,2,3,4]],['q',2],['sp',0]],
+  [['story'],['gap',1],['tr',2,'en2es'],['mv',[1,2,3,4,5]],['listen',3],['q',0],['tr',4,'es2en'],['sp',2],['gr',0]],
+  [['story'],['gr',0],['tr',5,'en2es'],['gr',1],['gap',0],['listen',6],['q',1],['tr',3,'es2en'],['sp',4]],
+  [['story'],['listen',7],['tr',6,'en2es'],['gap',1],['mv',[0,2,3,4,5]],['gr',1],['q',2],['tr',7,'es2en'],['sp',6],['q',0]]
+];
+
+function storyDistractors(st, lang, answerTokens) {
+  const seen = {}, out = [];
+  answerTokens.forEach(w => seen[w.toLowerCase()] = 1);
+  const pool = [];
+  st.ln.forEach(l => tokenize(lang === 'es' ? l[0] : l[1]).forEach(w => pool.push(w)));
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  pool.forEach(w => {
+    const k = w.toLowerCase();
+    if (!seen[k] && out.length < 3) { seen[k] = 1; out.push(w); }
+  });
+  return out;
+}
+
+function buildStoryEx(st, si, op) {
+  const kind = op[0];
+  if (kind === 'story') {
+    return { type:'story', title:st.t, en:st.en, lines:st.ln };
+  }
+  if (kind === 'listen') {
+    const es = st.ln[op[1]][0];
+    const ans = tokenize(es);
+    return { type:'listen', ref:'slis:'+si+':'+op[1], sentence:es, answer:ans,
+             distractors:storyDistractors(st, 'es', ans), translation:st.ln[op[1]][1], g:st.gn };
+  }
+  if (kind === 'tr') {
+    const l = st.ln[op[1]], dir = op[2];
+    if (dir === 'en2es') {
+      const ans = tokenize(l[0]);
+      return { type:'translate', ref:'str:'+si+':'+op[1]+':en2es', dir:'en2es', source:l[1], answer:ans,
+               distractors:storyDistractors(st, 'es', ans), solution:l[0], g:st.gn };
+    }
+    const ans = tokenize(l[1]);
+    return { type:'translate', ref:'str:'+si+':'+op[1]+':es2en', dir:'es2en', source:l[0], answer:ans,
+             distractors:storyDistractors(st, 'en', ans), solution:l[1], g:st.gn };
+  }
+  if (kind === 'q') {
+    const c = st.q[op[1]];
+    return { type:'choice', ref:'sq:'+si+':'+op[1], prompt:c.p, context:c.ctx, options:c.o, correct:c.c, note:c.n, storyQ:true };
+  }
+  if (kind === 'gr') {
+    const c = st.gr[op[1]];
+    return { type:'choice', ref:'sgr:'+si+':'+op[1], prompt:c.p, context:c.ctx, options:c.o, correct:c.c, note:c.n, gramQ:true };
+  }
+  if (kind === 'gap') {
+    const g = st.gp[op[1]];
+    return { type:'fillblank', ref:'sgap:'+si+':'+op[1], before:g.b, after:g.a, options:g.o, correct:g.c, translation:g.t, g:st.gn };
+  }
+  if (kind === 'mv') {
+    return { type:'match', prompt:'Tap the matching pairs', pairs:op[1].map(i => st.vc[i]) };
+  }
+  if (kind === 'sp') {
+    const l = st.ln[op[1]];
+    return { type:'speak', ref:'ssp:'+si+':'+op[1], sentence:l[0], translation:l[1] };
+  }
+  throw new Error('bad story op ' + kind);
+}
+
+function sectionPairs(base, offset) {
+  const seen = {}, out = [];
+  for (let k = 0; k < 5; k++) {
+    const vc = STORIES[base + k].vc;
+    for (let j = 0; j < vc.length; j++) {
+      const p = vc[(j + offset) % vc.length];
+      if (!seen[p[0]] && !seen[p[1]]) { seen[p[0]] = 1; seen[p[1]] = 1; out.push(p); break; }
+    }
+  }
+  return out;
+}
+
+function storyFinal(sec) {
+  const base = sec * 5, out = [];
+  for (let k = 0; k < 5; k++) {
+    const si = base + k, st = STORIES[si];
+    out.push(buildStoryEx(st, si, ['q', k % 3]));
+    out.push(buildStoryEx(st, si, ['tr', (k * 2) % 8, k % 2 ? 'en2es' : 'es2en']));
+    out.push(buildStoryEx(st, si, ['listen', (k * 3 + 1) % 8]));
+  }
+  out.push({ type:'match', prompt:'Tap the matching pairs', pairs:sectionPairs(base, 0) });
+  out.push({ type:'match', prompt:'Tap the matching pairs', pairs:sectionPairs(base, 3) });
+  return out;
+}
+
+function composeStoryLesson(nodeIdx) {
+  const off = nodeIdx - CLASSIC_NODES;
+  const sec = Math.floor(off / 21), within = off % 21;
+  if (within === 20) return storyFinal(sec);
+  const si = sec * 5 + Math.floor(within / 4);
+  const st = STORIES[si];
+  return STORY_PLANS[within % 4].map(op => buildStoryEx(st, si, op));
+}
+
+/* unit helpers that cover both classic units and story units */
+const TOTAL_UNITS = () => CLASSIC_UNITS + STORIES.length;
+function unitMeta(i) {
+  if (i < CLASSIC_UNITS) { const u = UNITS[i]; return { title:u.title, en:u.en, vocab:u.vocab }; }
+  const s = STORIES[i - CLASSIC_UNITS]; return { title:s.t, en:s.en, vocab:s.vc };
+}
+function unitEsLines(i) {
+  if (i < CLASSIC_UNITS) return UNITS[i].sentences.map(s => [s.es, s.en]);
+  return STORIES[i - CLASSIC_UNITS].ln;
+}
+
 function composeLesson(nodeIdx) {
+  if (nodeIdx >= CLASSIC_NODES) return composeStoryLesson(nodeIdx);
   const sec = Math.floor(nodeIdx / 21), within = nodeIdx % 21;
   if (within === 20) {
     return FINAL_PLAN.map(op => {
@@ -1537,6 +2542,17 @@ function speak(text, lang, rate) {
   speechSynthesis.speak(u);
 }
 
+function speakLines(lines) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const v = pickVoice('es');
+  lines.forEach(t => {
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = 'es-ES'; if (v) u.voice = v; u.rate = 0.92;
+    speechSynthesis.speak(u);
+  });
+}
+
 /* ============================ icons / owl ============================ */
 function owlSVG(celebrate) {
   const wingL = celebrate ? 'rotate(-115 28 88)' : 'rotate(-15 28 88)';
@@ -1601,6 +2617,7 @@ function nodeButton(i, color, shadow, label, icon) {
 function renderPath() {
   $('#hdr-xp').textContent = PROG.xp;
   $('#hdr-crowns').textContent = doneCount();
+  $('#hdr-total').textContent = TOTAL_NODES;
   const inner = $('#path-inner'); inner.innerHTML = '';
 
   const mc = mistakeCount();
@@ -1640,20 +2657,22 @@ function renderPath() {
     sd.querySelector('.sd-en').textContent = sec.en;
     if (!isUnlocked(si * 21)) sd.classList.add('locked');
     inner.appendChild(sd);
+    const isStory = si * 21 >= CLASSIC_NODES;
+    const names = isStory ? STORY_NODE_NAMES : NODE_NAMES;
     for (let uu = 0; uu < 5; uu++) {
-      const u = UNITS[si * 5 + uu];
+      const u = unitMeta(si * 5 + uu);
       const pal = PALETTE[uu % 5];
       const banner = document.createElement('div'); banner.className = 'unit-banner';
       banner.style.background = pal[0];
-      banner.innerHTML = '<div class="ub-label">UNIT ' + (uu + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
+      banner.innerHTML = '<div class="ub-label">' + (isStory ? 'HISTORIA ' : 'UNIT ') + (uu + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
       banner.querySelector('.ub-title').textContent = u.title;
       banner.querySelector('.ub-en').textContent = u.en;
       inner.appendChild(banner);
       const nodes = document.createElement('div'); nodes.className = 'nodes';
       for (let l = 0; l < 4; l++) {
         const i = si * 21 + uu * 4 + l;
-        const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' : ICON_STAR;
-        nodes.appendChild(nodeButton(i, pal[0], pal[1], NODE_NAMES[l], icon));
+        const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' : (isStory && l === 0 ? '<span style="font-size:28px">📖</span>' : ICON_STAR);
+        nodes.appendChild(nodeButton(i, pal[0], pal[1], names[l], icon));
       }
       inner.appendChild(nodes);
     }
@@ -1688,7 +2707,8 @@ function renderWordbook() {
   const list = $('#wb-list'); list.innerHTML = '';
   let count = 0, lastSec = -1;
   unlockedUnits().forEach(u => {
-    const entries = UNITS[u].vocab.filter(p => !q ||
+    const meta = unitMeta(u);
+    const entries = meta.vocab.filter(p => !q ||
       stripAccents(normalize(p[0])).indexOf(q) !== -1 ||
       stripAccents(normalize(p[1])).indexOf(q) !== -1);
     if (entries.length === 0) return;
@@ -1703,7 +2723,7 @@ function renderWordbook() {
     const dot = document.createElement('span'); dot.className = 'dot';
     dot.style.background = PALETTE[u % 5][0];
     uh.appendChild(dot);
-    uh.appendChild(document.createTextNode(UNITS[u].title + ' — ' + UNITS[u].en));
+    uh.appendChild(document.createTextNode(meta.title + ' — ' + meta.en));
     list.appendChild(uh);
     entries.forEach(p => {
       count++;
@@ -1766,7 +2786,7 @@ function startMistakes() {
 
 function unlockedUnits() {
   const out = [];
-  for (let u = 0; u < UNITS.length; u++) {
+  for (let u = 0; u < TOTAL_UNITS(); u++) {
     const firstNode = Math.floor(u / 5) * 21 + (u % 5) * 4;
     if (isUnlocked(firstNode)) out.push(u);
   }
@@ -1776,10 +2796,12 @@ function unlockedUnits() {
 function startSpeaking() {
   audio();
   const pool = [];
-  unlockedUnits().forEach(u => UNITS[u].sentences.forEach((s, i) => pool.push([u, i])));
+  unlockedUnits().forEach(u => unitEsLines(u).forEach((l, i) => pool.push([u, i])));
   const pick = shuffle(pool).slice(0, 8);
   nodeIdx = -2; isPractice = false; isMistakeReview = false; isSpeakSession = true;
-  CURRENT = pick.map(p => buildExercise(p[0], ['speak', p[1]], true));
+  CURRENT = pick.map(p => p[0] < CLASSIC_UNITS
+    ? buildExercise(p[0], ['speak', p[1]], true)
+    : buildStoryEx(STORIES[p[0] - CLASSIC_UNITS], p[0] - CLASSIC_UNITS, ['sp', p[1]]));
   resetLessonState();
 }
 
@@ -2040,6 +3062,18 @@ function renderExercise(ex) {
     const tag = document.createElement('div'); tag.className = 'review-tag';
     tag.textContent = '🎙️ PRONUNCIATION STUDIO';
     area.appendChild(tag);
+  } else if (ex.type === 'story') {
+    const tag = document.createElement('div'); tag.className = 'review-tag';
+    tag.textContent = '📖 HISTORIA · listen and read';
+    area.appendChild(tag);
+  } else if (ex.storyQ) {
+    const tag = document.createElement('div'); tag.className = 'review-tag';
+    tag.textContent = '🧠 COMPRENSIÓN';
+    area.appendChild(tag);
+  } else if (ex.gramQ) {
+    const tag = document.createElement('div'); tag.className = 'new-word-tag';
+    tag.textContent = '✏️ GRAMÁTICA';
+    area.appendChild(tag);
   } else if (ex.newWord && ex.type === 'choice') {
     const tag = document.createElement('div'); tag.className = 'new-word-tag';
     tag.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#ce82ff"/><path d="M12 7v10M7 12h10" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg> NEW EXPRESSION';
@@ -2051,11 +3085,11 @@ function renderExercise(ex) {
     h.textContent = ex.prompt; area.appendChild(h);
     if (ex.context) area.appendChild(speakerRow(ex.context, 'es', { showText: true }));
     const wrap = document.createElement('div'); wrap.className = 'options';
-    ex.options.forEach((opt, i) => {
+    shuffle(ex.options.map((_, i) => i)).forEach((oi, k) => {
       const card = document.createElement('button'); card.className = 'option-card';
-      card.innerHTML = '<span class="num">' + (i + 1) + '</span><span></span>';
-      card.lastChild.textContent = opt;
-      card.onclick = () => selectOption(wrap, card, i);
+      card.innerHTML = '<span class="num">' + (k + 1) + '</span><span></span>';
+      card.lastChild.textContent = ex.options[oi];
+      card.onclick = () => selectOption(wrap, card, oi);
       wrap.appendChild(card);
     });
     area.appendChild(wrap);
@@ -2088,11 +3122,11 @@ function renderExercise(ex) {
     sent.appendChild(document.createTextNode(ex.after));
     area.appendChild(sent);
     const wrap = document.createElement('div'); wrap.className = 'options';
-    ex.options.forEach((opt, i) => {
+    shuffle(ex.options.map((_, i) => i)).forEach((oi, k) => {
       const card = document.createElement('button'); card.className = 'option-card';
-      card.innerHTML = '<span class="num">' + (i + 1) + '</span><span></span>';
-      card.lastChild.textContent = opt;
-      card.onclick = () => { selectOption(wrap, card, i); slot.textContent = opt; };
+      card.innerHTML = '<span class="num">' + (k + 1) + '</span><span></span>';
+      card.lastChild.textContent = ex.options[oi];
+      card.onclick = () => { selectOption(wrap, card, oi); slot.textContent = ex.options[oi]; };
       wrap.appendChild(card);
     });
     area.appendChild(wrap);
@@ -2113,6 +3147,29 @@ function renderExercise(ex) {
       }
     }
     area.appendChild(grid);
+
+  } else if (ex.type === 'story') {
+    h.textContent = ex.title; area.appendChild(h);
+    const sub = document.createElement('div'); sub.className = 'story-sub'; sub.textContent = ex.en;
+    area.appendChild(sub);
+    const play = document.createElement('button'); play.className = 'btn btn-blue story-play';
+    play.innerHTML = '▶ Escuchar la historia';
+    play.onclick = () => speakLines(ex.lines.map(l => l[0]));
+    area.appendChild(play);
+    const wrap = document.createElement('div'); wrap.className = 'story-lines';
+    ex.lines.forEach(l => {
+      const row = document.createElement('div'); row.className = 'story-line';
+      const b = document.createElement('button'); b.className = 'speaker-btn small'; b.innerHTML = ICON_SPEAKER;
+      b.onclick = () => speak(l[0], 'es');
+      const txt = document.createElement('div'); txt.style.minWidth = '0';
+      const es = document.createElement('div'); es.className = 'sl-es'; es.textContent = l[0];
+      const en = document.createElement('div'); en.className = 'sl-en'; en.textContent = l[1];
+      txt.appendChild(es); txt.appendChild(en);
+      row.appendChild(b); row.appendChild(txt);
+      wrap.appendChild(row);
+    });
+    area.appendChild(wrap);
+    setTimeout(() => speakLines(ex.lines.map(l => l[0])), 400);
 
   } else if (ex.type === 'speak') {
     h.textContent = 'Say this sentence'; area.appendChild(h);
@@ -2183,6 +3240,11 @@ function handleMatch(ex, lookup, btn, col, txt) {
 function renderFooterAnswer(ex) {
   const f = $('#footer'); f.className = 'footer';
   const fb = $('#feedback'); fb.innerHTML = '';
+  if (ex.type === 'story') {
+    const btn0 = $('#check-btn'); btn0.textContent = 'Continue';
+    btn0.className = 'btn btn-green'; btn0.disabled = false;
+    return;
+  }
   if (ex.type === 'speak') {
     const sk = document.createElement('button'); sk.className = 'skip-btn'; sk.textContent = "Can't speak now";
     sk.onclick = speakSkip; fb.appendChild(sk);
@@ -2205,6 +3267,14 @@ function refreshCheck() {
 }
 
 function mainButton() {
+  const cur = CURRENT[currentIdx];
+  if (phase === 'answer' && cur && cur.type === 'story') {
+    if (!attempted.has(currentIdx)) { attempted.add(currentIdx); firstTryCorrect++; }
+    solved.add(currentIdx); updateProgress();
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    nextExercise();
+    return;
+  }
   if (phase === 'answer') grade();
   else nextExercise();
 }
