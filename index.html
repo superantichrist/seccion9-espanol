@@ -190,6 +190,19 @@
   .mic-btn svg{width:38px; height:38px;}
   .mic-btn.listening{background:var(--red); box-shadow:0 5px 0 #d33131; animation:micpulse 1s ease-in-out infinite;}
   @keyframes micpulse{0%,100%{transform:scale(1);} 50%{transform:scale(1.09);}}
+  .chat-row{display:flex; gap:10px; margin-bottom:14px; align-items:flex-start;}
+  .chat-row.me{flex-direction:row-reverse;}
+  .chat-av{width:40px; height:40px; border-radius:50%; background:#f0f0f0; border:2px solid var(--gray);
+    display:flex; align-items:center; justify-content:center; font-size:20px; flex:none;}
+  .chat-row.me .chat-av{background:var(--blue-sel); border-color:var(--blue-border);}
+  .chat-bub{border:2px solid var(--gray); border-bottom-width:3px; border-radius:16px; padding:10px 14px;
+    max-width:80%; cursor:pointer; background:#fff;}
+  .chat-bub:hover{background:#f7f7f7;}
+  .chat-row.me .chat-bub{background:var(--blue-sel); border-color:var(--blue-border);}
+  .chat-who{font-size:11px; font-weight:900; letter-spacing:.8px; color:var(--gray-dark); margin-bottom:3px; text-transform:uppercase;}
+  .chat-es{font-weight:700; font-size:16.5px; line-height:1.45;}
+  .chat-en{font-size:13.5px; color:var(--text-soft); font-weight:600; margin-top:3px;}
+  .reply-bub{display:flex; gap:12px; align-items:flex-start; margin-bottom:22px;}
   .story-sub{color:var(--text-soft); font-weight:700; font-size:15px; margin:-14px 0 16px;}
   .story-play{margin-bottom:18px;}
   .story-lines{border-top:2px solid var(--gray); padding-top:14px;}
@@ -1360,7 +1373,17 @@ const SECTIONS = [
   {num:23, es:'Fiestas y líos',       en:'Story mode · parties & mix-ups',          cefr:'B1-B2'},
   {num:24, es:'Salud y despistes',    en:'Story mode · health & absent-mindedness', cefr:'B1-B2'},
   {num:25, es:'Compras y trueques',   en:'Story mode · shopping & swapping',        cefr:'B1-B2'},
-  {num:26, es:'Sueños y planes',      en:'Story mode · dreams & plans',             cefr:'B1-B2'}
+  {num:26, es:'Sueños y planes',      en:'Story mode · dreams & plans',             cefr:'B1-B2'},
+  {num:27, es:'En el restaurante',    en:'Talk mode · booking, ordering, paying',   cefr:'A2-B1'},
+  {num:28, es:'Cafés y bares',        en:'Talk mode · breakfast, tapas, coffee',    cefr:'A2-B1'},
+  {num:29, es:'De compras',           en:'Talk mode · sizes, prices, returns',      cefr:'A2-B1'},
+  {num:30, es:'Mercados y regalos',   en:'Talk mode · markets, souvenirs, haggling', cefr:'A2-B1'},
+  {num:31, es:'El tiempo',            en:'Talk mode · weather talk & plans',        cefr:'A2-B1'},
+  {num:32, es:'Paisajes y excursiones', en:'Talk mode · views, hikes, boat trips',  cefr:'B1'},
+  {num:33, es:'En el hotel',          en:'Talk mode · check-in to check-out',       cefr:'A2-B1'},
+  {num:34, es:'Transporte y llegadas', en:'Talk mode · airport, taxi, trains',      cefr:'A2-B1'},
+  {num:35, es:'Información turística', en:'Talk mode · tickets, directions, help',  cefr:'B1'},
+  {num:36, es:'Charlar con locales',  en:'Talk mode · small talk & making friends', cefr:'B1'}
 ];
 const PALETTE = [['#58cc02','#58a700'],['#1cb0f6','#1899d6'],['#ce82ff','#a560e8'],['#ff9600','#e08600'],['#ff4b96','#d63384']];
 
@@ -1473,6 +1496,12 @@ function exerciseFromRef(key) {
     if (p[0] === 'sgr') return buildStoryEx(STORIES[idx], idx, ['gr', parseInt(p[2], 10)]);
     if (p[0] === 'sgap') return buildStoryEx(STORIES[idx], idx, ['gap', parseInt(p[2], 10)]);
     if (p[0] === 'ssp') return buildStoryEx(STORIES[idx], idx, ['sp', parseInt(p[2], 10)]);
+    if (p[0] === 'dtr') return buildDialogEx(DIALOGS[idx], idx, ['tr', parseInt(p[2], 10), p[3]]);
+    if (p[0] === 'dlis') return buildDialogEx(DIALOGS[idx], idx, ['listen', parseInt(p[2], 10)]);
+    if (p[0] === 'drp') return buildDialogEx(DIALOGS[idx], idx, ['rp', parseInt(p[2], 10)]);
+    if (p[0] === 'dq') return buildDialogEx(DIALOGS[idx], idx, ['q', parseInt(p[2], 10)]);
+    if (p[0] === 'dgap') return buildDialogEx(DIALOGS[idx], idx, ['gap', parseInt(p[2], 10)]);
+    if (p[0] === 'dsp') return buildDialogEx(DIALOGS[idx], idx, ['sp', parseInt(p[2], 10)]);
     if (!UNITS[idx]) return null;
     if (p[0] === 'tr') return buildExercise(idx, ['tr', parseInt(p[2], 10), p[3]], true);
     return buildExercise(idx, [p[0], parseInt(p[2], 10)], true);
@@ -2450,18 +2479,984 @@ function composeStoryLesson(nodeIdx) {
   return STORY_PLANS[within % 4].map(op => buildStoryEx(st, si, op));
 }
 
-/* unit helpers that cover both classic units and story units */
-const TOTAL_UNITS = () => CLASSIC_UNITS + STORIES.length;
+/* =====================================================================
+   CONVERSATION MODE — travel dialogues: listen to a real conversation,
+   choose the right reply, fill what you would say, speak your line.
+   ===================================================================== */
+const DIALOG_NODE_NAMES = ['Escucha el diálogo', 'Responde tú', 'Palabras y frases', 'Repaso'];
+
+/* Each dialogue: {t,en,gn,who[2],ln[8]=[speaker,es,en],vc[6],rp[3],q[2],gp[2]} */
+const DIALOGS = [
+/* ===== SECTION 27 · En el restaurante ===== */
+{t:'Reservar mesa por teléfono', en:'Booking a table by phone', gn:'Usa «quisiera» y «podría» para pedir por teléfono con cortesía.', who:['Camarero','Tú'],
+ ln:[[0,'Restaurante El Olivo, buenas tardes. ¿En qué puedo ayudarle?','El Olivo restaurant, good afternoon. How can I help you?'],
+     [1,'Buenas tardes. Quisiera reservar una mesa para cuatro personas.','Good afternoon. I would like to book a table for four people.'],
+     [0,'Muy bien. ¿Para qué día y a qué hora la quiere?','Very good. For what day and at what time would you like it?'],
+     [1,'Para el sábado por la noche, sobre las nueve.','For Saturday evening, around nine.'],
+     [0,'A las nueve tenemos todo lleno, pero hay sitio a las diez.','At nine we are completely full, but there is room at ten.'],
+     [1,'Nos viene bien. ¿Podría ser una mesa junto a la ventana?','That works for us. Could it be a table by the window?'],
+     [0,'Claro que sí. ¿A nombre de quién hago la reserva?','Of course. Under whose name shall I make the reservation?'],
+     [1,'A nombre de Marta Ruiz. Muchas gracias por todo.','Under the name Marta Ruiz. Thank you very much for everything.']],
+ vc:[['reservar una mesa','to book a table'],['todo lleno','completely full'],['hay sitio','there is room'],['junto a la ventana','by the window'],['a nombre de','under the name of'],['venir bien','to suit someone']],
+ rp:[{p:'¿Para cuántas personas es la reserva?', pen:'For how many people is the reservation?', o:['Para cuatro personas, por favor.','El sábado por la noche.','Junto a la ventana, si puede ser.'], c:0, n:'La pregunta es por el número de personas.'},
+     {p:'¿A qué hora quiere venir?', pen:'What time would you like to come?', o:['Sobre las nueve, si es posible.','Somos cuatro adultos.','A nombre de Marta.'], c:0, n:'Responde con una hora.'},
+     {p:'¿A nombre de quién hago la reserva?', pen:'Under whose name shall I make the reservation?', o:['A nombre de Marta Ruiz.','Para el sábado, por favor.','Pago con tarjeta.'], c:0, n:'Responde con un nombre.'}],
+ q:[{p:'¿A qué hora hay sitio finalmente?', o:['A las diez','A las nueve','A las ocho'], c:0, n:'A las nueve estaba todo lleno.'},
+    {p:'¿Qué tipo de mesa pide la clienta?', o:['Una mesa junto a la ventana','Una mesa en la terraza','Una mesa al fondo del salón'], c:0, n:'Lo pide con la expresión podría ser.'}],
+ gp:[{b:'', a:' reservar una mesa para cuatro personas.', o:['Quisiera','Quiero que','Querría que'], c:0, t:'I would like to book a table for four people. (cortesía)'},
+     {b:'A las nueve ', a:' todo lleno.', o:['tenemos','somos','hay'], c:0, t:'At nine we are completely full. (tener + lleno)'}]},
+{t:'El menú del día', en:'Ordering the set lunch menu', gn:'Para pedir la comida usa «de primero», «de segundo» y «para beber».', who:['Camarera','Tú'],
+ ln:[[0,'Buenos días. ¿Tienen reserva o prefieren esta mesa de aquí?','Good morning. Do you have a reservation or do you prefer this table here?'],
+     [1,'No tenemos reserva, pero esta mesa nos parece perfecta.','We do not have a reservation, but this table seems perfect to us.'],
+     [0,'Estupendo. Hoy el menú del día cuesta quince euros.','Great. Today the set menu costs fifteen euros.'],
+     [1,'¿Qué lleva el menú? ¿Incluye bebida y postre?','What does the menu include? Does it include a drink and dessert?'],
+     [0,'Lleva primero, segundo, pan, bebida y postre o café.','It has a starter, a main, bread, a drink and dessert or coffee.'],
+     [1,'Entonces de primero una ensalada mixta y de segundo pollo asado.','Then a mixed salad to start and roast chicken as a main.'],
+     [0,'Muy bien. ¿Y para beber? Tenemos agua, vino o refrescos.','Very good. And to drink? We have water, wine or soft drinks.'],
+     [1,'Una botella de agua sin gas, bien fría, por favor.','A bottle of still water, nice and cold, please.']],
+ vc:[['el menú del día','the set lunch menu'],['de primero','for the first course'],['de segundo','for the main course'],['la ensalada mixta','mixed salad'],['el pollo asado','roast chicken'],['agua sin gas','still water']],
+ rp:[{p:'¿Qué van a tomar de primero?', pen:'What will you have as a starter?', o:['De primero una ensalada mixta, por favor.','Somos dos personas, gracias.','La cuenta, cuando pueda.'], c:0, n:'Responde con un plato de primero.'},
+     {p:'¿Y para beber?', pen:'And to drink?', o:['Una botella de agua sin gas.','De segundo, pollo asado.','No tenemos reserva.'], c:0, n:'Responde con una bebida.'},
+     {p:'¿Prefiere el postre o el café?', pen:'Do you prefer the dessert or the coffee?', o:['Un café solo, por favor.','Quince euros está muy bien.','Sí, esta mesa nos gusta.'], c:0, n:'Elige una de las dos opciones.'}],
+ q:[{p:'¿Cuánto cuesta el menú del día?', o:['Quince euros','Doce euros','Veinte euros'], c:0, n:'La camarera lo dice al principio.'},
+    {p:'¿Qué pide el cliente de segundo?', o:['Pollo asado','Ensalada mixta','Sopa de verduras'], c:0, n:'La ensalada es el primer plato.'}],
+ gp:[{b:'Hoy el menú del día ', a:' quince euros.', o:['cuesta','cuestan','costar'], c:0, t:'Today the set menu costs fifteen euros. (3ª persona singular)'},
+     {b:'De primero una ensalada mixta y ', a:' segundo pollo asado.', o:['de','en','por'], c:0, t:'A mixed salad to start and roast chicken as a main. (de primero, de segundo)'}]},
+{t:'Soy alérgico a los frutos secos', en:'Ingredients and an allergy', gn:'Usa «ser alérgico a» para la alergia y «llevar» para los ingredientes.', who:['Camarero','Tú'],
+ ln:[[0,'¿Han decidido ya? Hoy el pescado del día está buenísimo.','Have you decided yet? Today the fish of the day is delicious.'],
+     [1,'Antes de pedir, soy alérgico a los frutos secos.','Before ordering, I am allergic to nuts.'],
+     [0,'Gracias por avisar. Se lo digo ahora mismo a la cocina.','Thank you for letting us know. I will tell the kitchen right now.'],
+     [1,'¿La salsa de ese pescado lleva nueces o almendras?','Does the sauce of that fish contain walnuts or almonds?'],
+     [0,'Esa salsa lleva almendras, pero podemos prepararlo a la plancha.','That sauce contains almonds, but we can prepare it grilled.'],
+     [1,'Perfecto. ¿Y la ensalada de la casa lleva algún fruto seco?','Perfect. And does the house salad contain any nuts?'],
+     [0,'Lleva queso, tomate y aceitunas, nada más. Es totalmente segura.','It has cheese, tomato and olives, nothing else. It is completely safe.'],
+     [1,'Genial. Entonces el pescado a la plancha con esa ensalada.','Great. Then the grilled fish with that salad.']],
+ vc:[['ser alérgico a','to be allergic to'],['los frutos secos','nuts'],['la cocina','the kitchen'],['a la plancha','grilled'],['la salsa','the sauce'],['las almendras','almonds']],
+ rp:[{p:'¿Tiene usted alguna alergia?', pen:'Do you have any allergy?', o:['Sí, soy alérgico a los frutos secos.','Sí, una mesa para dos personas.','No, prefiero la terraza.'], c:0, n:'Responde hablando de tu alergia.'},
+     {p:'¿Cómo quiere el pescado?', pen:'How would you like the fish?', o:['A la plancha, por favor.','Con hielo y limón.','Después del postre, gracias.'], c:0, n:'Elige una forma de cocinarlo.'},
+     {p:'¿Quiere que le cambie la salsa?', pen:'Would you like me to change the sauce for you?', o:['Sí, por favor, una salsa sin almendras.','No, la mesa está bien así.','Sí, pago con tarjeta.'], c:0, n:'La pregunta es sobre la salsa.'}],
+ q:[{p:'¿Qué lleva la salsa del pescado?', o:['Almendras','Nueces','Cacahuetes'], c:0, n:'El camarero lo dice claramente.'},
+    {p:'¿Qué lleva la ensalada de la casa?', o:['Queso, tomate y aceitunas','Nueces y queso fresco','Lechuga con almendras'], c:0, n:'No lleva ningún fruto seco.'}],
+ gp:[{b:'Soy ', a:' a los frutos secos.', o:['alérgico','alergia','alergias'], c:0, t:'I am allergic to nuts. (ser + adjetivo)'},
+     {b:'Esa salsa ', a:' almendras.', o:['lleva','llevan','llevar'], c:0, t:'That sauce contains almonds. (llevar = to contain)'}]},
+{t:'La cuenta, por favor', en:'Asking for the bill and paying by card', gn:'«¿Nos trae la cuenta?» suena más amable que un imperativo seco.', who:['Camarero','Tú'],
+ ln:[[0,'¿Desean algo más? ¿Un café o una copita de licor?','Would you like anything else? A coffee or a small liqueur?'],
+     [1,'No, gracias. ¿Nos trae la cuenta cuando pueda?','No, thank you. Could you bring us the bill when you can?'],
+     [0,'Enseguida se la traigo. ¿Todo junto o cuentas separadas?','I will bring it right away. All together or separate bills?'],
+     [1,'Todo junto, por favor. ¿Se puede pagar con tarjeta?','All together, please. Can I pay by card?'],
+     [0,'Por supuesto. Aquí tiene la cuenta: treinta y ocho euros.','Of course. Here is the bill: thirty eight euros.'],
+     [1,'¿El servicio está incluido en ese precio?','Is service included in that price?'],
+     [0,'Sí, está todo incluido. Ahora le traigo el datáfono.','Yes, everything is included. I will bring you the card machine now.'],
+     [1,'Estupendo. Todo estaba riquísimo, muchas gracias por la atención.','Great. Everything was delicious, thank you very much for the service.']],
+ vc:[['la cuenta','the bill'],['todo junto','all together'],['cuentas separadas','separate bills'],['pagar con tarjeta','to pay by card'],['el servicio incluido','service included'],['el datáfono','the card machine']],
+ rp:[{p:'¿Van a pagar todo junto o por separado?', pen:'Are you paying all together or separately?', o:['Todo junto, por favor.','Un café solo, gracias.','A las nueve y media.'], c:0, n:'Elige una de las dos formas de pagar.'},
+     {p:'¿Quiere pagar en efectivo o con tarjeta?', pen:'Do you want to pay in cash or by card?', o:['Con tarjeta, si es posible.','De segundo, pollo asado.','Sí, éramos cuatro.'], c:0, n:'Responde eligiendo la forma de pago.'},
+     {p:'¿Desean tomar algo más?', pen:'Would you like anything else?', o:['No, gracias, solo la cuenta.','Sí, el servicio está incluido.','Son treinta y ocho euros.'], c:0, n:'Puedes decir que no y pedir la cuenta.'}],
+ q:[{p:'¿Cuánto es la cuenta?', o:['Treinta y ocho euros','Veintiocho euros','Cuarenta y ocho euros'], c:0, n:'El camarero dice el precio total.'},
+    {p:'¿Cómo paga el cliente?', o:['Con tarjeta','En efectivo','Con el móvil'], c:0, n:'Pregunta si se puede pagar así.'}],
+ gp:[{b:'¿Nos ', a:' la cuenta cuando pueda?', o:['trae','traiga','traes'], c:0, t:'Could you bring us the bill when you can? (usted → trae)'},
+     {b:'¿Se ', a:' pagar con tarjeta?', o:['puede','puedo','pueden'], c:0, t:'Can one pay by card? (se impersonal)'}]},
+{t:'La sopa está fría', en:'Solving a small problem politely', gn:'Para quejarte con educación empieza por «perdone» y usa «estar» para el estado.', who:['Camarera','Tú'],
+ ln:[[0,'¿Qué tal está todo? ¿Les gusta la comida?','How is everything? Do you like the food?'],
+     [1,'Perdone, la sopa está un poco fría.','Excuse me, the soup is a bit cold.'],
+     [0,'Cuánto lo siento. ¿Quiere que se la caliente?','I am so sorry. Would you like me to heat it up for you?'],
+     [1,'Sí, por favor. El resto está todo buenísimo.','Yes, please. Everything else is delicious.'],
+     [0,'Se la llevo a la cocina y vuelvo en un minuto.','I will take it to the kitchen and be back in a minute.'],
+     [1,'Muchas gracias, no hay ninguna prisa.','Thank you very much, there is no rush at all.'],
+     [0,'Aquí tiene su sopa bien caliente. Perdone la molestia.','Here is your soup nice and hot. Sorry for the inconvenience.'],
+     [1,'No pasa nada, ahora está perfecta. Son ustedes muy amables.','It is not a problem, now it is perfect. You are very kind.']],
+ vc:[['perdone','excuse me'],['estar frío','to be cold'],['calentar','to heat up'],['no hay prisa','there is no rush'],['la molestia','the inconvenience'],['no pasa nada','it is not a problem']],
+ rp:[{p:'¿Qué tal está todo?', pen:'How is everything?', o:['Todo muy bueno, pero la sopa está fría.','Sí, una mesa para dos, por favor.','Pago con tarjeta, gracias.'], c:0, n:'Responde hablando de la comida.'},
+     {p:'¿Quiere que le caliente la sopa?', pen:'Would you like me to heat up your soup?', o:['Sí, por favor, se lo agradezco.','No, prefiero la mesa de fuera.','Sí, el menú del día.'], c:0, n:'Responde sí o no a la oferta.'},
+     {p:'Perdone la molestia, de verdad.', pen:'Sorry for the inconvenience, really.', o:['No pasa nada, ahora está perfecta.','Somos cuatro personas.','La cuenta, por favor.'], c:0, n:'Responde quitando importancia al problema.'}],
+ q:[{p:'¿Cuál es el problema con la sopa?', o:['Está fría','Está muy salada','Lleva frutos secos'], c:0, n:'El cliente lo dice al principio.'},
+    {p:'¿Qué hace la camarera?', o:['Lleva la sopa a la cocina para calentarla','Trae un plato completamente distinto','Cobra la sopa aparte'], c:0, n:'Ofrece calentar la sopa.'}],
+ gp:[{b:'Perdone, la sopa ', a:' un poco fría.', o:['está','es','tiene'], c:0, t:'Excuse me, the soup is a bit cold. (estado → estar)'},
+     {b:'¿Quiere que se la ', a:'?', o:['caliente','calienta','calentar'], c:0, t:'Would you like me to heat it up for you? (subjuntivo tras querer que)'}]},
+/* ===== SECTION 28 · Cafés y bares ===== */
+{t:'Desayuno en la cafetería', en:'Breakfast at a café', gn:'En España se pide «un café con leche» y «una tostada con tomate».', who:['Camarera','Tú'],
+ ln:[[0,'Buenos días. ¿Qué le pongo para desayunar hoy?','Good morning. What can I get you for breakfast today?'],
+     [1,'Buenos días. Un café con leche, por favor.','Good morning. A white coffee, please.'],
+     [0,'¿Lo quiere en taza grande o en vaso pequeño?','Do you want it in a big cup or a small glass?'],
+     [1,'En taza grande y con la leche templada, si puede.','In a big cup and with lukewarm milk, if you can.'],
+     [0,'Muy bien. ¿Le pongo también algo de comer?','Very good. Shall I get you something to eat as well?'],
+     [1,'Sí, una tostada con tomate y aceite de oliva.','Yes, a slice of toast with tomato and olive oil.'],
+     [0,'Marchando. El desayuno completo sale por tres euros con cincuenta.','Coming up. The full breakfast comes to three euros fifty.'],
+     [1,'Perfecto. Luego le pago todo junto en la barra.','Perfect. I will pay you for everything at the bar later.']],
+ vc:[['el café con leche','white coffee'],['la taza','the cup'],['templado','lukewarm'],['la tostada','the slice of toast'],['el aceite de oliva','olive oil'],['la barra','the bar counter']],
+ rp:[{p:'¿Qué le pongo para desayunar?', pen:'What can I get you for breakfast?', o:['Un café con leche y una tostada.','Somos tres personas, gracias.','A las nueve y media, por favor.'], c:0, n:'Responde con lo que quieres desayunar.'},
+     {p:'¿El café en taza o en vaso?', pen:'Coffee in a cup or in a glass?', o:['En taza grande, por favor.','Con tarjeta, si es posible.','Sí, hace mucho frío hoy.'], c:0, n:'Elige entre la taza y el vaso.'},
+     {p:'¿La tostada con tomate o con mantequilla?', pen:'Toast with tomato or with butter?', o:['Con tomate y aceite, gracias.','En la terraza, por favor.','Son tres euros con cincuenta.'], c:0, n:'Elige uno de los dos acompañamientos.'}],
+ q:[{p:'¿Cómo quiere el café el cliente?', o:['En taza grande y con leche templada','En vaso pequeño y muy caliente','Solo y sin nada de azúcar'], c:0, n:'Lo dice cuando la camarera pregunta.'},
+    {p:'¿Cuánto cuesta el desayuno completo?', o:['Tres euros con cincuenta','Dos euros con cincuenta','Cuatro euros justos'], c:0, n:'La camarera dice el precio al final.'}],
+ gp:[{b:'Un café ', a:' leche, por favor.', o:['con','de','en'], c:0, t:'A white coffee, please. (café con leche)'},
+     {b:'¿Lo quiere en taza grande o ', a:' vaso pequeño?', o:['en','a','por'], c:0, t:'Do you want it in a big cup or a small glass? (en + recipiente)'}]},
+{t:'Tapas en un bar lleno', en:'Ordering tapas at a busy bar', gn:'En un bar con mucha gente, «¿me pone una caña?» es la fórmula más habitual.', who:['Camarero','Tú'],
+ ln:[[0,'¡Buenas! Perdone la espera, hoy hay muchísima gente.','Hello! Sorry for the wait, there are a lot of people today.'],
+     [1,'No se preocupe. ¿Me pone una caña, por favor?','Do not worry. Could you get me a small beer, please?'],
+     [0,'Marchando una caña. ¿Le pongo algo para picar?','One small beer coming up. Shall I get you something to nibble?'],
+     [1,'Sí, ¿qué tapas tienen hoy en la pizarra?','Yes, what tapas do you have on the board today?'],
+     [0,'Tenemos tortilla, croquetas caseras, boquerones y pimientos de padrón.','We have omelette, homemade croquettes, anchovies and padrón peppers.'],
+     [1,'Póngame una ración de croquetas y otra de tortilla.','Give me a portion of croquettes and another of omelette.'],
+     [0,'Ahora mismo. ¿Comen aquí en la barra o en mesa?','Right away. Are you eating here at the bar or at a table?'],
+     [1,'Aquí en la barra está bien, así vamos más rápido.','Here at the bar is fine, that way we are quicker.']],
+ vc:[['la caña','small draught beer'],['picar','to nibble'],['la pizarra','the blackboard'],['las croquetas caseras','homemade croquettes'],['la ración','a full portion'],['la barra','the bar counter']],
+ rp:[{p:'¿Qué le pongo de beber?', pen:'What can I get you to drink?', o:['Una caña bien fría, por favor.','Sí, comemos en la barra.','Somos dos, muchas gracias.'], c:0, n:'Responde con una bebida.'},
+     {p:'¿Quiere algo para picar?', pen:'Would you like something to nibble on?', o:['Sí, una ración de croquetas.','No, hoy hay mucha gente.','Sí, pago con tarjeta.'], c:0, n:'Responde con una tapa o una ración.'},
+     {p:'¿Comen en la barra o en una mesa?', pen:'Are you eating at the bar or at a table?', o:['En la barra, si hay sitio.','Una caña y un vino tinto.','Perdone usted la espera.'], c:0, n:'Elige entre la barra y la mesa.'}],
+ q:[{p:'¿Qué bebida pide el cliente?', o:['Una caña','Un vino tinto','Un café solo'], c:0, n:'Es una cerveza pequeña de barril.'},
+    {p:'¿Qué dos tapas pide?', o:['Croquetas y tortilla','Boquerones y tortilla','Pimientos y croquetas'], c:0, n:'Pide una ración de cada una.'}],
+ gp:[{b:'¿Me ', a:' una caña, por favor?', o:['pone','pongo','ponga'], c:0, t:'Could you get me a small beer, please? (usted → pone)'},
+     {b:'Póngame una ración de croquetas y ', a:' de tortilla.', o:['otra','otro','otras'], c:0, t:'Give me a portion of croquettes and another of omelette. (ración → femenino)'}]},
+{t:'La especialidad de la casa', en:'Asking about the house speciality', gn:'Para pedir consejo usa «¿qué me recomienda?» y «¿cuál es la especialidad?».', who:['Camarero','Tú'],
+ ln:[[0,'Buenas tardes. ¿Ya saben lo que van a tomar?','Good afternoon. Do you know what you are going to have?'],
+     [1,'Todavía no. ¿Cuál es la especialidad de la casa?','Not yet. What is the house speciality?'],
+     [0,'Nuestro plato estrella es el arroz con verduras de la huerta.','Our signature dish is rice with vegetables from the garden.'],
+     [1,'Suena muy bien. ¿Es un plato muy picante?','That sounds very good. Is it a very spicy dish?'],
+     [0,'No pica nada, pero lleva mucho ajo y pimentón dulce.','It is not spicy at all, but it has a lot of garlic and sweet paprika.'],
+     [1,'¿Y qué me recomienda para acompañarlo, vino o cerveza?','And what do you recommend to go with it, wine or beer?'],
+     [0,'Con ese arroz le recomiendo un vino blanco de la zona.','With that rice I recommend a local white wine.'],
+     [1,'Estupendo. Pues una copa de vino blanco y el arroz.','Great. Then a glass of white wine and the rice.']],
+ vc:[['la especialidad de la casa','the house speciality'],['el plato estrella','the signature dish'],['la huerta','the vegetable garden'],['picante','spicy'],['el pimentón dulce','sweet paprika'],['recomendar','to recommend']],
+ rp:[{p:'¿Qué desea tomar hoy?', pen:'What would you like to have today?', o:['¿Cuál es la especialidad de la casa?','Sí, la cuenta, por favor.','En la barra estamos muy bien.'], c:0, n:'Puedes contestar con otra pregunta útil.'},
+     {p:'¿Le gusta la comida picante?', pen:'Do you like spicy food?', o:['Un poco, pero no demasiado.','Sí, una mesa para cuatro.','Con tarjeta, muchas gracias.'], c:0, n:'Responde hablando de tus gustos.'},
+     {p:'¿Vino o cerveza con el arroz?', pen:'Wine or beer with the rice?', o:['Una copa de vino blanco, por favor.','El arroz de la huerta, gracias.','Sí, somos dos personas.'], c:0, n:'Elige una de las dos bebidas.'}],
+ q:[{p:'¿Cuál es el plato estrella del restaurante?', o:['El arroz con verduras de la huerta','La tortilla de patatas','El pescado a la plancha'], c:0, n:'El camarero lo dice al principio.'},
+    {p:'¿Qué bebida recomienda el camarero?', o:['Un vino blanco de la zona','Una cerveza muy fría','Un vino tinto de la casa'], c:0, n:'La recomienda para acompañar el arroz.'}],
+ gp:[{b:'¿Cuál ', a:' la especialidad de la casa?', o:['es','está','hay'], c:0, t:'What is the house speciality? (característica → ser)'},
+     {b:'¿Qué me ', a:' para acompañarlo?', o:['recomienda','recomiendo','recomendar'], c:0, t:'What do you recommend to go with it? (usted → recomienda)'}]},
+{t:'Agua fría y los servicios', en:'Buying water and asking for the toilet', gn:'En España «los servicios» y «el baño» valen para preguntar por el aseo.', who:['Camarera','Tú'],
+ ln:[[0,'Hola, buenas tardes. ¿Qué le pongo hoy?','Hello, good afternoon. What can I get you today?'],
+     [1,'Una botella de agua fría, la grande, por favor.','A bottle of cold water, the big one, please.'],
+     [0,'¿La quiere con gas o sin gas?','Do you want it sparkling or still?'],
+     [1,'Sin gas, y muy fría si es posible.','Still, and very cold if possible.'],
+     [0,'Aquí tiene, recién sacada de la nevera. Son dos euros.','Here you are, just taken out of the fridge. That is two euros.'],
+     [1,'Gracias. ¿Puedo usar los servicios, por favor?','Thank you. May I use the toilets, please?'],
+     [0,'Claro, están al fondo a la derecha, bajando las escaleras.','Of course, they are at the back on the right, down the stairs.'],
+     [1,'Perfecto. Le pago ahora y luego bajo un momento.','Perfect. I will pay you now and go down in a moment.']],
+ vc:[['la botella de agua','the bottle of water'],['con gas','sparkling'],['sin gas','still'],['la nevera','the fridge'],['los servicios','the toilets'],['al fondo a la derecha','at the back on the right']],
+ rp:[{p:'¿La quiere con gas o sin gas?', pen:'Do you want it sparkling or still?', o:['Sin gas, por favor.','Los servicios están abajo.','Sí, con tarjeta, gracias.'], c:0, n:'Elige entre con gas y sin gas.'},
+     {p:'¿Necesita alguna cosa más?', pen:'Do you need anything else?', o:['Sí, ¿dónde están los servicios?','Son dos euros con veinte.','La nevera está al fondo.'], c:0, n:'Puedes aprovechar para preguntar algo.'},
+     {p:'Son dos euros, por favor.', pen:'That is two euros, please.', o:['Aquí tiene, muchas gracias.','Sin gas y bien fría.','Están al fondo a la derecha.'], c:0, n:'Responde entregando el dinero.'}],
+ q:[{p:'¿Cómo quiere el agua el cliente?', o:['Sin gas y muy fría','Con gas y del tiempo','Con gas y con mucho hielo'], c:0, n:'Lo dice al responder a la camarera.'},
+    {p:'¿Dónde están los servicios?', o:['Al fondo a la derecha, bajando las escaleras','Justo al lado de la barra','En la terraza de fuera'], c:0, n:'Hay que bajar unas escaleras.'}],
+ gp:[{b:'¿', a:' usar los servicios, por favor?', o:['Puedo','Puedes','Puede'], c:0, t:'May I use the toilets, please? (yo → puedo)'},
+     {b:'Están al fondo ', a:' la derecha.', o:['a','en','de'], c:0, t:'They are at the back on the right. (a la derecha)'}]},
+{t:'Postre y café', en:'Dessert and coffee after lunch', gn:'«Un cortado» y «un café solo» son formas típicas de pedir café en España.', who:['Camarero','Tú'],
+ ln:[[0,'¿Han terminado? ¿Les apetece un postre casero?','Have you finished? Do you fancy a homemade dessert?'],
+     [1,'Sí, ¿qué postres tienen hoy en la carta?','Yes, what desserts do you have on the menu today?'],
+     [0,'Hay flan de la casa, tarta de queso y fruta.','There is house caramel flan, cheesecake and fruit.'],
+     [1,'La tarta de queso, por favor. ¿Es muy grande?','The cheesecake, please. Is it very big?'],
+     [0,'Es una ración normal, con un poco de mermelada encima.','It is a normal portion, with a bit of jam on top.'],
+     [1,'Estupendo. Y después un cortado bien caliente, por favor.','Great. And afterwards a very hot cortado, please.'],
+     [0,'¿Con leche normal o prefiere leche sin lactosa?','With normal milk or do you prefer lactose free milk?'],
+     [1,'Con leche normal está bien. Muchas gracias por todo.','With normal milk is fine. Thank you very much for everything.']],
+ vc:[['el postre casero','homemade dessert'],['el flan de la casa','the house caramel flan'],['la tarta de queso','cheesecake'],['la mermelada','the jam'],['el cortado','espresso with a little milk'],['la leche sin lactosa','lactose free milk']],
+ rp:[{p:'¿Les apetece un postre?', pen:'Do you fancy a dessert?', o:['Sí, una tarta de queso, por favor.','Sí, la cuenta cuando pueda.','No, la mesa está bien así.'], c:0, n:'Responde eligiendo un postre.'},
+     {p:'¿Y para tomar después del postre?', pen:'And to drink after the dessert?', o:['Un cortado bien caliente, gracias.','Con mermelada por encima.','Somos cuatro personas.'], c:0, n:'Responde con un café o una bebida.'},
+     {p:'¿Con leche normal o sin lactosa?', pen:'With normal milk or lactose free?', o:['Con leche normal, por favor.','Un flan de la casa.','Está todo muy rico, gracias.'], c:0, n:'Elige un tipo de leche.'}],
+ q:[{p:'¿Qué postre elige el cliente?', o:['La tarta de queso','El flan de la casa','La fruta del tiempo'], c:0, n:'Pregunta si es muy grande.'},
+    {p:'¿Qué café pide después del postre?', o:['Un cortado','Un café con leche','Un café solo'], c:0, n:'Lo pide bien caliente.'}],
+ gp:[{b:'¿Les ', a:' un postre casero?', o:['apetece','apetecen','apetecer'], c:0, t:'Do you fancy a homemade dessert? (un postre → singular)'},
+     {b:'¿', a:' leche normal o prefiere leche sin lactosa?', o:['Con','En','De'], c:0, t:'With normal milk or do you prefer lactose free milk? (con + ingrediente)'}]},
+/* ===== SECTION 29 · De compras ===== */
+{t:'Otra talla, por favor', en:'Asking for another size', gn:'Fíjate en «me quedan estrechos»: el verbo quedar concuerda con la ropa.', who:['Dependiente','Tú'],
+ ln:[[0,'Buenas tardes, ¿busca usted algo en concreto?','Good afternoon, are you looking for anything in particular?'],
+     [1,'Sí, quiero estos pantalones vaqueros, pero en otra talla.','Yes, I want these jeans, but in another size.'],
+     [0,'¿Qué talla necesita, la treinta y ocho o la cuarenta?','What size do you need, the thirty eight or the forty?'],
+     [1,'La cuarenta, creo, porque estos me quedan muy estrechos.','The forty, I think, because these are very tight on me.'],
+     [0,'Voy al almacén a mirar si nos queda alguna.','I will go to the stockroom to see if we have any left.'],
+     [1,'Muchas gracias, es usted muy amable, espero aquí.','Thank you very much, you are very kind, I will wait here.'],
+     [0,'Aquí tiene, esta es la última talla cuarenta azul.','Here you are, this is the last blue size forty.'],
+     [1,'Genial, me los llevo si me quedan bien.','Great, I will take them if they fit me well.']],
+ vc:[['los pantalones vaqueros','the jeans'],['la talla','the size'],['estrecho','tight'],['el almacén','the stockroom'],['quedar bien','to fit well'],['llevarse algo','to take something away']],
+ rp:[{p:'¿Qué talla necesita usted?', pen:'What size do you need?', o:['Necesito la talla cuarenta, por favor.','El museo cierra a las seis.','Mi hermano vive en Sevilla.'], c:0, n:'Di un número de talla.'},
+     {p:'¿Cómo le quedan esos pantalones?', pen:'How do those trousers fit you?', o:['Me quedan un poco estrechos.','Hoy hace mucho viento fuera.','El tren sale por la mañana.'], c:0, n:'Habla de cómo te queda la ropa.'},
+     {p:'¿Quiere que le busque otra talla?', pen:'Would you like me to look for another size?', o:['Sí, por favor, una talla más grande.','No, prefiero la sopa caliente.','Vivo en un piso pequeño.'], c:0, n:'Contesta sobre la talla.'}],
+ q:[{p:'¿Qué problema tienen los pantalones?', o:['Le quedan estrechos','Son de otro color','Están rotos'], c:0, n:'Lo dice en la cuarta frase.'},
+    {p:'¿Adónde va el dependiente a buscar la talla?', o:['Al almacén','A la caja','Al probador'], c:0, n:'Es un sitio de la tienda.'}],
+ gp:[{b:'Estos pantalones me ', a:' muy estrechos.', o:['quedan','están','tienen'], c:0, t:'These trousers are very tight on me. (quedar + adjetivo)'},
+     {b:'Voy ', a:' almacén a mirar.', o:['al','a la','en el'], c:0, t:'I am going to the stockroom to look. (a + el = al)'}]},
+{t:'En el probador', en:'Trying on a jacket', gn:'Con la ropa usamos quedar y sentar: «me queda bien», «le sienta genial».', who:['Dependienta','Tú'],
+ ln:[[0,'¿Le ha gustado la chaqueta que se está probando?','Do you like the jacket you are trying on?'],
+     [1,'Sí, pero me miro en el espejo y dudo.','Yes, but I look at myself in the mirror and hesitate.'],
+     [0,'Yo la veo muy bien, le sienta genial ese color.','I think it looks great, that colour really suits you.'],
+     [1,'¿No me hace la espalda demasiado ancha?','Does it not make my back look too wide?'],
+     [0,'Para nada, la chaqueta le queda perfecta de hombros.','Not at all, the jacket fits you perfectly on the shoulders.'],
+     [1,'Las mangas me parecen un poco largas, ¿verdad?','The sleeves seem a bit long to me, right?'],
+     [0,'Un poco, pero podemos arreglarlas aquí mismo sin coste.','A little, but we can alter them right here at no cost.'],
+     [1,'Entonces me la quedo, gracias por su paciencia.','Then I will keep it, thank you for your patience.']],
+ vc:[['el espejo','the mirror'],['sentar bien','to suit someone'],['la manga','the sleeve'],['los hombros','the shoulders'],['arreglar','to alter'],['quedarse algo','to keep something']],
+ rp:[{p:'¿Cómo le sienta la chaqueta?', pen:'How does the jacket suit you?', o:['Me sienta bien, pero dudo un poco.','La estación está muy lejos de aquí.','Prefiero dormir con la ventana abierta.'], c:0, n:'Habla de la ropa.'},
+     {p:'¿Quiere mirarse en el espejo?', pen:'Would you like to look at yourself in the mirror?', o:['Sí, quiero verme bien la espalda.','No, el autobús llega muy tarde.','Mi maleta pesa demasiado.'], c:0, n:'Responde sobre el espejo.'},
+     {p:'¿Le arreglamos las mangas?', pen:'Shall we alter the sleeves for you?', o:['Sí, por favor, son un poco largas.','No, la playa está cerrada hoy.','Trabajo en una oficina grande.'], c:0, n:'Habla de las mangas.'}],
+ q:[{p:'¿Qué parte de la chaqueta es demasiado larga?', o:['Las mangas','Los hombros','El cuello'], c:0, n:'Lo dice el cliente.'},
+    {p:'¿Qué ofrece la dependienta?', o:['Arreglar las mangas sin coste','Cambiar el color','Devolver el dinero'], c:0, n:'Lo dice casi al final.'}],
+ gp:[{b:'Me miro en el ', a:' y dudo.', o:['espejo','probador','escaparate'], c:0, t:'I look at myself in the mirror and hesitate. (mirror)'},
+     {b:'La chaqueta le ', a:' perfecta de hombros.', o:['queda','tiene','pone'], c:0, t:'The jacket fits you perfectly on the shoulders. (quedar)'}]},
+{t:'¿Está de rebajas?', en:'Asking the price and the discount', gn:'Recuerda «cuánto cuesta» para el precio y «estar de rebajas» para los descuentos.', who:['Vendedor','Tú'],
+ ln:[[0,'Hola, veo que le interesa ese vestido de flores.','Hello, I see you are interested in that flowery dress.'],
+     [1,'Sí, ¿cuánto cuesta? No veo la etiqueta del precio.','Yes, how much does it cost? I cannot see the price tag.'],
+     [0,'Cuesta cuarenta y cinco euros, aunque hoy hay rebajas.','It costs forty five euros, although there are sales today.'],
+     [1,'¿De cuánto es el descuento en esta sección?','How big is the discount in this section?'],
+     [0,'Un treinta por ciento en toda la ropa de verano.','Thirty percent off all the summer clothes.'],
+     [1,'Entonces sale por unos treinta euros, ¿es correcto?','So it comes to about thirty euros, is that right?'],
+     [0,'Exacto, treinta euros con cincuenta céntimos en total.','Exactly, thirty euros fifty cents in total.'],
+     [1,'Me parece un buen precio, me lo llevo.','That seems a good price, I will take it.']],
+ vc:[['la etiqueta','the price tag'],['las rebajas','the sales'],['el descuento','the discount'],['cuánto cuesta','how much does it cost'],['por ciento','percent'],['los céntimos','the cents']],
+ rp:[{p:'Hoy tenemos un treinta por ciento de descuento.', pen:'Today we have thirty percent off.', o:['Qué bien, entonces me lo llevo.','La biblioteca abre los domingos.','Mi vuelo sale desde Barcelona.'], c:0, n:'Reacciona al descuento.'},
+     {p:'¿Busca algo de la sección de verano?', pen:'Are you looking for something from the summer section?', o:['Sí, quiero un vestido ligero.','No, el café está muy caliente.','Mi hermana llega el jueves.'], c:0, n:'Contesta sobre lo que buscas.'},
+     {p:'¿Le parece bien el precio final?', pen:'Does the final price seem all right to you?', o:['Sí, me parece un precio justo.','No, todavía no he desayunado.','El hotel tiene una piscina grande.'], c:0, n:'Habla del precio.'}],
+ q:[{p:'¿Cuánto costaba el vestido antes del descuento?', o:['Cuarenta y cinco euros','Treinta euros','Cincuenta euros'], c:0, n:'Lo dice el vendedor al principio.'},
+    {p:'¿A qué ropa se aplica la rebaja?', o:['A la ropa de verano','A los zapatos','A todo el escaparate'], c:0, n:'Es la ropa de una estación.'}],
+ gp:[{b:'¿', a:' cuesta este vestido?', o:['Cuánto','Cómo','Cuándo'], c:0, t:'How much does this dress cost? (asking a price)'},
+     {b:'Hay un treinta por ciento ', a:' descuento.', o:['de','en','con'], c:0, t:'There is thirty percent off. (por ciento de descuento)'}]},
+{t:'En la caja', en:'Paying and asking for the receipt', gn:'Con usted el imperativo cambia: «introduzca», «marque», «guárdelo».', who:['Cajera','Tú'],
+ ln:[[0,'Buenos días, ¿va a pagar con tarjeta o en efectivo?','Good morning, are you going to pay by card or in cash?'],
+     [1,'Con tarjeta, si no le importa, no llevo suelto.','By card, if you do not mind, I have no change on me.'],
+     [0,'Sin problema, introduzca la tarjeta y marque su clave.','No problem, insert the card and enter your PIN.'],
+     [1,'Ya está. ¿Me puede dar el ticket, por favor?','Done. Can you give me the receipt, please?'],
+     [0,'Claro, aquí lo tiene, guárdelo por si quiere cambiar algo.','Of course, here it is, keep it in case you want to exchange anything.'],
+     [1,'Perfecto, ¿cuántos días tengo para hacer un cambio?','Perfect, how many days do I have to make an exchange?'],
+     [0,'Tiene treinta días con el ticket y la etiqueta puesta.','You have thirty days with the receipt and the tag still on.'],
+     [1,'Estupendo, muchas gracias por su ayuda, hasta luego.','Great, thank you very much for your help, see you later.']],
+ vc:[['pagar con tarjeta','to pay by card'],['en efectivo','in cash'],['el suelto','loose change'],['la clave','the PIN'],['el ticket','the receipt'],['hacer un cambio','to make an exchange']],
+ rp:[{p:'¿Cómo va a pagar, con tarjeta o en efectivo?', pen:'How are you going to pay, by card or in cash?', o:['Con tarjeta, por favor.','Mi hermana llega mañana por la tarde.','La tienda está en la segunda planta.'], c:0, n:'Elige una forma de pago.'},
+     {p:'¿Quiere el ticket de la compra?', pen:'Would you like the receipt for your purchase?', o:['Sí, démelo, por favor.','No, hoy hace mucho calor.','Vivo en un pueblo tranquilo.'], c:0, n:'Contesta sobre el ticket.'},
+     {p:'Introduzca la tarjeta y marque su clave.', pen:'Insert the card and enter your PIN.', o:['Un momento, ahora mismo la marco.','El museo abre a las diez.','Mi maleta es de color rojo.'], c:0, n:'Responde a una instrucción.'}],
+ q:[{p:'¿Cómo paga el cliente?', o:['Con tarjeta','En efectivo','Con un cheque'], c:0, n:'Lo dice en la segunda frase.'},
+    {p:'¿Cuánto tiempo hay para cambiar la compra?', o:['Treinta días','Siete días','Un año'], c:0, n:'Hace falta el ticket.'}],
+ gp:[{b:'¿Va a pagar con tarjeta o ', a:' efectivo?', o:['en','de','por'], c:0, t:'Are you going to pay by card or in cash? (en efectivo)'},
+     {b:'¿Me puede ', a:' el ticket, por favor?', o:['dar','doy','dando'], c:0, t:'Can you give me the receipt, please? (poder + infinitivo)'}]},
+{t:'Quiero devolverlo', en:'Returning a jumper that does not fit', gn:'Los pronombres van pegados al infinitivo: «cambiarlo», «devolverlo», «probármelo».', who:['Dependienta','Tú'],
+ ln:[[0,'Buenas tardes, ¿en qué puedo ayudarle hoy?','Good afternoon, how can I help you today?'],
+     [1,'Compré este jersey ayer, pero me queda muy grande.','I bought this jumper yesterday, but it is too big on me.'],
+     [0,'¿Trae usted el ticket y la etiqueta original?','Have you brought the receipt and the original tag?'],
+     [1,'Sí, aquí están, no me lo he puesto nunca.','Yes, here they are, I have never worn it.'],
+     [0,'¿Prefiere cambiarlo por otra talla o devolver el dinero?','Would you rather exchange it for another size or get a refund?'],
+     [1,'Prefiero cambiarlo por una talla más pequeña, si puede ser.','I would rather exchange it for a smaller size, if possible.'],
+     [0,'Tenemos la mediana en gris y en azul marino.','We have the medium in grey and in navy blue.'],
+     [1,'Me quedo con el gris, gracias por la ayuda.','I will take the grey one, thanks for your help.']],
+ vc:[['devolver','to return'],['el jersey','the jumper'],['quedar grande','to be too big on someone'],['la etiqueta','the tag'],['cambiar por','to exchange for'],['azul marino','navy blue']],
+ rp:[{p:'¿Trae usted el ticket de compra?', pen:'Have you brought the purchase receipt?', o:['Sí, lo tengo aquí en la cartera.','No, el cine cierra los lunes.','Mi vecino toca la guitarra.'], c:0, n:'Contesta sobre el ticket.'},
+     {p:'¿Quiere cambiarlo o prefiere el dinero?', pen:'Do you want to exchange it or would you rather have the money?', o:['Prefiero cambiarlo por otra talla.','Prefiero el asiento de la ventana.','Prefiero salir muy temprano.'], c:0, n:'Elige entre cambio y devolución.'},
+     {p:'¿Por qué quiere devolver el jersey?', pen:'Why do you want to return the jumper?', o:['Porque me queda demasiado grande.','Porque mañana visito a mi tía.','Porque el hotel está completo.'], c:0, n:'Explica el motivo.'}],
+ q:[{p:'¿Qué problema tiene el jersey?', o:['Le queda grande','Tiene un agujero','Es de otro color'], c:0, n:'Lo dice al principio.'},
+    {p:'¿Qué decide hacer el cliente?', o:['Cambiarlo por una talla más pequeña','Pedir el dinero','Quedarse con el jersey grande'], c:0, n:'Elige entre dos opciones.'}],
+ gp:[{b:'Este jersey me queda muy ', a:'.', o:['grande','grandes','grandemente'], c:0, t:'This jumper is too big on me. (adjective agreement)'},
+     {b:'Prefiero ', a:' por una talla más pequeña.', o:['cambiarlo','cambiándolo','cambiado'], c:0, t:'I would rather exchange it for a smaller size. (preferir + infinitivo)'}]},
+/* ===== SECTION 30 · Mercados y regalos ===== */
+{t:'A cuánto está el kilo', en:'Buying fruit at the market', gn:'En el mercado se dice «¿a cuánto está el kilo?» y «póngame medio kilo».', who:['Frutero','Tú'],
+ ln:[[0,'Buenos días, ¿qué le pongo hoy?','Good morning, what can I get you today?'],
+     [1,'Buenos días, ¿a cuánto está el kilo de naranjas?','Good morning, how much is a kilo of oranges?'],
+     [0,'Están a dos euros el kilo, dulces y de Valencia.','They are two euros a kilo, sweet and from Valencia.'],
+     [1,'Póngame dos kilos, por favor, y medio kilo de cerezas.','Give me two kilos, please, and half a kilo of cherries.'],
+     [0,'Las cerezas están muy buenas, pero son un poco caras.','The cherries are very good, but they are a bit expensive.'],
+     [1,'No importa, es mi fruta favorita del verano.','It does not matter, it is my favourite summer fruit.'],
+     [0,'Son siete euros con veinte. ¿Le pongo algo más?','That is seven euros twenty. Anything else for you?'],
+     [1,'Nada más, gracias. Todo tiene una pinta estupenda.','Nothing else, thank you. Everything looks great.']],
+ vc:[['a cuánto está','how much is it'],['el kilo','the kilo'],['las naranjas','the oranges'],['las cerezas','the cherries'],['póngame','give me'],['tener buena pinta','to look delicious']],
+ rp:[{p:'¿Qué le pongo hoy?', pen:'What can I get you today?', o:['Un kilo de naranjas, por favor.','El museo está al lado del río.','Mañana viajo en autobús.'], c:0, n:'Pide una cantidad de fruta.'},
+     {p:'Las cerezas están a seis euros el kilo.', pen:'The cherries are six euros a kilo.', o:['Pues póngame medio kilo, por favor.','Pues mi hermano llega el martes.','Pues la puerta está abierta.'], c:0, n:'Reacciona al precio.'},
+     {p:'¿Le pongo algo más?', pen:'Anything else for you?', o:['No, nada más, muchas gracias.','No, la ducha no funciona.','No, mi perro se llama Luna.'], c:0, n:'Termina la compra.'}],
+ q:[{p:'¿A cuánto está el kilo de naranjas?', o:['A dos euros','A siete euros','A veinte céntimos'], c:0, n:'Lo dice el frutero.'},
+    {p:'¿De dónde son las naranjas?', o:['De Valencia','De Sevilla','De Galicia'], c:0, n:'Es una ciudad del este.'}],
+ gp:[{b:'¿A cuánto ', a:' el kilo de naranjas?', o:['está','es','tiene'], c:0, t:'How much is a kilo of oranges? (changing price with estar)'},
+     {b:'Póngame dos ', a:' de naranjas.', o:['kilos','kilo','kilas'], c:0, t:'Give me two kilos of oranges. (plural)'}]},
+{t:'Recuerdos para la familia', en:'Choosing souvenirs', gn:'Usa «para» cuando hablas del destinatario de un regalo.', who:['Vendedora','Tú'],
+ ln:[[0,'¿Busca usted un recuerdo bonito de la ciudad?','Are you looking for a nice souvenir of the city?'],
+     [1,'Sí, necesito regalos para mis padres y mi hermana.','Yes, I need presents for my parents and my sister.'],
+     [0,'Este abanico pintado a mano gusta mucho.','This hand painted fan is very popular.'],
+     [1,'Es precioso, aunque mi madre prefiere cosas más pequeñas.','It is lovely, although my mother prefers smaller things.'],
+     [0,'Entonces mire estos azulejos y estas cucharas de olivo.','Then look at these tiles and these olive wood spoons.'],
+     [1,'Los azulejos me encantan, ¿los tiene en azul?','I love the tiles, do you have them in blue?'],
+     [0,'Sí, tengo azules, verdes y también algunos amarillos.','Yes, I have blue ones, green ones and some yellow ones too.'],
+     [1,'Me llevo tres azules y dos cucharas de olivo.','I will take three blue ones and two olive wood spoons.']],
+ vc:[['el recuerdo','the souvenir'],['el regalo','the present'],['el abanico','the fan'],['pintado a mano','hand painted'],['el azulejo','the tile'],['la cuchara de olivo','the olive wood spoon']],
+ rp:[{p:'¿Para quién es el regalo?', pen:'Who is the present for?', o:['Es para mi madre, que cumple años.','Es tarde y la tienda ya cierra.','Está lloviendo bastante en la calle.'], c:0, n:'Di la persona.'},
+     {p:'¿Le gustan estos azulejos pintados a mano?', pen:'Do you like these hand painted tiles?', o:['Sí, son preciosos, me llevo tres.','Sí, el aeropuerto queda muy lejos.','No, nunca desayuno tan temprano.'], c:0, n:'Habla de los azulejos.'},
+     {p:'¿Quiere ver algo más de cerámica?', pen:'Would you like to see anything else in ceramics?', o:['Sí, enséñeme los platos pequeños.','Sí, el mapa está en la mochila.','No, mi hotel tiene garaje.'], c:0, n:'Pide ver otra cosa.'}],
+ q:[{p:'¿Para quién compra regalos el viajero?', o:['Para sus padres y su hermana','Para sus amigos del trabajo','Para sus vecinos'], c:0, n:'Lo dice en la segunda frase.'},
+    {p:'¿Qué compra al final?', o:['Tres azulejos y dos cucharas','Un abanico pintado','Dos platos grandes'], c:0, n:'Está en la última frase.'}],
+ gp:[{b:'Necesito regalos ', a:' mis padres.', o:['para','por','de'], c:0, t:'I need presents for my parents. (destinatario con para)'},
+     {b:'Este abanico pintado a ', a:' gusta mucho.', o:['mano','manos','las manos'], c:0, t:'This hand painted fan is very popular. (fixed expression)'}]},
+{t:'¿Es artesanal?', en:'Asking if it is handmade', gn:'El verbo venir con «de» indica el origen de las cosas.', who:['Artesano','Tú'],
+ ln:[[0,'Puede tocarlo, todo lo de esta mesa es artesanal.','You can touch it, everything on this table is handmade.'],
+     [1,'¿De verdad? ¿Quién hace estos cuencos de barro?','Really? Who makes these clay bowls?'],
+     [0,'Los hago yo mismo en un taller cerca del pueblo.','I make them myself in a workshop near the village.'],
+     [1,'¿Y el barro también viene de esta zona?','And does the clay also come from this area?'],
+     [0,'Sí, viene de una cantera que está a pocos kilómetros.','Yes, it comes from a quarry a few kilometres away.'],
+     [1,'Me encanta saber el origen de lo que compro.','I love knowing the origin of what I buy.'],
+     [0,'Cada pieza es única, por eso ninguna es igual.','Each piece is unique, that is why no two are alike.'],
+     [1,'Entonces me llevo este cuenco azul tan bonito.','Then I will take this lovely blue bowl.']],
+ vc:[['artesanal','handmade'],['el cuenco','the bowl'],['el barro','the clay'],['el taller','the workshop'],['la pieza','the piece'],['único','unique']],
+ rp:[{p:'¿Le gustaría saber cómo hacemos estas piezas?', pen:'Would you like to know how we make these pieces?', o:['Sí, me interesa mucho el proceso.','Sí, la habitación tiene vistas al mar.','No, el tren pasa cada hora.'], c:0, n:'Muestra interés.'},
+     {p:'Todo lo de esta mesa es artesanal.', pen:'Everything on this table is handmade.', o:['¿Y de dónde viene el material?','¿Y a qué hora abre el banco?','¿Y dónde puedo aparcar el coche?'], c:0, n:'Pregunta por el origen.'},
+     {p:'¿Quiere llevarse alguna pieza?', pen:'Would you like to take a piece?', o:['Sí, me llevo este cuenco azul.','Sí, mi vuelo sale muy pronto.','No, ya he comido bastante.'], c:0, n:'Decide tu compra.'}],
+ q:[{p:'¿Quién hace los cuencos de barro?', o:['El propio vendedor','Una fábrica grande','Los vecinos del pueblo'], c:0, n:'Los hace en su taller.'},
+    {p:'¿De dónde viene el barro?', o:['De una cantera cercana','De otro país','Del río del pueblo'], c:0, n:'Está a pocos kilómetros.'}],
+ gp:[{b:'Los ', a:' yo mismo en mi taller.', o:['hago','hace','hacen'], c:0, t:'I make them myself in my workshop. (yo hago)'},
+     {b:'El barro ', a:' de una cantera cercana.', o:['viene','vienen','venir'], c:0, t:'The clay comes from a nearby quarry. (tercera persona singular)'}]},
+{t:'En el rastro', en:'Polite haggling at the flea market', gn:'Para regatear con educación usa el condicional: «¿me la podría dejar más barata?»', who:['Vendedor','Tú'],
+ ln:[[0,'Esa lámpara antigua cuesta treinta euros, es una ganga.','That antique lamp costs thirty euros, it is a bargain.'],
+     [1,'Me gusta mucho, pero treinta euros es un poco caro.','I like it a lot, but thirty euros is a bit expensive.'],
+     [0,'Tiene más de cincuenta años y funciona perfectamente.','It is over fifty years old and it works perfectly.'],
+     [1,'¿Me la podría dejar en veinte euros, por favor?','Could you let me have it for twenty euros, please?'],
+     [0,'Veinte es muy poco, pero se la dejo en veinticinco.','Twenty is too little, but I will let you have it for twenty five.'],
+     [1,'Trato hecho, si me la envuelve bien para el viaje.','It is a deal, if you wrap it well for the trip.'],
+     [0,'Claro, la envuelvo con papel de periódico y cartón.','Of course, I will wrap it in newspaper and cardboard.'],
+     [1,'Muchas gracias, ha sido usted muy amable conmigo.','Thank you very much, you have been very kind to me.']],
+ vc:[['el rastro','the flea market'],['la ganga','the bargain'],['caro','expensive'],['dejar en','to let someone have it for'],['trato hecho','it is a deal'],['envolver','to wrap']],
+ rp:[{p:'Esta lámpara cuesta treinta euros.', pen:'This lamp costs thirty euros.', o:['¿Me la puede dejar en veinte?','¿Me puede indicar el baño?','¿Me presta un bolígrafo azul?'], c:0, n:'Regatea con educación.'},
+     {p:'Se la dejo en veinticinco euros.', pen:'I will let you have it for twenty five euros.', o:['Trato hecho, muchas gracias.','Mi hermana estudia en Granada.','La playa está bastante lejos.'], c:0, n:'Acepta el precio.'},
+     {p:'¿Quiere que se la envuelva?', pen:'Would you like me to wrap it for you?', o:['Sí, por favor, viajo en avión.','Sí, el desayuno está incluido.','No, mi bicicleta está rota.'], c:0, n:'Habla del embalaje.'}],
+ q:[{p:'¿Cuánto pide el vendedor al principio?', o:['Treinta euros','Veinte euros','Veinticinco euros'], c:0, n:'Es el primer precio.'},
+    {p:'¿En cuánto cierran el trato?', o:['En veinticinco euros','En treinta euros','En veinte euros'], c:0, n:'Es un precio intermedio.'}],
+ gp:[{b:'¿Me la ', a:' dejar en veinte euros?', o:['podría','podía','puedo'], c:0, t:'Could you let me have it for twenty euros? (cortesía con el condicional)'},
+     {b:'Se la ', a:' en veinticinco euros.', o:['dejo','dejas','dejamos'], c:0, t:'I will let you have it for twenty five euros. (yo dejo)'}]},
+{t:'¿Me lo envuelve para regalo?', en:'Gift wrapping and shipping', gn:'Detrás de desear o querer que usamos subjuntivo: «que se lo envuelva».', who:['Dependienta','Tú'],
+ ln:[[0,'¿Desea que se lo envuelva para regalo?','Would you like me to gift wrap it for you?'],
+     [1,'Sí, por favor, es para el cumpleaños de mi padre.','Yes, please, it is for my father’s birthday.'],
+     [0,'Tenemos papel dorado y también uno de rayas verdes.','We have gold paper and also one with green stripes.'],
+     [1,'El dorado queda muy elegante, me quedo con ese.','The gold one looks very elegant, I will take that one.'],
+     [0,'¿Le pongo un lazo rojo y una tarjeta pequeña?','Shall I add a red ribbon and a small card?'],
+     [1,'Sí, y otra cosa, ¿ustedes hacen envíos al extranjero?','Yes, and another thing, do you ship abroad?'],
+     [0,'Sí, enviamos a toda Europa en unos cinco días.','Yes, we ship to all of Europe in about five days.'],
+     [1,'Perfecto, entonces mándelo a esta dirección de Irlanda.','Perfect, then send it to this address in Ireland.']],
+ vc:[['envolver para regalo','to gift wrap'],['el papel dorado','the gold paper'],['el lazo','the ribbon'],['la tarjeta','the card'],['hacer envíos','to ship things'],['el extranjero','abroad']],
+ rp:[{p:'¿Desea que se lo envuelva para regalo?', pen:'Would you like me to gift wrap it?', o:['Sí, por favor, es un regalo.','Sí, la ventana está abierta.','No, mañana llueve todo el día.'], c:0, n:'Contesta sobre el envoltorio.'},
+     {p:'¿Prefiere el papel dorado o el de rayas?', pen:'Do you prefer the gold paper or the striped one?', o:['El dorado, me parece más elegante.','El lunes salgo hacia Madrid.','El desayuno empieza a las ocho.'], c:0, n:'Elige un papel.'},
+     {p:'¿Quiere que se lo enviemos a su casa?', pen:'Would you like us to send it to your home?', o:['Sí, envíenlo a mi dirección de Irlanda.','Sí, la sopa estaba muy rica.','No, prefiero pagar en efectivo.'], c:0, n:'Habla del envío.'}],
+ q:[{p:'¿Qué papel elige el cliente?', o:['El dorado','El de rayas verdes','El de flores'], c:0, n:'Le parece elegante.'},
+    {p:'¿Cuánto tarda el envío a Europa?', o:['Unos cinco días','Un mes entero','Dos semanas'], c:0, n:'Lo dice la dependienta.'}],
+ gp:[{b:'¿Me lo ', a:' para regalo?', o:['envuelve','envolver','envuelto'], c:0, t:'Can you gift wrap it for me? (usted envuelve)'},
+     {b:'Enviamos a toda Europa ', a:' unos cinco días.', o:['en','por','de'], c:0, t:'We ship to all of Europe in about five days. (en + tiempo)'}]},
+/* ===== SECTION 31 · El tiempo ===== */
+{t:'¿Qué tiempo hará mañana?', en:'Asking the receptionist about tomorrow’s weather', gn:'Para hablar del futuro usa el futuro simple: hará, lloverá, subirá.', who:['Recepcionista','Tú'],
+ ln:[[0,'Buenos días, ¿necesita algo para hoy?','Good morning, do you need anything for today?'],
+     [1,'Sí, quería preguntar qué tiempo hará mañana.','Yes, I wanted to ask what the weather will be like tomorrow.'],
+     [0,'El pronóstico dice que hará sol casi todo el día.','The forecast says it will be sunny almost all day.'],
+     [1,'¿Y hará frío por la mañana temprano?','And will it be cold early in the morning?'],
+     [0,'Un poco, unos doce grados sobre las ocho.','A little, around twelve degrees at about eight.'],
+     [1,'¿Cree que lloverá en algún momento?','Do you think it will rain at some point?'],
+     [0,'No, mañana no lloverá, puede dejar el paraguas aquí.','No, tomorrow it will not rain, you can leave the umbrella here.'],
+     [1,'Estupendo, muchas gracias por la información.','Great, thank you very much for the information.']],
+ vc:[['el pronóstico','the forecast'],['hacer sol','to be sunny'],['hacer frío','to be cold'],['llover','to rain'],['el paraguas','the umbrella'],['los grados','the degrees']],
+ rp:[{p:'Mañana hará sol todo el día.', pen:'Tomorrow it will be sunny all day.', o:['Qué bien, entonces saldremos temprano.','La habitación tiene dos camas.','El tren llega a las nueve.'], c:0, n:'Reacciona al buen tiempo.'},
+     {p:'¿Quiere el pronóstico de la semana?', pen:'Do you want the forecast for the week?', o:['Sí, por favor, me vendría muy bien.','No como carne, soy vegetariana.','La maleta pesa mucho.'], c:0, n:'Acepta la oferta con amabilidad.'},
+     {p:'Por la mañana hará bastante frío.', pen:'In the morning it will be quite cold.', o:['Entonces llevaré un jersey grueso.','Prefiero pagar con tarjeta.','El museo cierra los lunes.'], c:0, n:'Di qué ropa vas a llevar.'}],
+ q:[{p:'¿Qué tiempo hará mañana?', o:['Hará sol casi todo el día','Lloverá toda la mañana','Nevará por la noche'], c:0, n:'Lo dice el pronóstico.'},
+    {p:'¿Necesitará el paraguas mañana?', o:['No, porque no lloverá','Sí, porque lloverá mucho','Sí, porque hará viento'], c:0, n:'El recepcionista es claro.'}],
+ gp:[{b:'El pronóstico dice que ', a:' sol casi todo el día.', o:['hará','estará','tendrá'], c:0, t:'The forecast says it will be sunny almost all day. (hacer sol)'},
+     {b:'No, mañana no ', a:', puede dejar el paraguas aquí.', o:['lloverá','llueve','llovía'], c:0, t:'No, tomorrow it will not rain, you can leave the umbrella here. (futuro simple)'}]},
+{t:'Una lluvia de repente', en:'A sudden shower and buying an umbrella', gn:'Con el presente continuo: está lloviendo, se está mojando.', who:['Dependiente','Tú'],
+ ln:[[0,'Pase, pase, que está lloviendo mucho ahí fuera.','Come in, come in, it is raining a lot out there.'],
+     [1,'Gracias, no esperaba esta lluvia tan fuerte.','Thank you, I was not expecting this heavy rain.'],
+     [0,'Aquí en primavera cambia el tiempo en diez minutos.','Here in spring the weather changes in ten minutes.'],
+     [1,'Ya lo veo. ¿Vende paraguas, por casualidad?','I can see that. Do you sell umbrellas, by any chance?'],
+     [0,'Sí, tenemos estos pequeños y otros más grandes.','Yes, we have these small ones and other bigger ones.'],
+     [1,'Me llevo el pequeño, cabe en la mochila.','I will take the small one, it fits in the backpack.'],
+     [0,'Buena elección, son ocho euros con cincuenta.','Good choice, that is eight euros fifty.'],
+     [1,'Aquí tiene. Espero que escampe pronto.','Here you are. I hope it stops raining soon.']],
+ vc:[['llover','to rain'],['la lluvia','the rain'],['el paraguas','the umbrella'],['cambiar el tiempo','for the weather to change'],['la mochila','the backpack'],['escampar','to stop raining']],
+ rp:[{p:'Está lloviendo mucho, ¿quiere pasar?', pen:'It is raining a lot, do you want to come in?', o:['Sí, gracias, me estoy mojando bastante.','No, la cuenta está pagada.','El vuelo sale a las seis.'], c:0, n:'Acepta y explica por qué.'},
+     {p:'¿Prefiere un paraguas grande o pequeño?', pen:'Do you prefer a big or a small umbrella?', o:['Pequeño, por favor, viajo con poco espacio.','Somos cuatro para cenar.','Vivo cerca del mercado.'], c:0, n:'Elige uno de los dos.'},
+     {p:'Son ocho euros con cincuenta.', pen:'That is eight euros fifty.', o:['Perfecto, ¿puedo pagar con tarjeta?','Mañana hará mucho calor en la sierra.','Mi hermano estudia medicina.'], c:0, n:'Habla del pago.'}],
+ q:[{p:'¿Por qué entra el viajero en la tienda?', o:['Porque está lloviendo mucho','Porque quiere comprar comida','Porque busca el baño'], c:0, n:'Mira la primera frase.'},
+    {p:'¿Qué paraguas compra?', o:['El pequeño','El más grande','Ninguno'], c:0, n:'Piensa en la mochila.'}],
+ gp:[{b:'Pase, pase, que está ', a:' mucho ahí fuera.', o:['lloviendo','llovido','llover'], c:0, t:'Come in, it is raining a lot out there. (estar + gerundio)'},
+     {b:'Me llevo el pequeño, ', a:' en la mochila.', o:['cabe','cabo','caben'], c:0, t:'I will take the small one, it fits in the backpack. (caber, tercera persona)'}]},
+{t:'Un día de mucho calor', en:'A very hot day, finding shade and water', gn:'Recuerda: hace calor, tengo calor. El verbo cambia según el sujeto.', who:['Camarera','Tú'],
+ ln:[[0,'Buenas tardes, ¿quiere sentarse dentro o fuera?','Good afternoon, would you like to sit inside or outside?'],
+     [1,'Fuera, pero a la sombra, si es posible.','Outside, but in the shade, if possible.'],
+     [0,'Claro, esa mesa de debajo del árbol está libre.','Of course, that table under the tree is free.'],
+     [1,'Perfecto. Hoy hace un calor terrible, ¿verdad?','Perfect. It is terribly hot today, isn’t it?'],
+     [0,'Sí, estamos a treinta y ocho grados a esta hora.','Yes, we are at thirty eight degrees at this time.'],
+     [1,'¿Me trae una botella de agua bien fría?','Could you bring me a bottle of really cold water?'],
+     [0,'Ahora mismo. Por la noche refrescará un poco.','Right away. At night it will cool down a bit.'],
+     [1,'Menos mal, así podremos pasear tranquilos.','Thank goodness, then we can stroll peacefully.']],
+ vc:[['hacer calor','to be hot'],['la sombra','the shade'],['los grados','the degrees'],['una botella de agua','a bottle of water'],['refrescar','to cool down'],['pasear','to stroll']],
+ rp:[{p:'¿Quiere sentarse dentro o fuera?', pen:'Would you like to sit inside or outside?', o:['Fuera, pero a la sombra, por favor.','Tengo dos maletas grandes.','La farmacia abre a las diez.'], c:0, n:'Elige un sitio.'},
+     {p:'Hoy hace muchísimo calor, ¿verdad?', pen:'It is extremely hot today, isn’t it?', o:['Sí, casi no se puede andar al sol.','No, gracias, no fumo nunca.','El hotel está en la playa.'], c:0, n:'Habla del calor.'},
+     {p:'¿Le traigo algo fresco para beber?', pen:'Shall I bring you something cool to drink?', o:['Sí, una botella de agua bien fría.','Sí, la reserva es para el jueves.','No sé dónde está mi pasaporte.'], c:0, n:'Pide una bebida.'}],
+ q:[{p:'¿Dónde quiere sentarse el viajero?', o:['Fuera, a la sombra','Dentro, junto a la ventana','En la barra'], c:0, n:'Hace mucho calor.'},
+    {p:'¿Qué pasará por la noche?', o:['Refrescará un poco','Lloverá con fuerza','Hará todavía más calor'], c:0, n:'Lo dice la camarera.'}],
+ gp:[{b:'Fuera, pero a la ', a:', si es posible.', o:['sombra','lluvia','nieve'], c:0, t:'Outside, but in the shade, if possible. (buscar el fresco)'},
+     {b:'Por la noche ', a:' un poco.', o:['refrescará','refresca','refrescaba'], c:0, t:'At night it will cool down a bit. (futuro simple)'}]},
+{t:'¿Llevo chaqueta esta noche?', en:'Asking whether to take a jacket for the evening', gn:'Usa «yo que usted» o «yo en su lugar» para dar consejos con condicional.', who:['Vecino','Tú'],
+ ln:[[0,'Buenas tardes, ¿ya se va usted a cenar?','Good afternoon, are you off to dinner already?'],
+     [1,'Sí, pero no sé si llevar chaqueta o no.','Yes, but I do not know whether to take a jacket or not.'],
+     [0,'Yo que usted la llevaría, aquí refresca de noche.','If I were you I would take it, it cools down here at night.'],
+     [1,'¿De verdad? Ahora hace bastante calor todavía.','Really? It is still quite hot now.'],
+     [0,'Sí, pero cuando se pone el sol baja mucho la temperatura.','Yes, but when the sun sets the temperature drops a lot.'],
+     [1,'Entonces subo a por una chaqueta fina.','Then I will go up and get a light jacket.'],
+     [0,'Buena idea, y cerca del río corre el aire.','Good idea, and near the river there is a breeze.'],
+     [1,'Gracias por el consejo, muy amable.','Thanks for the advice, very kind of you.']],
+ vc:[['la chaqueta','the jacket'],['refrescar','to cool down'],['ponerse el sol','for the sun to set'],['bajar la temperatura','for the temperature to drop'],['correr el aire','for there to be a breeze'],['el consejo','the advice']],
+ rp:[{p:'Yo que usted llevaría una chaqueta.', pen:'If I were you I would take a jacket.', o:['Tiene razón, subo a buscarla ahora.','El desayuno cuesta seis euros.','Mi vuelo aterrizó muy tarde.'], c:0, n:'Acepta el consejo.'},
+     {p:'Por la noche aquí refresca bastante.', pen:'At night it cools down quite a lot here.', o:['No lo sabía, gracias por avisarme.','Sí, la piscina está cerrada.','Trabajo en una oficina pequeña.'], c:0, n:'Agradece la información.'},
+     {p:'¿Va a cenar cerca del río?', pen:'Are you going to have dinner near the river?', o:['Sí, en un restaurante de la orilla.','No, el paraguas es azul.','Tengo la llave en el bolsillo.'], c:0, n:'Responde a la pregunta sobre la cena.'}],
+ q:[{p:'¿Qué le aconseja el vecino?', o:['Llevar chaqueta','Llevar paraguas','Quedarse en casa'], c:0, n:'Piensa en la noche fresca.'},
+    {p:'¿Por qué baja la temperatura?', o:['Porque se pone el sol','Porque va a nevar','Porque está nublado'], c:0, n:'Lo explica el vecino.'}],
+ gp:[{b:'Yo que usted la ', a:', aquí refresca de noche.', o:['llevaría','llevaba','llevé'], c:0, t:'If I were you I would take it, it cools down here at night. (condicional para consejos)'},
+     {b:'Sí, pero cuando se pone el sol ', a:' mucho la temperatura.', o:['baja','bajo','bajan'], c:0, t:'Yes, but when the sun sets the temperature drops a lot. (concordancia con la temperatura)'}]},
+{t:'Charla en la parada del autobús', en:'Weather small talk with a neighbour at the bus stop', gn:'Las coletillas «¿verdad?» y «¿no?» sirven para pedir acuerdo.', who:['Vecina','Tú'],
+ ln:[[0,'Menudo día, ¿verdad? No para de llover desde ayer.','What a day, right? It has not stopped raining since yesterday.'],
+     [1,'Sí, y ayer hacía sol por la mañana.','Yes, and yesterday it was sunny in the morning.'],
+     [0,'Este mes el tiempo está muy loco, cambia cada día.','This month the weather is crazy, it changes every day.'],
+     [1,'¿Sabe si mejorará el fin de semana?','Do you know if it will improve at the weekend?'],
+     [0,'El pronóstico dice que el sábado ya hará mejor tiempo.','The forecast says the weather will be better on Saturday.'],
+     [1,'Ojalá, tengo ganas de pasear por el parque.','I hope so, I feel like walking in the park.'],
+     [0,'Pues lleve chaqueta igualmente, que por la tarde refresca.','Well, take a jacket anyway, because it cools down in the afternoon.'],
+     [1,'Lo haré. Mire, ya viene nuestro autobús.','I will. Look, our bus is coming.']],
+ vc:[['no parar de llover','to not stop raining'],['hacer sol','to be sunny'],['el pronóstico','the forecast'],['mejorar','to improve'],['refrescar','to cool down'],['tener ganas de','to feel like']],
+ rp:[{p:'Menudo día, ¿verdad? No para de llover.', pen:'What a day, right? It does not stop raining.', o:['Sí, llevo dos días sin ver el sol.','No, el bocadillo era de queso.','La estación está muy lejos.'], c:0, n:'Sigue la conversación sobre la lluvia.'},
+     {p:'¿Le gusta este tiempo tan cambiante?', pen:'Do you like this changeable weather?', o:['La verdad es que prefiero el sol.','Sí, tengo veintiocho años.','Compré las entradas por internet.'], c:0, n:'Da tu opinión sobre el tiempo.'},
+     {p:'El sábado ya hará mejor tiempo.', pen:'The weather will be better on Saturday.', o:['Qué buena noticia, saldremos al campo.','El ascensor está estropeado.','Mi habitación da al patio.'], c:0, n:'Reacciona con alegría.'}],
+ q:[{p:'¿Qué tiempo hace hoy?', o:['Está lloviendo','Hace mucho sol','Hace mucho frío y nieva'], c:0, n:'Lo dice la vecina al principio.'},
+    {p:'¿Qué le recomienda la vecina para el sábado?', o:['Llevar chaqueta','Llevar bañador','Quedarse en el hotel'], c:0, n:'Por la tarde refresca.'}],
+ gp:[{b:'No ', a:' de llover desde ayer.', o:['para','paro','paran'], c:0, t:'It has not stopped raining since yesterday. (parar de + infinitivo)'},
+     {b:'Ojalá, tengo ', a:' de pasear por el parque.', o:['ganas','gana','ganado'], c:0, t:'I hope so, I feel like walking in the park. (tener ganas de)'}]},
+/* ===== SECTION 32 · Paisajes y excursiones ===== */
+{t:'En el mirador', en:'Asking at a viewpoint what you can see', gn:'«Se ve» y «se pueden ver» son formas impersonales muy útiles.', who:['Guía','Tú'],
+ ln:[[0,'Bienvenidos al mirador, es el punto más alto del pueblo.','Welcome to the viewpoint, it is the highest point of the village.'],
+     [1,'La vista es preciosa. ¿Qué se ve al fondo?','The view is beautiful. What can you see in the distance?'],
+     [0,'Aquellas montañas son la sierra y detrás está el mar.','Those mountains are the mountain range and behind is the sea.'],
+     [1,'¿Y aquella cala pequeña de la derecha?','And that small cove on the right?'],
+     [0,'Es la cala del Sol, se baja por un sendero corto.','It is Cala del Sol, you go down by a short path.'],
+     [1,'¿Merece la pena bajar con este calor?','Is it worth going down in this heat?'],
+     [0,'Sí, pero vaya temprano y lleve agua suficiente.','Yes, but go early and take enough water.'],
+     [1,'Perfecto, iremos mañana por la mañana.','Perfect, we will go tomorrow morning.']],
+ vc:[['el mirador','the viewpoint'],['la vista','the view'],['la sierra','the mountain range'],['la cala','the cove'],['el sendero','the path'],['merecer la pena','to be worth it']],
+ rp:[{p:'Desde aquí se ve toda la costa.', pen:'From here you can see the whole coast.', o:['Es impresionante, nunca había visto algo así.','La cuenta, por favor, tenemos prisa.','Mi hotel tiene cuatro estrellas.'], c:0, n:'Comenta la vista.'},
+     {p:'¿Quiere que le explique el paisaje?', pen:'Would you like me to explain the landscape?', o:['Sí, me encantaría saber más, gracias.','No, la talla mediana me queda bien.','El autobús pasa cada hora.'], c:0, n:'Acepta la explicación.'},
+     {p:'La cala está a veinte minutos a pie.', pen:'The cove is twenty minutes away on foot.', o:['Entonces bajaremos antes de comer.','Prefiero una mesa junto a la ventana.','No tengo cambio de cincuenta euros.'], c:0, n:'Habla de la bajada a la cala.'}],
+ q:[{p:'¿Qué hay detrás de las montañas?', o:['El mar','Un pueblo grande','Un aeropuerto'], c:0, n:'Lo explica la guía.'},
+    {p:'¿Qué recomienda la guía para bajar a la cala?', o:['Ir temprano y llevar agua','Ir en coche por la tarde','No bajar nunca'], c:0, n:'Hace mucho calor.'}],
+ gp:[{b:'La vista es preciosa. ¿Qué ', a:' al fondo?', o:['se ve','se ven','se vio'], c:0, t:'The view is beautiful. What can you see in the distance? (impersonal se + singular)'},
+     {b:'¿', a:' la pena bajar con este calor?', o:['Merece','Merecen','Mereció'], c:0, t:'Is it worth going down in this heat? (merecer la pena)'}]},
+{t:'¿Es difícil el sendero?', en:'Asking about a trail’s difficulty and length', gn:'Para duración usa «se tarda» y «unas dos horas» para aproximar.', who:['Informadora','Tú'],
+ ln:[[0,'Buenos días, ¿quieren información sobre las rutas de la zona?','Good morning, do you want information about the routes in the area?'],
+     [1,'Sí, ¿es difícil el sendero hasta la cascada?','Yes, is the path to the waterfall difficult?'],
+     [0,'No es difícil, pero hay una subida bastante larga.','It is not difficult, but there is a fairly long climb.'],
+     [1,'¿Cuánto se tarda en llegar arriba?','How long does it take to get to the top?'],
+     [0,'Unas dos horas subiendo y hora y media bajando.','About two hours going up and an hour and a half coming down.'],
+     [1,'¿Está bien señalizada toda la ruta?','Is the whole route well signposted?'],
+     [0,'Sí, siga siempre las marcas blancas y amarillas.','Yes, always follow the white and yellow markings.'],
+     [1,'Genial, entonces salimos mañana a las ocho.','Great, then we will set off tomorrow at eight.']],
+ vc:[['el sendero','the path'],['la ruta','the route'],['la subida','the climb'],['tardar','to take time'],['señalizada','signposted'],['la cascada','the waterfall']],
+ rp:[{p:'¿Quieren información sobre las rutas?', pen:'Do you want information about the routes?', o:['Sí, buscamos una ruta fácil para hoy.','No, la habitación es demasiado cara.','Trabajo de lunes a viernes.'], c:0, n:'Di qué tipo de ruta buscas.'},
+     {p:'La subida dura unas dos horas.', pen:'The climb takes about two hours.', o:['Vale, creo que podemos hacerla.','Sí, dos cafés con leche, gracias.','El museo está cerrado hoy.'], c:0, n:'Reacciona a la duración.'},
+     {p:'Recuerde llevar agua y buenas zapatillas.', pen:'Remember to take water and good trainers.', o:['Gracias, lo prepararé todo esta noche.','La estación de tren está allí.','No hablo francés, lo siento.'], c:0, n:'Agradece el consejo práctico.'}],
+ q:[{p:'¿Cómo es el sendero hasta la cascada?', o:['No es difícil, pero tiene una subida larga','Es muy peligroso','Es completamente llano'], c:0, n:'Lo dice la informadora.'},
+    {p:'¿Cómo está señalizada la ruta?', o:['Con marcas blancas y amarillas','Con banderas rojas','No está señalizada'], c:0, n:'Sigue las marcas.'}],
+ gp:[{b:'¿Cuánto ', a:' en llegar arriba?', o:['se tarda','se tardan','se tardó'], c:0, t:'How long does it take to get to the top? (se tarda, impersonal)'},
+     {b:'Sí, ', a:' siempre las marcas blancas y amarillas.', o:['siga','sigue usted a','seguir'], c:0, t:'Yes, always follow the white and yellow markings. (imperativo formal)'}]},
+{t:'Un paseo en barco por la costa', en:'Booking a boat trip to see the coast', gn:'Para reservar usa «quería» o «me gustaría»: suena más educado.', who:['Empleado','Tú'],
+ ln:[[0,'Buenas tardes, ¿en qué puedo ayudarle?','Good afternoon, how can I help you?'],
+     [1,'Quería reservar dos plazas para el paseo en barco.','I wanted to book two places for the boat trip.'],
+     [0,'Perfecto, ¿prefiere la salida de las once o la de las cinco?','Perfect, do you prefer the eleven o’clock or the five o’clock departure?'],
+     [1,'La de las cinco. ¿Qué se ve durante el trayecto?','The five o’clock one. What do you see during the trip?'],
+     [0,'Los acantilados, varias calas y a veces delfines.','The cliffs, several coves and sometimes dolphins.'],
+     [1,'Suena muy bien. ¿Cuánto dura la excursión?','That sounds great. How long does the trip last?'],
+     [0,'Dos horas y media, con una parada para bañarse.','Two and a half hours, with a stop for a swim.'],
+     [1,'Merece la pena. ¿Puedo pagar ahora con tarjeta?','It is worth it. Can I pay now by card?']],
+ vc:[['reservar','to book'],['el paseo en barco','the boat trip'],['los acantilados','the cliffs'],['la cala','the cove'],['durar','to last'],['merecer la pena','to be worth it']],
+ rp:[{p:'¿Prefiere la salida de las once o la de las cinco?', pen:'Do you prefer the eleven or the five o’clock departure?', o:['La de las cinco, por favor.','Somos de Alemania, del norte.','El desayuno está incluido.'], c:0, n:'Elige un horario.'},
+     {p:'La excursión dura dos horas y media.', pen:'The trip lasts two and a half hours.', o:['Muy bien, tenemos tiempo de sobra.','No, prefiero la carne al pescado.','Mi móvil no tiene batería.'], c:0, n:'Reacciona a la duración.'},
+     {p:'Hay una parada para bañarse en una cala.', pen:'There is a stop to swim in a cove.', o:['Estupendo, llevaremos el bañador.','Perdone, ¿dónde está el ascensor?','Aquí tiene mi carné de conducir.'], c:0, n:'Reacciona con entusiasmo.'}],
+ q:[{p:'¿Qué salida elige el viajero?', o:['La de las cinco','La de las once','La de la noche'], c:0, n:'Lo dice en la cuarta línea.'},
+    {p:'¿Qué se puede ver durante el trayecto?', o:['Acantilados, calas y a veces delfines','Montañas con nieve','Un castillo medieval'], c:0, n:'Lo explica el empleado.'}],
+ gp:[{b:'Quería ', a:' dos plazas para el paseo en barco.', o:['reservar','reservo','reservado'], c:0, t:'I wanted to book two places for the boat trip. (querer + infinitivo)'},
+     {b:'Dos horas y media, con una parada para ', a:'.', o:['bañarse','bañar','se baña'], c:0, t:'Two and a half hours, with a stop for a swim. (para + infinitivo reflexivo)'}]},
+{t:'¿Nos hace una foto?', en:'Asking someone to take your photo', gn:'«¿Nos hace una foto?» es la forma más natural de pedirlo en España.', who:['Señora','Tú'],
+ ln:[[0,'Qué vista tan bonita, ¿verdad? Nunca me cansa.','What a lovely view, right? I never get tired of it.'],
+     [1,'Es impresionante. Perdone, ¿nos hace una foto?','It is impressive. Excuse me, could you take a photo of us?'],
+     [0,'Claro que sí, deme el móvil y póngase ahí.','Of course, give me the phone and stand over there.'],
+     [1,'¿Sale el mar detrás de nosotros?','Does the sea appear behind us?'],
+     [0,'Sí, sale todo el acantilado y el pueblo blanco.','Yes, the whole cliff and the white village appear.'],
+     [1,'Muchas gracias, ha quedado genial.','Thank you very much, it has come out great.'],
+     [0,'De nada. Si suben al mirador de arriba, merece la pena.','You are welcome. If you go up to the upper viewpoint, it is worth it.'],
+     [1,'Iremos ahora mismo, gracias por el consejo.','We will go right now, thanks for the tip.']],
+ vc:[['la vista','the view'],['hacer una foto','to take a photo'],['el móvil','the mobile phone'],['el acantilado','the cliff'],['el mirador','the viewpoint'],['merecer la pena','to be worth it']],
+ rp:[{p:'Qué vista tan bonita, ¿verdad?', pen:'What a lovely view, right?', o:['Sí, es de las más bonitas que he visto.','No, la maleta es de mi marido.','Cenamos siempre a las nueve.'], c:0, n:'Comenta la vista con entusiasmo.'},
+     {p:'Claro, deme el móvil y póngase ahí.', pen:'Of course, give me the phone and stand over there.', o:['Aquí lo tiene, muchas gracias.','Prefiero el menú del día.','El banco cierra a las dos.'], c:0, n:'Dale el móvil con amabilidad.'},
+     {p:'Arriba hay otro mirador precioso.', pen:'There is another lovely viewpoint up there.', o:['¿Sí? Pues subiremos después de esta foto.','No, no me gusta el pescado frito.','Llegué en tren esta mañana.'], c:0, n:'Muestra interés por el mirador.'}],
+ q:[{p:'¿Qué pide el viajero a la señora?', o:['Que les haga una foto','Que le preste el móvil','Que le indique el hotel'], c:0, n:'Están en un sitio con vistas.'},
+    {p:'¿Qué recomienda la señora al final?', o:['Subir al mirador de arriba','Bajar a la playa','Coger un taxi'], c:0, n:'Dice que merece la pena.'}],
+ gp:[{b:'Perdone, ¿nos ', a:' una foto?', o:['hace','hacen','hago'], c:0, t:'Excuse me, could you take a photo of us? (usted, presente)'},
+     {b:'Si suben al mirador de arriba, ', a:' la pena.', o:['merece','merecen','mereció'], c:0, t:'If you go up to the upper viewpoint, it is worth it. (merecer la pena)'}]},
+{t:'Visita guiada por el casco antiguo', en:'Joining a guided walking tour of the old town', gn:'«Se puede», «se conserva»: el se impersonal se usa mucho en visitas guiadas.', who:['Guía','Tú'],
+ ln:[[0,'Buenas tardes, la visita al casco antiguo empieza en cinco minutos.','Good afternoon, the old town tour starts in five minutes.'],
+     [1,'¿Todavía quedan plazas para dos personas?','Are there still places for two people?'],
+     [0,'Sí, quedan tres. Son doce euros por persona.','Yes, there are three left. It is twelve euros per person.'],
+     [1,'Perfecto. ¿Cuánto dura el recorrido a pie?','Perfect. How long does the walking tour last?'],
+     [0,'Hora y media, con una parada en la plaza mayor.','An hour and a half, with a stop in the main square.'],
+     [1,'¿Se puede entrar también en la catedral?','Can we also go inside the cathedral?'],
+     [0,'Sí, entramos al final y se ve el claustro antiguo.','Yes, we go in at the end and you see the old cloister.'],
+     [1,'Estupendo, merece la pena. Aquí tiene el dinero.','Great, it is worth it. Here is the money.']],
+ vc:[['el casco antiguo','the old town'],['quedar plazas','for places to be left'],['el recorrido','the tour route'],['la plaza mayor','the main square'],['la catedral','the cathedral'],['merecer la pena','to be worth it']],
+ rp:[{p:'La visita empieza en cinco minutos.', pen:'The tour starts in five minutes.', o:['Perfecto, llegamos justo a tiempo.','No, mi habitación es la doce.','El taxi cuesta veinte euros.'], c:0, n:'Reacciona a la hora de salida.'},
+     {p:'Son doce euros por persona.', pen:'It is twelve euros per person.', o:['Vale, somos dos, aquí tiene.','Sí, me gusta mucho la paella.','El aeropuerto está muy lejos.'], c:0, n:'Paga por dos personas.'},
+     {p:'¿Tiene alguna pregunta antes de empezar?', pen:'Do you have any questions before we start?', o:['Sí, ¿el recorrido tiene muchas cuestas?','Sí, dos billetes de ida y vuelta.','No, no encuentro las gafas.'], c:0, n:'Haz una pregunta sobre la visita.'}],
+ q:[{p:'¿Cuánto cuesta la visita por persona?', o:['Doce euros','Veinte euros','Es gratuita'], c:0, n:'Lo dice la guía.'},
+    {p:'¿Qué visitan al final del recorrido?', o:['La catedral','El puerto','El mercado'], c:0, n:'Allí se ve el claustro.'}],
+ gp:[{b:'¿Todavía ', a:' plazas para dos personas?', o:['quedan','queda','quedar'], c:0, t:'Are there still places for two people? (quedar concuerda con plazas)'},
+     {b:'¿', a:' entrar también en la catedral?', o:['Se puede','Se pueden','Se podía'], c:0, t:'Can we also go inside the cathedral? (se puede + infinitivo)'}]},
+/* ===== SECTION 33 · En el hotel ===== */
+{t:'Llegamos con reserva', en:'Checking in with a reservation', gn:'Con usted el verbo va en tercera persona: tiene, firme, suba.', who:['Recepcionista','Tú'],
+ ln:[[0,'Buenas tardes y bienvenido. ¿Tiene usted una reserva con nosotros?','Good afternoon and welcome. Do you have a reservation with us?'],
+     [1,'Sí, está a nombre de Martín, para cuatro noches.','Yes, it is under the name Martín, for four nights.'],
+     [0,'Veo aquí una habitación individual con desayuno incluido.','I see here a single room with breakfast included.'],
+     [1,'Correcto. ¿Me puede dar la llave, por favor?','Correct. Can you give me the key, please?'],
+     [0,'Claro, pero antes firme esta ficha de entrada, por favor.','Of course, but first please sign this check in form.'],
+     [1,'Ya está firmada. ¿En qué planta está la habitación?','It is signed now. What floor is the room on?'],
+     [0,'En la tercera planta. El ascensor está a la derecha.','On the third floor. The lift is on the right.'],
+     [1,'Muchas gracias, es usted muy amable.','Thank you very much, you are very kind.']],
+ vc:[['la reserva','the reservation'],['la habitación individual','the single room'],['el desayuno incluido','breakfast included'],['la llave','the key'],['firmar la ficha','to sign the form'],['el ascensor','the lift']],
+ rp:[{p:'¿Tiene usted una reserva con nosotros?', pen:'Do you have a reservation with us?', o:['Sí, a nombre de Martín.','El museo cierra a las seis.','Prefiero el vino tinto, gracias.'], c:0, n:'Responde con tu nombre de reserva.'},
+     {p:'¿Para cuántas noches se queda?', pen:'How many nights are you staying for?', o:['Para cuatro noches, hasta el jueves.','Con desayuno y café solo.','En la parada del autobús.'], c:0, n:'Di un número de noches.'},
+     {p:'Firme aquí, por favor.', pen:'Sign here, please.', o:['Claro, ahora mismo firmo.','No, hoy no tengo hambre.','La playa está muy lejos.'], c:0, n:'Acepta hacer lo que te pide.'}],
+ q:[{p:'¿Qué tipo de habitación tiene el viajero?', o:['Una habitación individual','Una habitación doble','Un apartamento grande'], c:0, n:'Lo dice la recepcionista al leer la reserva.'},
+    {p:'¿En qué planta está la habitación?', o:['En la tercera planta','En la planta baja','En la sexta planta'], c:0, n:'Se menciona junto al ascensor.'}],
+ gp:[{b:'La reserva está ', a:' nombre de Martín.', o:['a','en','de'], c:0, t:'The reservation is under the name Martín. (a nombre de)'},
+     {b:'El ascensor ', a:' a la derecha.', o:['está','es','hay'], c:0, t:'The lift is on the right. (ubicación → estar)'}]},
+{t:'El desayuno y el wifi', en:'Asking about breakfast times and wifi', gn:'Para horarios usamos «de… a…» y «hasta»: de siete a once, hasta las once.', who:['Recepcionista','Tú'],
+ ln:[[0,'Buenos días, ¿en qué puedo ayudarle esta mañana?','Good morning, how can I help you this morning?'],
+     [1,'Quería saber a qué hora se sirve el desayuno.','I wanted to know what time breakfast is served.'],
+     [0,'De siete a once, en el comedor de la planta baja.','From seven to eleven, in the dining room on the ground floor.'],
+     [1,'Perfecto. ¿El desayuno está incluido en el precio?','Perfect. Is breakfast included in the price?'],
+     [0,'Sí, está incluido en su tarifa de habitación.','Yes, it is included in your room rate.'],
+     [1,'Estupendo. ¿Y cuál es la contraseña del wifi?','Great. And what is the wifi password?'],
+     [0,'La red es HotelSol y la contraseña viene en la tarjeta.','The network is HotelSol and the password is on the card.'],
+     [1,'Muy bien, gracias por la información.','Very good, thank you for the information.']],
+ vc:[['el desayuno','breakfast'],['el comedor','the dining room'],['la planta baja','the ground floor'],['la tarifa','the rate'],['la contraseña del wifi','the wifi password'],['la red','the network']],
+ rp:[{p:'¿En qué puedo ayudarle esta mañana?', pen:'How can I help you this morning?', o:['Quería preguntar por el desayuno.','El tren sale del andén cuatro.','Mi maleta pesa veinte kilos.'], c:0, n:'Explica qué quieres preguntar.'},
+     {p:'El desayuno se sirve de siete a once.', pen:'Breakfast is served from seven to eleven.', o:['Perfecto, bajaré sobre las nueve.','No, prefiero una habitación doble.','El seguro cuesta diez euros.'], c:0, n:'Reacciona diciendo cuándo bajarás.'},
+     {p:'¿Necesita algo más, señor?', pen:'Do you need anything else, sir?', o:['Sí, la contraseña del wifi, por favor.','Sí, el andén está muy lleno.','No, el coche tiene el depósito lleno.'], c:0, n:'Pide algo del hotel.'}],
+ q:[{p:'¿Hasta qué hora se sirve el desayuno?', o:['Hasta las once','Hasta las nueve','Hasta la una'], c:0, n:'La recepcionista dice de siete a…'},
+    {p:'¿Dónde está la contraseña del wifi?', o:['En la tarjeta','En el comedor','En el ascensor'], c:0, n:'Lo dice al final la recepcionista.'}],
+ gp:[{b:'El desayuno se sirve de siete ', a:' once.', o:['a','en','por'], c:0, t:'Breakfast is served from seven to eleven. (de… a…)'},
+     {b:'El desayuno ', a:' incluido en el precio.', o:['está','es','hay'], c:0, t:'Breakfast is included in the price. (participio con estar)'}]},
+{t:'El aire no funciona', en:'A problem in the room', gn:'Para quejarse con educación: «no funciona» y «¿podría…?» suenan muy amables.', who:['Recepcionista','Tú'],
+ ln:[[0,'Recepción, buenas noches. ¿Va todo bien en su habitación?','Reception, good evening. Is everything fine in your room?'],
+     [1,'Pues no. El aire acondicionado no funciona y hace calor.','Well, no. The air conditioning does not work and it is hot.'],
+     [0,'Cuánto lo siento. ¿Ha probado el mando de la pared?','I am so sorry. Have you tried the control on the wall?'],
+     [1,'Sí, lo he probado varias veces y no sale aire frío.','Yes, I have tried it several times and no cold air comes out.'],
+     [0,'Aviso ahora mismo al técnico, que subirá en diez minutos.','I will call the technician right now, he will come up in ten minutes.'],
+     [1,'Gracias. ¿Podría cambiarme de habitación si no se arregla?','Thank you. Could you change my room if it is not fixed?'],
+     [0,'Por supuesto, tenemos otra habitación libre en la cuarta planta.','Of course, we have another free room on the fourth floor.'],
+     [1,'Perfecto, entonces espero al técnico en mi habitación.','Perfect, then I will wait for the technician in my room.']],
+ vc:[['el aire acondicionado','the air conditioning'],['no funciona','it does not work'],['el mando','the remote control'],['el técnico','the technician'],['arreglar','to fix'],['cambiar de habitación','to change rooms']],
+ rp:[{p:'¿Va todo bien en su habitación?', pen:'Is everything fine in your room?', o:['No, el aire acondicionado no funciona.','Sí, dos billetes de ida y vuelta.','No, prefiero pagar en efectivo.'], c:0, n:'Explica el problema de la habitación.'},
+     {p:'¿Ha probado el mando de la pared?', pen:'Have you tried the control on the wall?', o:['Sí, lo he probado y no sale aire frío.','Sí, el desayuno estaba muy bueno.','No, el tren llega al andén dos.'], c:0, n:'Di que ya lo has intentado.'},
+     {p:'El técnico sube en diez minutos.', pen:'The technician is coming up in ten minutes.', o:['Muy bien, le espero en la habitación.','Muy bien, quiero un coche pequeño.','Muy bien, dejo la maleta en la consigna.'], c:0, n:'Di que vas a esperar.'}],
+ q:[{p:'¿Qué problema tiene el viajero?', o:['El aire acondicionado no funciona','La llave está perdida','El ascensor está roto'], c:0, n:'Lo dice el viajero al principio.'},
+    {p:'¿Qué ofrece la recepcionista si no se arregla?', o:['Otra habitación en la cuarta planta','Un desayuno gratis','Un taxi al aeropuerto'], c:0, n:'Lo dice casi al final.'}],
+ gp:[{b:'El aire acondicionado no ', a:' desde ayer.', o:['funciona','funcionan','funcionar'], c:0, t:'The air conditioning has not worked since yesterday. (tercera persona singular)'},
+     {b:'¿', a:' cambiarme de habitación?', o:['Podría','Puedo','Puede'], c:0, t:'Could you change my room for me? (petición cortés)'}]},
+{t:'La maleta y la salida tarde', en:'Luggage storage and late checkout', gn:'«Dejar» significa aquí to leave something: dejo la maleta en la consigna.', who:['Recepcionista','Tú'],
+ ln:[[0,'Buenos días. ¿Se marcha usted hoy del hotel?','Good morning. Are you leaving the hotel today?'],
+     [1,'Sí, pero mi vuelo sale muy tarde por la noche.','Yes, but my flight leaves very late at night.'],
+     [0,'Entiendo. La salida es a las doce del mediodía.','I see. Check out is at twelve noon.'],
+     [1,'¿Puedo dejar las maletas aquí hasta esta tarde?','Can I leave my suitcases here until this afternoon?'],
+     [0,'Claro, tenemos una consigna gratuita junto a recepción.','Of course, we have a free luggage room next to reception.'],
+     [1,'Genial. ¿Y sería posible una salida más tarde?','Great. And would a later checkout be possible?'],
+     [0,'Hasta las dos, sí, sin coste. Después cobramos veinte euros.','Until two, yes, at no cost. After that we charge twenty euros.'],
+     [1,'Entonces salgo a las dos y recojo las maletas luego.','Then I will leave at two and pick up the suitcases later.']],
+ vc:[['la maleta','the suitcase'],['la consigna','the luggage room'],['la salida','the check out'],['el vuelo','the flight'],['sin coste','at no cost'],['recoger','to pick up']],
+ rp:[{p:'¿Se marcha usted hoy del hotel?', pen:'Are you leaving the hotel today?', o:['Sí, pero mi vuelo sale por la noche.','Sí, el aire acondicionado no funciona.','Sí, quiero un billete de ida y vuelta.'], c:0, n:'Confirma y explica tu horario.'},
+     {p:'¿Necesita algo antes de marcharse?', pen:'Do you need anything before you leave?', o:['Sí, quiero dejar las maletas aquí.','Sí, el desayuno empieza a las siete.','Sí, el taxi cuesta treinta euros.'], c:0, n:'Pide guardar el equipaje.'},
+     {p:'La salida tarde es gratis hasta las dos.', pen:'Late checkout is free until two.', o:['Perfecto, entonces salgo a las dos.','Perfecto, entonces pago con la llave.','Perfecto, entonces el seguro está incluido.'], c:0, n:'Acepta y di tu hora de salida.'}],
+ q:[{p:'¿Dónde puede dejar las maletas el viajero?', o:['En la consigna junto a recepción','En la habitación del hotel','En el comedor del desayuno'], c:0, n:'Lo dice la recepcionista.'},
+    {p:'¿Hasta qué hora es gratis la salida tarde?', o:['Hasta las dos','Hasta las doce','Hasta las cinco'], c:0, n:'Después de esa hora cobran veinte euros.'}],
+ gp:[{b:'¿Puedo ', a:' las maletas en la consigna?', o:['dejar','dejo','dejando'], c:0, t:'Can I leave the suitcases in the luggage room? (infinitivo tras poder)'},
+     {b:'Recojo las maletas ', a:' la tarde.', o:['por','en','de'], c:0, t:'I will pick up the suitcases in the afternoon. (por la tarde)'}]},
+{t:'La cuenta del hotel', en:'Checking out and paying the bill', gn:'Ojo: «la factura» es el documento y «la cuenta» es el importe que pagas.', who:['Recepcionista','Tú'],
+ ln:[[0,'Buenos días. ¿Desea usted hacer la salida ahora?','Good morning. Do you want to check out now?'],
+     [1,'Sí, por favor. Aquí tiene la llave de la habitación.','Yes, please. Here is the room key.'],
+     [0,'Gracias. Su cuenta son doscientos diez euros en total.','Thank you. Your bill comes to two hundred and ten euros in total.'],
+     [1,'¿Puede explicarme este cargo de veinte euros?','Can you explain this charge of twenty euros to me?'],
+     [0,'Son las dos botellas de agua y un café del bar.','That is two bottles of water and a coffee from the bar.'],
+     [1,'Ah, vale. ¿Puedo pagar con tarjeta, por favor?','Ah, fine. Can I pay by card, please?'],
+     [0,'Por supuesto. Le mando la factura por correo electrónico.','Of course. I will send you the invoice by email.'],
+     [1,'Perfecto. Hemos estado muy a gusto, muchas gracias.','Perfect. We have been very comfortable, thank you very much.']],
+ vc:[['hacer la salida','to check out'],['la cuenta','the bill'],['el cargo','the charge'],['pagar con tarjeta','to pay by card'],['la factura','the invoice'],['el correo electrónico','the email']],
+ rp:[{p:'¿Desea usted hacer la salida ahora?', pen:'Do you want to check out now?', o:['Sí, aquí tiene la llave.','Sí, el tren sale del andén tres.','Sí, quiero un coche automático.'], c:0, n:'Confirma y entrega la llave.'},
+     {p:'Su cuenta son doscientos diez euros.', pen:'Your bill comes to two hundred and ten euros.', o:['¿Puedo pagar con tarjeta?','¿El desayuno es a las once?','¿La consigna está abierta?'], c:0, n:'Pregunta por la forma de pago.'},
+     {p:'¿Quiere la factura en papel?', pen:'Do you want the invoice on paper?', o:['No, mándemela por correo electrónico.','No, prefiero una habitación doble.','No, el depósito ya está lleno.'], c:0, n:'Pide la factura de otra forma.'}],
+ q:[{p:'¿Cuánto es la cuenta del hotel?', o:['Doscientos diez euros','Ciento veinte euros','Veinte euros'], c:0, n:'Lo dice la recepcionista.'},
+    {p:'¿Qué incluye el cargo de veinte euros?', o:['Dos botellas de agua y un café','El desayuno de tres días','La salida tarde'], c:0, n:'La recepcionista lo explica.'}],
+ gp:[{b:'¿Puedo pagar ', a:' tarjeta?', o:['con','en','de'], c:0, t:'Can I pay by card? (pagar con tarjeta)'},
+     {b:'La cuenta ', a:' doscientos diez euros.', o:['son','están','hay'], c:0, t:'The bill comes to two hundred and ten euros. (ser para cantidades)'}]},
+/* ===== SECTION 34 · Transporte y llegadas ===== */
+{t:'Las maletas y el taxi', en:'At the airport looking for luggage and a taxi', gn:'Para preguntar por sitios usamos «¿dónde está…?» y «¿dónde se recoge…?».', who:['Informador','Tú'],
+ ln:[[0,'Buenas tardes, información del aeropuerto. ¿Puedo ayudarle?','Good afternoon, airport information. Can I help you?'],
+     [1,'Sí, ¿dónde se recogen las maletas del vuelo de Roma?','Yes, where do you pick up the luggage from the Rome flight?'],
+     [0,'En la cinta número cuatro, bajando esas escaleras.','On belt number four, down those stairs.'],
+     [1,'Gracias. ¿Y dónde puedo coger un taxi después?','Thank you. And where can I get a taxi afterwards?'],
+     [0,'La parada de taxis está justo a la salida, puerta dos.','The taxi rank is right at the exit, door two.'],
+     [1,'¿Hay mucha cola a esta hora de la tarde?','Is there a long queue at this time of the afternoon?'],
+     [0,'Normalmente no, y siempre hay taxis esperando fuera.','Usually not, and there are always taxis waiting outside.'],
+     [1,'Perfecto, muchas gracias por su ayuda.','Perfect, thank you very much for your help.']],
+ vc:[['la cinta','the baggage belt'],['recoger las maletas','to collect the luggage'],['la parada de taxis','the taxi rank'],['la salida','the exit'],['la cola','the queue'],['el vuelo','the flight']],
+ rp:[{p:'¿Puedo ayudarle en algo?', pen:'Can I help you with anything?', o:['Sí, ¿dónde se recogen las maletas?','Sí, la habitación no tiene toallas.','Sí, el desayuno estaba muy rico.'], c:0, n:'Pregunta por el equipaje.'},
+     {p:'Las maletas salen por la cinta cuatro.', pen:'The luggage comes out on belt four.', o:['Gracias, ¿y dónde cojo un taxi?','Gracias, ¿y a qué hora es la cena?','Gracias, ¿y cuánto cuesta el seguro?'], c:0, n:'Pregunta ahora por el taxi.'},
+     {p:'La parada está a la salida, puerta dos.', pen:'The rank is at the exit, door two.', o:['Muy bien, voy hacia allí ahora.','Muy bien, firmo la ficha del hotel.','Muy bien, quiero un billete de ida.'], c:0, n:'Di que vas hacia ese sitio.'}],
+ q:[{p:'¿En qué cinta salen las maletas?', o:['En la cinta cuatro','En la cinta dos','En la cinta ocho'], c:0, n:'Lo dice el informador al principio.'},
+    {p:'¿Dónde está la parada de taxis?', o:['A la salida, en la puerta dos','En la planta de llegadas','Al lado de la cinta cuatro'], c:0, n:'Se menciona la puerta.'}],
+ gp:[{b:'¿Dónde ', a:' la parada de taxis?', o:['está','es','hay'], c:0, t:'Where is the taxi rank? (ubicación → estar)'},
+     {b:'Siempre ', a:' taxis esperando fuera.', o:['hay','están','son'], c:0, t:'There are always taxis waiting outside. (existencia → hay)'}]},
+{t:'En taxi al hotel', en:'Taking a taxi to the hotel', gn:'Para preguntar precios: «¿cuánto cuesta…?» o «¿cuánto es…?».', who:['Taxista','Tú'],
+ ln:[[0,'Buenas noches. ¿Adónde le llevo esta noche?','Good evening. Where shall I take you tonight?'],
+     [1,'Al hotel Miramar, en la calle Mayor, por favor.','To the Miramar hotel, on Calle Mayor, please.'],
+     [0,'Muy bien. ¿Le abro el maletero para la maleta?','Very good. Shall I open the boot for the suitcase?'],
+     [1,'Sí, gracias. ¿Cuánto cuesta el viaje más o menos?','Yes, thank you. How much does the trip cost, more or less?'],
+     [0,'Del aeropuerto al centro hay una tarifa fija de treinta euros.','From the airport to the centre there is a fixed fare of thirty euros.'],
+     [1,'De acuerdo. ¿Y cuánto tardamos en llegar al hotel?','All right. And how long does it take to reach the hotel?'],
+     [0,'Unos veinte minutos, hoy no hay mucho tráfico.','About twenty minutes, there is not much traffic today.'],
+     [1,'Estupendo. ¿Puedo pagar con tarjeta al final?','Great. Can I pay by card at the end?']],
+ vc:[['el maletero','the boot'],['el viaje','the trip'],['la tarifa fija','the fixed fare'],['tardar','to take time'],['el tráfico','the traffic'],['pagar con tarjeta','to pay by card']],
+ rp:[{p:'¿Adónde le llevo esta noche?', pen:'Where shall I take you tonight?', o:['Al hotel Miramar, por favor.','A las ocho de la mañana.','Con vistas al mar, gracias.'], c:0, n:'Di tu destino.'},
+     {p:'¿Le abro el maletero?', pen:'Shall I open the boot?', o:['Sí, gracias, llevo una maleta grande.','Sí, gracias, el wifi no funciona.','Sí, gracias, quiero pagar la factura.'], c:0, n:'Acepta y habla de tu equipaje.'},
+     {p:'Son treinta euros, tarifa fija.', pen:'It is thirty euros, a fixed fare.', o:['Vale, ¿puedo pagar con tarjeta?','Vale, ¿el tren sale del andén cinco?','Vale, ¿el desayuno está incluido?'], c:0, n:'Pregunta por la forma de pago.'}],
+ q:[{p:'¿Cuánto cuesta el viaje al centro?', o:['Treinta euros','Veinte euros','Cincuenta euros'], c:0, n:'El taxista habla de una tarifa fija.'},
+    {p:'¿Cuánto se tarda en llegar al hotel?', o:['Unos veinte minutos','Unas dos horas','Unos cinco minutos'], c:0, n:'Lo dice el taxista al hablar del tráfico.'}],
+ gp:[{b:'¿Cuánto ', a:' el viaje al centro?', o:['cuesta','cuestan','costar'], c:0, t:'How much does the trip to the centre cost? (sujeto singular)'},
+     {b:'Hoy no ', a:' mucho tráfico.', o:['hay','está','son'], c:0, t:'There is not much traffic today. (existencia → hay)'}]},
+{t:'Dos billetes a Sevilla', en:'Buying train tickets at the station', gn:'«Ida» es one way y «ida y vuelta» es return: un billete de ida y vuelta.', who:['Taquillero','Tú'],
+ ln:[[0,'Buenos días, ¿qué billetes necesita usted hoy?','Good morning, what tickets do you need today?'],
+     [1,'Dos billetes para Sevilla, de ida y vuelta, por favor.','Two tickets to Seville, return, please.'],
+     [0,'¿Para qué día quiere la vuelta, señor?','Which day do you want the return for, sir?'],
+     [1,'Para el domingo por la tarde, si es posible.','For Sunday afternoon, if possible.'],
+     [0,'Hay un tren a las seis y otro a las ocho.','There is a train at six and another at eight.'],
+     [1,'El de las seis está bien. ¿Cuánto es en total?','The six one is fine. How much is it in total?'],
+     [0,'Ochenta euros los dos, con asientos juntos en ventanilla.','Eighty euros for both, with seats together by the window.'],
+     [1,'Perfecto, aquí tiene mi tarjeta. Muchas gracias.','Perfect, here is my card. Thank you very much.']],
+ vc:[['el billete de ida y vuelta','the return ticket'],['la vuelta','the return journey'],['el tren','the train'],['el asiento','the seat'],['la ventanilla','the window seat'],['en total','in total']],
+ rp:[{p:'¿Qué billetes necesita usted hoy?', pen:'What tickets do you need today?', o:['Dos billetes de ida y vuelta a Sevilla.','Una habitación doble para dos noches.','Un coche pequeño con seguro completo.'], c:0, n:'Pide los billetes que necesitas.'},
+     {p:'¿Para qué día quiere la vuelta?', pen:'Which day do you want the return for?', o:['Para el domingo por la tarde.','Para la cinta número cuatro.','Para la consigna del hotel.'], c:0, n:'Responde con un día.'},
+     {p:'Hay un tren a las seis y otro a las ocho.', pen:'There is a train at six and another at eight.', o:['Prefiero el de las seis, por favor.','Prefiero pagar la factura mañana.','Prefiero dejar la maleta aquí.'], c:0, n:'Elige uno de los dos trenes.'}],
+ q:[{p:'¿Qué tipo de billetes compra el viajero?', o:['De ida y vuelta','Solo de ida','Billetes de autobús'], c:0, n:'Lo dice al principio del diálogo.'},
+    {p:'¿Cuánto cuestan los dos billetes?', o:['Ochenta euros','Sesenta euros','Cien euros'], c:0, n:'Lo dice el taquillero al final.'}],
+ gp:[{b:'Quiero dos billetes de ida ', a:' vuelta.', o:['y','o','a'], c:0, t:'I want two return tickets. (de ida y vuelta)'},
+     {b:'¿', a:' un tren por la tarde?', o:['Hay','Está','Es'], c:0, t:'Is there a train in the afternoon? (existencia → hay)'}]},
+{t:'¿Es este el tren?', en:'Checking the right train on the platform', gn:'«Este» va antes del nombre: este tren, este andén, esta vía.', who:['Revisor','Tú'],
+ ln:[[0,'Buenos días, ¿puedo ver su billete, por favor?','Good morning, may I see your ticket, please?'],
+     [1,'Sí, aquí está. ¿Es este el tren para Valencia?','Yes, here it is. Is this the train to Valencia?'],
+     [0,'Sí, sale de este andén dentro de cinco minutos.','Yes, it leaves from this platform in five minutes.'],
+     [1,'Menos mal. ¿Sabe usted en qué coche está mi asiento?','Thank goodness. Do you know which carriage my seat is in?'],
+     [0,'Su asiento está en el coche siete, al final del tren.','Your seat is in carriage seven, at the end of the train.'],
+     [1,'¿Puedo dejar la maleta grande en algún sitio?','Can I leave the big suitcase somewhere?'],
+     [0,'Sí, hay un espacio para maletas junto a la puerta.','Yes, there is a luggage space next to the door.'],
+     [1,'Gracias, subo ahora mismo antes de que salga.','Thank you, I will get on right now before it leaves.']],
+ vc:[['el andén','the platform'],['el billete','the ticket'],['el coche','the carriage'],['el asiento','the seat'],['el espacio para maletas','the luggage space'],['subir','to get on']],
+ rp:[{p:'¿Puedo ver su billete, por favor?', pen:'May I see your ticket, please?', o:['Sí, aquí está mi billete.','Sí, dos noches con desayuno.','Sí, el aire no funciona bien.'], c:0, n:'Enseña el billete.'},
+     {p:'Sí, este tren va a Valencia.', pen:'Yes, this train goes to Valencia.', o:['Menos mal, entonces subo ahora.','Menos mal, entonces pago la cuenta.','Menos mal, entonces cojo un taxi.'], c:0, n:'Muestra alivio y di qué haces.'},
+     {p:'Su asiento está en el coche siete.', pen:'Your seat is in carriage seven.', o:['Gracias, ¿está al final del tren?','Gracias, ¿el desayuno acaba a las once?','Gracias, ¿el depósito está lleno?'], c:0, n:'Pregunta dónde está ese coche.'}],
+ q:[{p:'¿Adónde va este tren?', o:['A Valencia','A Sevilla','A Roma'], c:0, n:'Lo pregunta el viajero y lo confirma el revisor.'},
+    {p:'¿En qué coche está el asiento del viajero?', o:['En el coche siete','En el coche dos','En el coche once'], c:0, n:'Está al final del tren.'}],
+ gp:[{b:'¿Es ', a:' el tren para Valencia?', o:['este','esta','estos'], c:0, t:'Is this the train to Valencia? (tren es masculino singular)'},
+     {b:'El tren sale ', a:' cinco minutos.', o:['dentro de','desde','hasta'], c:0, t:'The train leaves in five minutes. (dentro de + tiempo)'}]},
+{t:'Alquilar un coche pequeño', en:'Renting a small car', gn:'«Alquilar» es to rent y «devolver» es to return: devuelvo el coche el viernes.', who:['Empleada','Tú'],
+ ln:[[0,'Buenos días, ¿qué tipo de coche busca usted?','Good morning, what kind of car are you looking for?'],
+     [1,'Uno pequeño y automático, para cuatro días.','A small automatic one, for four days.'],
+     [0,'Tengo un modelo urbano muy cómodo por veinte euros al día.','I have a very comfortable city model for twenty euros a day.'],
+     [1,'Suena bien. ¿Cómo funciona el tema del combustible?','Sounds good. How does the fuel work?'],
+     [0,'Se lo entrego con el depósito lleno y usted lo devuelve igual.','I give it to you with a full tank and you return it the same.'],
+     [1,'Entendido. ¿El seguro está incluido en ese precio?','Understood. Is the insurance included in that price?'],
+     [0,'El básico sí, y por siete euros más tiene el completo.','The basic one yes, and for seven euros more you get the full one.'],
+     [1,'Prefiero el completo, así viajo mucho más tranquilo.','I prefer the full one, that way I travel much more relaxed.']],
+ vc:[['alquilar','to rent'],['el coche automático','the automatic car'],['el combustible','the fuel'],['el depósito lleno','the full tank'],['el seguro','the insurance'],['devolver','to return something']],
+ rp:[{p:'¿Qué tipo de coche busca usted?', pen:'What kind of car are you looking for?', o:['Uno pequeño y automático, por favor.','Una habitación con vistas al mar.','Un billete de ida para el domingo.'], c:0, n:'Describe el coche que quieres.'},
+     {p:'¿Cuántos días lo necesita?', pen:'How many days do you need it for?', o:['Cuatro días, hasta el viernes.','En la cinta número cuatro.','Con desayuno incluido, gracias.'], c:0, n:'Responde con un número de días.'},
+     {p:'Se lo entrego con el depósito lleno.', pen:'I give it to you with a full tank.', o:['Vale, lo devuelvo lleno también.','Vale, dejo la maleta en la consigna.','Vale, pago la cuenta del hotel.'], c:0, n:'Confirma cómo devolverás el coche.'}],
+ q:[{p:'¿Cuánto cuesta el coche al día?', o:['Veinte euros','Siete euros','Cuarenta euros'], c:0, n:'Lo dice la empleada al presentar el modelo.'},
+    {p:'¿Qué seguro elige el viajero?', o:['El completo','El básico','Ninguno'], c:0, n:'Lo dice en la última frase.'}],
+ gp:[{b:'Quiero ', a:' un coche pequeño.', o:['alquilar','alquilo','alquilando'], c:0, t:'I want to rent a small car. (infinitivo tras querer)'},
+     {b:'El seguro ', a:' incluido en el precio.', o:['está','es','hay'], c:0, t:'The insurance is included in the price. (participio con estar)'}]},
+/* ===== SECTION 35 · Información turística ===== */
+{t:'Un día en la ciudad', en:'What to see in one day', gn:'Fíjate en las recomendaciones: «le recomiendo», «merece la pena», «no se pierda».', who:['Informadora','Tú'],
+ ln:[[0,'Buenos días, bienvenido a la oficina de turismo. ¿En qué puedo ayudarle?','Good morning, welcome to the tourist office. How can I help you?'],
+     [1,'Solo tengo un día aquí. ¿Qué me recomienda ver?','I only have one day here. What do you recommend I see?'],
+     [0,'El casco antiguo y el mirador del castillo, sin ninguna duda.','The old town and the castle viewpoint, without any doubt.'],
+     [1,'¿Se puede llegar al castillo andando desde el centro?','Can you get to the castle on foot from the centre?'],
+     [0,'Sí, son veinte minutos cuesta arriba, pero merece mucho la pena.','Yes, it is twenty minutes uphill, but it is really worth it.'],
+     [1,'Perfecto. ¿Hay algún mercado interesante por la mañana?','Perfect. Is there an interesting market in the morning?'],
+     [0,'El mercado central abre hasta las dos, no se lo pierda.','The central market is open until two, do not miss it.'],
+     [1,'Genial, empezaré por ahí. Muchísimas gracias por su ayuda.','Great, I will start there. Thank you very much for your help.']],
+ vc:[['la oficina de turismo','the tourist office'],['el casco antiguo','the old town'],['el mirador','the viewpoint'],['merecer la pena','to be worth it'],['cuesta arriba','uphill'],['no se lo pierda','do not miss it']],
+ rp:[{p:'¿Cuánto tiempo se queda usted en la ciudad?', pen:'How long are you staying in the city?', o:['Solo un día, salgo mañana temprano.','Con tarjeta de crédito, por favor.','Está justo al lado del río.'], c:0, n:'Responde con tiempo.'},
+     {p:'¿Le interesa más el arte o la naturaleza?', pen:'Are you more interested in art or nature?', o:['Sobre todo el arte, me encantan los museos.','Sí, llevo dos maletas grandes.','A las nueve de la noche, creo.'], c:0, n:'Elige una de las dos opciones.'},
+     {p:'¿Quiere un plano de la ciudad?', pen:'Would you like a city map?', o:['Sí, por favor, me vendría muy bien.','No, hoy no llueve nada.','Somos cuatro personas en total.'], c:0, n:'Acepta o rechaza el plano.'}],
+ q:[{p:'¿Qué le recomienda ver la informadora?', o:['El casco antiguo y el mirador del castillo','La playa y el puerto deportivo','La estación de autobuses'], c:0, n:'Lo dice en su primera recomendación.'},
+    {p:'¿Hasta qué hora abre el mercado central?', o:['Hasta las dos','Hasta las cinco','Toda la noche'], c:0, n:'Lo dice al final.'}],
+ gp:[{b:'¿Qué me ', a:' ver en un día?', o:['recomienda','recomiendo','recomendar'], c:0, t:'What do you recommend I see in one day? (usted → recomienda)'},
+     {b:'El castillo ', a:' mucho la pena.', o:['merece','merecen','mereciendo'], c:0, t:'The castle is really worth it. (el castillo → singular)'}]},
+{t:'Entradas para el museo', en:'Buying museum tickets', gn:'Para pedir en taquilla usa «quería», más suave que «quiero».', who:['Taquillero','Tú'],
+ ln:[[0,'Buenas tardes, ¿cuántas entradas necesita usted?','Good afternoon, how many tickets do you need?'],
+     [1,'Quería dos entradas para la exposición permanente, por favor.','I would like two tickets for the permanent exhibition, please.'],
+     [0,'Son dieciséis euros. ¿Desean también la audioguía?','That is sixteen euros. Would you also like the audio guide?'],
+     [1,'¿Está la audioguía disponible en inglés y en francés?','Is the audio guide available in English and in French?'],
+     [0,'Sí, en seis idiomas, y cuesta tres euros por persona.','Yes, in six languages, and it costs three euros per person.'],
+     [1,'Perfecto, añada dos audioguías. ¿Cuánto dura la visita completa?','Perfect, add two audio guides. How long does the full visit last?'],
+     [0,'Unos noventa minutos. Cerramos a las ocho en punto.','About ninety minutes. We close at eight on the dot.'],
+     [1,'Vamos con tiempo de sobra. Aquí tiene, gracias.','We have plenty of time. Here you are, thank you.']],
+ vc:[['la entrada','the ticket'],['la audioguía','the audio guide'],['la exposición permanente','the permanent exhibition'],['el idioma','the language'],['durar','to last'],['cerrar','to close']],
+ rp:[{p:'¿Quiere usted la entrada reducida con carné de estudiante?', pen:'Would you like the reduced ticket with a student card?', o:['No, gracias, ya no soy estudiante.','Sí, prefiero la mesa de la ventana.','El tren sale del andén cuatro.'], c:0, n:'Contesta sobre el carné.'},
+     {p:'La audioguía se recoge en aquel mostrador.', pen:'The audio guide is picked up at that desk.', o:['Muy bien, vamos allí ahora mismo.','Vivo en un piso pequeño del centro.','Prefiero el pescado a la plancha.'], c:0, n:'Confirma que lo has entendido.'},
+     {p:'¿Paga usted en efectivo o con tarjeta?', pen:'Are you paying in cash or by card?', o:['Con tarjeta, si es posible.','Somos de Corea del Sur.','La catedral está muy cerca.'], c:0, n:'Elige un método de pago.'}],
+ q:[{p:'¿Cuánto cuesta la audioguía por persona?', o:['Tres euros','Dieciséis euros','Nueve euros'], c:0, n:'Lo dice el taquillero en el centro del diálogo.'},
+    {p:'¿Cuánto dura la visita completa?', o:['Unos noventa minutos','Unos veinte minutos','Todo el día'], c:0, n:'Está cerca del final.'}],
+ gp:[{b:'Quería dos ', a:' para la exposición.', o:['entradas','entrada','entrar'], c:0, t:'I would like two tickets for the exhibition. (dos → plural)'},
+     {b:'¿Cuánto ', a:' la visita completa?', o:['dura','duran','durando'], c:0, t:'How long does the full visit last? (la visita → singular)'}]},
+{t:'Cómo llegar a la catedral', en:'Directions to the cathedral', gn:'Para indicaciones: «todo recto», «gire a la derecha», «al final de la calle».', who:['Guardia','Tú'],
+ ln:[[0,'¿Necesita ayuda? Parece que está buscando algo.','Do you need help? It looks like you are looking for something.'],
+     [1,'Sí, perdone. ¿Cómo se va a la catedral andando?','Yes, excuse me. How do you get to the cathedral on foot?'],
+     [0,'Siga todo recto por esta calle hasta la plaza mayor.','Go straight ahead along this street until the main square.'],
+     [1,'Y en la plaza, ¿tengo que girar a la derecha?','And in the square, do I have to turn right?'],
+     [0,'Exacto, gire a la derecha y verá la torre enseguida.','Exactly, turn right and you will see the tower straight away.'],
+     [1,'¿Cuánto se tarda más o menos desde aquí?','How long does it take more or less from here?'],
+     [0,'Unos diez minutos tranquilamente, todo es zona peatonal.','About ten minutes at an easy pace, it is all pedestrian area.'],
+     [1,'Estupendo, así puedo ir sin prisa. Muchas gracias.','Excellent, so I can go without rushing. Thank you very much.']],
+ vc:[['todo recto','straight ahead'],['girar a la derecha','to turn right'],['la plaza mayor','the main square'],['la zona peatonal','the pedestrian area'],['tardar','to take time'],['enseguida','straight away']],
+ rp:[{p:'¿Prefiere ir andando o en autobús?', pen:'Do you prefer to go on foot or by bus?', o:['Andando, así veo mejor la ciudad.','Sí, tengo dos hermanos mayores.','Cuesta doce euros la botella.'], c:0, n:'Elige un medio de transporte.'},
+     {p:'Cuidado, esa calle está en obras hoy.', pen:'Careful, that street is under construction today.', o:['Gracias por avisar, daré un rodeo.','Prefiero la habitación con vistas.','Desayuno siempre café con leche.'], c:0, n:'Agradece el aviso.'},
+     {p:'¿Quiere que se lo señale en el plano?', pen:'Would you like me to point it out on the map?', o:['Sí, por favor, así lo veo mejor.','No, el museo abre los lunes.','Llegamos el viernes por la tarde.'], c:0, n:'Acepta la ayuda con el plano.'}],
+ q:[{p:'¿Qué tiene que hacer el viajero en la plaza mayor?', o:['Girar a la derecha','Girar a la izquierda','Seguir todo recto'], c:0, n:'Lo confirma el guardia.'},
+    {p:'¿Cuánto se tarda hasta la catedral?', o:['Unos diez minutos','Unos cuarenta minutos','Más de una hora'], c:0, n:'Está en la parte final.'}],
+ gp:[{b:'Siga ', a:' por esta calle.', o:['todo recto','todo recta','toda recto'], c:0, t:'Go straight ahead along this street. (fixed expression)'},
+     {b:'En la plaza, ', a:' a la derecha.', o:['gire','giro','girando'], c:0, t:'In the square, turn right. (usted → gire)'}]},
+{t:'En la farmacia', en:'Headache and sunburn', gn:'Para el dolor usa «me duele» y «tengo dolor de».', who:['Farmacéutico','Tú'],
+ ln:[[0,'Buenos días, dígame. ¿Qué le pasa?','Good morning, tell me. What is the matter?'],
+     [1,'Tengo dolor de cabeza desde esta mañana temprano.','I have a headache since early this morning.'],
+     [0,'¿Ha tomado usted algo o ha bebido bastante agua?','Have you taken anything or have you drunk enough water?'],
+     [1,'No he tomado nada. Además tengo una quemadura del sol.','I have not taken anything. I also have sunburn.'],
+     [0,'Le doy paracetamol y esta crema para después del sol.','I will give you paracetamol and this cream for after sun.'],
+     [1,'¿Cuántas veces al día me pongo la crema?','How many times a day should I put on the cream?'],
+     [0,'Tres veces y evite el sol fuerte del mediodía.','Three times and avoid the strong midday sun.'],
+     [1,'Muy bien, seguiré su consejo. ¿Cuánto es todo?','Very well, I will follow your advice. How much is everything?']],
+ vc:[['la farmacia','the pharmacy'],['el dolor de cabeza','the headache'],['la quemadura del sol','the sunburn'],['la crema','the cream'],['evitar','to avoid'],['el consejo','the advice']],
+ rp:[{p:'¿Es usted alérgico a algún medicamento?', pen:'Are you allergic to any medicine?', o:['No, que yo sepa no soy alérgico a nada.','Sí, el hotel está en la playa.','Trabajo en una escuela de idiomas.'], c:0, n:'Contesta sobre alergias.'},
+     {p:'¿Le duele también la garganta?', pen:'Does your throat hurt too?', o:['No, solo la cabeza y la piel.','Sí, me gusta mucho la paella.','Salimos del aeropuerto a las seis.'], c:0, n:'Di qué te duele.'},
+     {p:'Beba mucha agua y descanse esta tarde.', pen:'Drink lots of water and rest this afternoon.', o:['Lo haré, muchas gracias por el consejo.','Quería dos entradas para el museo.','Mi vuelo llega con retraso.'], c:0, n:'Agradece el consejo.'}],
+ q:[{p:'¿Qué dos problemas tiene el viajero?', o:['Dolor de cabeza y quemadura del sol','Tos y fiebre alta','Dolor de muelas y gripe'], c:0, n:'Aparecen al principio.'},
+    {p:'¿Cuántas veces al día debe ponerse la crema?', o:['Tres veces','Una vez','Cada hora'], c:0, n:'Lo dice el farmacéutico casi al final.'}],
+ gp:[{b:'Tengo ', a:' de cabeza desde esta mañana.', o:['dolor','duele','doloroso'], c:0, t:'I have a headache since this morning. (tener + dolor)'},
+     {b:'', a:' el sol fuerte del mediodía.', o:['Evite','Evita usted','Evitando'], c:0, t:'Avoid the strong midday sun. (usted → evite)'}]},
+{t:'He perdido el móvil', en:'Losing a phone', gn:'Para objetos perdidos: «he perdido», «poner una denuncia», «objetos perdidos».', who:['Agente','Tú'],
+ ln:[[0,'Buenas tardes, pase. ¿Qué desea denunciar?','Good afternoon, come in. What would you like to report?'],
+     [1,'He perdido el móvil esta mañana en el autobús.','I lost my phone this morning on the bus.'],
+     [0,'¿Recuerda usted la línea y la hora aproximada?','Do you remember the line and the approximate time?'],
+     [1,'La línea catorce, sobre las once y media, creo.','Line fourteen, around half past eleven, I think.'],
+     [0,'Voy a mirar en la oficina de objetos perdidos ahora mismo.','I am going to check the lost property office right now.'],
+     [1,'Se lo agradezco mucho. Es un móvil negro con funda azul.','I am very grateful. It is a black phone with a blue case.'],
+     [0,'Rellene esta hoja y le avisamos si aparece algo.','Fill in this form and we will let you know if something turns up.'],
+     [1,'Perfecto, le dejo el teléfono de mi hotel.','Perfect, I will leave you my hotel telephone number.']],
+ vc:[['el móvil','the mobile phone'],['denunciar','to report'],['los objetos perdidos','lost property'],['la funda','the case'],['rellenar','to fill in'],['avisar','to let someone know']],
+ rp:[{p:'¿Llevaba usted el móvil en el bolso o en el bolsillo?', pen:'Were you carrying the phone in your bag or in your pocket?', o:['En el bolsillo del abrigo, creo.','Sí, la audioguía estaba en inglés.','Nos quedamos hasta el domingo.'], c:0, n:'Di dónde lo llevabas.'},
+     {p:'¿Ha probado a llamar a su propio número?', pen:'Have you tried calling your own number?', o:['Sí, pero está apagado desde hace horas.','No, prefiero la crema para el sol.','La plaza mayor está muy cerca.'], c:0, n:'Responde sobre la llamada.'},
+     {p:'¿Puede darme un teléfono de contacto?', pen:'Can you give me a contact telephone number?', o:['Claro, le dejo el número de mi hotel.','Claro, dos entradas y una audioguía.','Claro, gire a la derecha al final.'], c:0, n:'Ofrece un número de contacto.'}],
+ q:[{p:'¿Dónde perdió el viajero el móvil?', o:['En el autobús','En el museo','En la playa'], c:0, n:'Lo dice en su primera frase.'},
+    {p:'¿Cómo es el móvil perdido?', o:['Negro con funda azul','Blanco sin funda','Gris con funda roja'], c:0, n:'Lo describe el viajero.'}],
+ gp:[{b:'', a:' el móvil esta mañana.', o:['He perdido','He perdiendo','Ha perdido'], c:0, t:'I lost my phone this morning. (yo → he perdido)'},
+     {b:'', a:' esta hoja, por favor.', o:['Rellene','Rellena usted','Rellenando'], c:0, t:'Fill in this form, please. (usted → rellene)'}]},
+/* ===== SECTION 36 · Charlar con locales ===== */
+{t:'La mesa de al lado', en:'Chatting about the food', gn:'En este tema hablamos de tú: «¿qué te parece?», «te lo recomiendo».', who:['Vecina de mesa','Tú'],
+ ln:[[0,'Perdona, ¿qué has pedido? Tiene una pinta buenísima.','Excuse me, what did you order? It looks really good.'],
+     [1,'Es el arroz de la casa. ¿Tú qué me recomiendas?','It is the house rice dish. What do you recommend?'],
+     [0,'Aquí las croquetas caseras están de escándalo, te lo digo yo.','Here the homemade croquettes are amazing, I am telling you.'],
+     [1,'¿Y son muy grandes? Es que ya he pedido bastante.','And are they very big? The thing is I have already ordered a lot.'],
+     [0,'Son pequeñas, perfectas para compartir entre dos personas.','They are small, perfect for sharing between two people.'],
+     [1,'Pues me animo. ¿Vienes mucho a este restaurante?','Then I will go for it. Do you come to this restaurant often?'],
+     [0,'Cada semana, es el sitio favorito de mi familia.','Every week, it is my family’s favourite place.'],
+     [1,'Con esa recomendación, seguro que acierto. Muchas gracias.','With that recommendation, I am sure I will get it right.']],
+ vc:[['tener buena pinta','to look good'],['las croquetas caseras','the homemade croquettes'],['compartir','to share'],['animarse','to go for it'],['el sitio','the place'],['acertar','to get it right']],
+ rp:[{p:'¿Es la primera vez que comes en este barrio?', pen:'Is it your first time eating in this neighbourhood?', o:['Sí, es la primera vez, acabo de llegar.','No, el tren sale a las siete.','Sí, dos entradas y una audioguía.'], c:0, n:'Responde sobre tu experiencia aquí.'},
+     {p:'¿Te gusta la comida picante?', pen:'Do you like spicy food?', o:['Bastante, aunque no demasiado picante.','Bastante, pero prefiero la ventanilla.','Bastante, mi hotel está en el centro.'], c:0, n:'Habla de tus gustos.'},
+     {p:'¿Quieres probar un poco de mi postre?', pen:'Do you want to try a bit of my dessert?', o:['Qué amable, un poquito sí, gracias.','Qué amable, gire a la izquierda.','Qué amable, he perdido el móvil.'], c:0, n:'Acepta con educación.'}],
+ q:[{p:'¿Qué le recomienda la vecina de mesa?', o:['Las croquetas caseras','La sopa de pescado','La tarta de queso'], c:0, n:'Lo dice al principio.'},
+    {p:'¿Con qué frecuencia viene ella al restaurante?', o:['Cada semana','Una vez al año','Nunca antes'], c:0, n:'Está casi al final.'}],
+ gp:[{b:'Tiene una pinta ', a:'.', o:['buenísima','buenísimo','muy bien'], c:0, t:'It looks really good. (la pinta → femenino)'},
+     {b:'¿', a:' mucho a este restaurante?', o:['Vienes','Vienen','Venir'], c:0, t:'Do you come to this restaurant often? (tú → vienes)'}]},
+{t:'Su sitio favorito', en:'A local recommendation', gn:'Para explicar razones usa «porque», «es que» y «sobre todo».', who:['Vecino','Tú'],
+ ln:[[0,'Si tienes una tarde libre, sube al barrio del faro.','If you have a free afternoon, go up to the lighthouse neighbourhood.'],
+     [1,'¿Ah sí? ¿Y por qué te gusta tanto ese barrio?','Oh really? And why do you like that neighbourhood so much?'],
+     [0,'Porque hay poca gente y el atardecer es precioso.','Because there are few people and the sunset is beautiful.'],
+     [1,'Suena muy bien. ¿Se puede tomar algo por allí arriba?','That sounds great. Can you have a drink up there?'],
+     [0,'Sí, hay un bar pequeño con una terraza sobre el mar.','Yes, there is a small bar with a terrace over the sea.'],
+     [1,'¿Y cómo subo? ¿Hay autobús o hay que caminar?','And how do I get up? Is there a bus or do you have to walk?'],
+     [0,'Sale un autobús cada media hora desde la plaza.','A bus leaves every half hour from the square.'],
+     [1,'Pues iré esta tarde. Gracias por el consejo, de verdad.','Then I will go this afternoon. Thanks for the tip, really.']],
+ vc:[['el faro','the lighthouse'],['el atardecer','the sunset'],['la terraza','the terrace'],['poca gente','few people'],['subir','to go up'],['cada media hora','every half hour']],
+ rp:[{p:'¿Prefieres los sitios tranquilos o con ambiente?', pen:'Do you prefer quiet places or lively ones?', o:['Los tranquilos, sobre todo al final del día.','Los tranquilos, dos euros por persona.','Los tranquilos, tengo dolor de cabeza.'], c:0, n:'Explica tu preferencia.'},
+     {p:'¿Te apetece que te acompañe hasta la parada?', pen:'Do you fancy me walking you to the bus stop?', o:['Te lo agradezco mucho, así no me pierdo.','Te lo agradezco, la crema cuesta poco.','Te lo agradezco, el museo cierra tarde.'], c:0, n:'Acepta el ofrecimiento.'},
+     {p:'¿Qué es lo que más te gusta de esta ciudad?', pen:'What do you like most about this city?', o:['La gente, todo el mundo es muy amable.','La gente, salgo el martes por la mañana.','La gente, quiero dos entradas.'], c:0, n:'Di qué te gusta y por qué.'}],
+ q:[{p:'¿Por qué le gusta al vecino el barrio del faro?', o:['Porque hay poca gente y el atardecer es precioso','Porque hay muchas tiendas baratas','Porque es el barrio más céntrico'], c:0, n:'Lo explica con porque.'},
+    {p:'¿Cada cuánto sale el autobús?', o:['Cada media hora','Cada cinco minutos','Solo dos veces al día'], c:0, n:'Está cerca del final.'}],
+ gp:[{b:'Me gusta ', a:' hay poca gente.', o:['porque','por qué','porqué'], c:0, t:'I like it because there are few people. (razón → porque)'},
+     {b:'¿Cómo ', a:' hasta el faro?', o:['subo','subes','subir'], c:0, t:'How do I get up to the lighthouse? (yo → subo)'}]},
+{t:'De dónde eres', en:'Where are you from', gn:'Para el tiempo: «llevo tres días aquí», «me quedo hasta el sábado».', who:['Camarera','Tú'],
+ ln:[[0,'Oye, ¿tú no eres de aquí, verdad? ¿De dónde eres?','Hey, you are not from here, are you? Where are you from?'],
+     [1,'Soy de Polonia, de una ciudad pequeña cerca del mar.','I am from Poland, from a small city near the sea.'],
+     [0,'Qué bien. ¿Y cuánto tiempo llevas en España?','How nice. And how long have you been in Spain?'],
+     [1,'Llevo cinco días y me quedo hasta el domingo.','I have been here five days and I am staying until Sunday.'],
+     [0,'¿Y qué tal? ¿Te acostumbras a nuestros horarios?','And how is it going? Are you getting used to our timetables?'],
+     [1,'Poco a poco, aunque cenar a las diez todavía me cuesta.','Little by little, though eating at ten is still hard for me.'],
+     [0,'Es cuestión de días, ya verás. ¿Hablas español en casa?','It is a matter of days, you will see. Do you speak Spanish at home?'],
+     [1,'Estudio dos años ya, pero aquí aprendo mucho más rápido.','I have been studying for two years, but here I learn much faster.']],
+ vc:[['llevar cinco días','to have been here five days'],['quedarse','to stay'],['acostumbrarse','to get used to'],['los horarios','the timetables'],['poco a poco','little by little'],['costar','to be hard']],
+ rp:[{p:'¿Viajas solo o con alguien?', pen:'Are you travelling alone or with someone?', o:['Con mi hermana, viajamos siempre juntas.','Con mi hermana, la farmacia cierra pronto.','Con mi hermana, gire a la derecha.'], c:0, n:'Di con quién viajas.'},
+     {p:'¿Y qué te ha gustado más hasta ahora?', pen:'And what have you liked most so far?', o:['El mercado, me pasé allí toda la mañana.','El mercado, mi vuelo sale del andén tres.','El mercado, he perdido mi audioguía.'], c:0, n:'Nombra un lugar y explica.'},
+     {p:'¿Vuelves el año que viene?', pen:'Are you coming back next year?', o:['Ojalá, me encantaría volver en primavera.','Ojalá, dos entradas y una crema.','Ojalá, tengo dolor de cabeza hoy.'], c:0, n:'Expresa un deseo.'}],
+ q:[{p:'¿De dónde es el viajero?', o:['De Polonia','De Italia','De Irlanda'], c:0, n:'Lo dice en su primera frase.'},
+    {p:'¿Qué le cuesta todavía?', o:['Cenar a las diez','Levantarse temprano','Hablar por teléfono'], c:0, n:'Lo comenta en el centro del diálogo.'}],
+ gp:[{b:'', a:' cinco días en España.', o:['Llevo','Llevas','Llevando'], c:0, t:'I have been in Spain five days. (yo → llevo)'},
+     {b:'Me ', a:' hasta el domingo.', o:['quedo','queda','quedar'], c:0, t:'I am staying until Sunday. (yo → me quedo)'}]},
+{t:'La fiesta del pueblo', en:'Invited to a village festival', gn:'Para ofrecerte usa «¿qué llevo?» y «¿hace falta llevar algo?».', who:['Amigo del pueblo','Tú'],
+ ln:[[0,'El sábado hay fiesta en mi pueblo. ¿Te apuntas?','On Saturday there is a festival in my village. Are you in?'],
+     [1,'Me encantaría. ¿Y qué se hace exactamente en la fiesta?','I would love to. And what exactly happens at the festival?'],
+     [0,'Comida en la plaza, música en directo y baile hasta tarde.','Food in the square, live music and dancing until late.'],
+     [1,'Suena genial. ¿Hace falta llevar algo de comer o beber?','Sounds great. Is it necessary to bring something to eat or drink?'],
+     [0,'Con una tarta o una botella de vino es más que suficiente.','With a cake or a bottle of wine it is more than enough.'],
+     [1,'Perfecto. ¿Y cómo llego hasta allí desde la ciudad?','Perfect. And how do I get there from the city?'],
+     [0,'Te recojo yo a las seis, me pilla de camino.','I will pick you up at six, it is on my way.'],
+     [1,'Qué detalle, muchas gracias. Llevaré una tarta casera.','How kind, thank you very much. I will bring a homemade cake.']],
+ vc:[['la fiesta del pueblo','the village festival'],['apuntarse','to join in'],['la música en directo','the live music'],['hacer falta','to be necessary'],['recoger','to pick up'],['pillar de camino','to be on the way']],
+ rp:[{p:'¿Sabes bailar sevillanas?', pen:'Do you know how to dance sevillanas?', o:['Ni idea, pero me apetece aprender.','Ni idea, la crema cuesta seis euros.','Ni idea, el museo abre a las diez.'], c:0, n:'Responde con humor y sinceridad.'},
+     {p:'¿Te importa volver un poco tarde?', pen:'Do you mind coming back a bit late?', o:['Para nada, mañana no madrugo.','Para nada, quiero dos entradas.','Para nada, he perdido el móvil.'], c:0, n:'Di si te importa o no.'},
+     {p:'¿Tienes alguna alergia o algo que no comas?', pen:'Do you have any allergy or anything you do not eat?', o:['No como carne, pero todo lo demás sí.','No como carne, gire a la derecha.','No como carne, el bus sale ya.'], c:0, n:'Habla de tu comida.'}],
+ q:[{p:'¿Qué va a llevar el viajero a la fiesta?', o:['Una tarta casera','Una guitarra','Unas flores'], c:0, n:'Lo dice en la última frase.'},
+    {p:'¿A qué hora lo recoge el amigo?', o:['A las seis','A las ocho','A medianoche'], c:0, n:'Lo dice el amigo casi al final.'}],
+ gp:[{b:'¿Hace falta ', a:' algo de beber?', o:['llevar','llevo','llevando'], c:0, t:'Is it necessary to bring something to drink? (hace falta + infinitivo)'},
+     {b:'Te ', a:' yo a las seis.', o:['recojo','recoges','recoger'], c:0, t:'I will pick you up at six. (yo → recojo)'}]},
+{t:'Hasta la próxima', en:'Saying goodbye', gn:'Para despedirte: «encantado de conocerte» y «mantener el contacto».', who:['Amiga','Tú'],
+ ln:[[0,'Entonces mañana ya te vas. Qué pena, de verdad.','So tomorrow you are leaving. What a shame, really.'],
+     [1,'Sí, sale mi tren a las nueve de la mañana.','Yes, my train leaves at nine in the morning.'],
+     [0,'Ha sido un placer conocerte. ¿Me pasas tu número?','It has been a pleasure to meet you. Will you give me your number?'],
+     [1,'Claro, te lo apunto aquí y así mantenemos el contacto.','Of course, I will write it down here and so we keep in touch.'],
+     [0,'Genial, te escribo y te mando fotos de la fiesta.','Great, I will write to you and send you photos of the festival.'],
+     [1,'Encantado de conocerte. Prometo volver el año que viene.','Lovely to meet you. I promise to come back next year.'],
+     [0,'Aquí tienes tu casa siempre. Buen viaje y cuídate.','You always have a home here. Have a good trip and take care.'],
+     [1,'Gracias por todo. Hasta la próxima, un abrazo muy fuerte.','Thanks for everything. Until next time, a big hug.']],
+ vc:[['encantado de conocerte','lovely to meet you'],['mantener el contacto','to keep in touch'],['apuntar','to write down'],['prometer','to promise'],['buen viaje','have a good trip'],['un abrazo','a hug']],
+ rp:[{p:'¿Me mandas un mensaje cuando llegues?', pen:'Will you send me a message when you arrive?', o:['Claro que sí, te escribo esa misma noche.','Claro que sí, dos entradas por favor.','Claro que sí, me duele la cabeza.'], c:0, n:'Promete escribir.'},
+     {p:'¿Estás en alguna red social?', pen:'Are you on any social network?', o:['Sí, te busco y te sigo ahora mismo.','Sí, la catedral está muy cerca.','Sí, he perdido mi funda azul.'], c:0, n:'Responde sobre el contacto.'},
+     {p:'Si vuelves, avísame con tiempo.', pen:'If you come back, let me know in advance.', o:['Cuenta con ello, te aviso en cuanto lo sepa.','Cuenta con ello, gire todo recto.','Cuenta con ello, la crema es cara.'], c:0, n:'Confirma que la avisarás.'}],
+ q:[{p:'¿A qué hora sale el tren del viajero?', o:['A las nueve de la mañana','A las nueve de la noche','A mediodía'], c:0, n:'Lo dice al principio.'},
+    {p:'¿Qué promete el viajero?', o:['Volver el año que viene','Escribir un libro','Mudarse al pueblo'], c:0, n:'Está en su tercera intervención.'}],
+ gp:[{b:'Encantado de ', a:'.', o:['conocerte','conozco','conociendo'], c:0, t:'Lovely to meet you. (de + infinitivo)'},
+     {b:'Así ', a:' el contacto.', o:['mantenemos','mantenéis','mantener'], c:0, t:'That way we keep in touch. (nosotros → mantenemos)'}]}
+];
+
+const DIALOG_PLANS = [
+  [['dialog'],['listen',0],['rp',0],['tr',1,'es2en'],['rp',1],['gap',0],['mv',[0,1,2,3,4]],['q',0],['sp',1]],
+  [['dialog'],['rp',0],['tr',2,'en2es'],['rp',1],['listen',3],['rp',2],['mv',[1,2,3,4,5]],['gap',1],['sp',3]],
+  [['dialog'],['gap',0],['q',0],['tr',4,'en2es'],['q',1],['listen',5],['rp',2],['mv',[0,2,3,4,5]],['sp',5]],
+  [['dialog'],['listen',6],['tr',7,'es2en'],['rp',1],['gap',1],['q',1],['tr',3,'en2es'],['rp',0],['sp',7]]
+];
+
+function dialogDistractors(dg, lang, answerTokens) {
+  const seen = {}, out = [];
+  answerTokens.forEach(w => seen[w.toLowerCase()] = 1);
+  const pool = [];
+  dg.ln.forEach(l => tokenize(lang === 'es' ? l[1] : l[2]).forEach(w => pool.push(w)));
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  pool.forEach(w => { const k = w.toLowerCase(); if (!seen[k] && out.length < 3) { seen[k] = 1; out.push(w); } });
+  return out;
+}
+
+function buildDialogEx(dg, di, op) {
+  const kind = op[0];
+  if (kind === 'dialog') return { type:'dialog', title:dg.t, en:dg.en, who:dg.who, lines:dg.ln };
+  if (kind === 'listen') {
+    const es = dg.ln[op[1]][1], ans = tokenize(es);
+    return { type:'listen', ref:'dlis:'+di+':'+op[1], sentence:es, answer:ans,
+             distractors:dialogDistractors(dg, 'es', ans), translation:dg.ln[op[1]][2], g:dg.gn };
+  }
+  if (kind === 'tr') {
+    const l = dg.ln[op[1]], dir = op[2];
+    if (dir === 'en2es') {
+      const ans = tokenize(l[1]);
+      return { type:'translate', ref:'dtr:'+di+':'+op[1]+':en2es', dir:'en2es', source:l[2], answer:ans,
+               distractors:dialogDistractors(dg, 'es', ans), solution:l[1], g:dg.gn };
+    }
+    const ans = tokenize(l[2]);
+    return { type:'translate', ref:'dtr:'+di+':'+op[1]+':es2en', dir:'es2en', source:l[1], answer:ans,
+             distractors:dialogDistractors(dg, 'en', ans), solution:l[2], g:dg.gn };
+  }
+  if (kind === 'rp') {
+    const r = dg.rp[op[1]];
+    return { type:'choice', ref:'drp:'+di+':'+op[1], isReply:true, who:dg.who[0],
+             prompt:'¿Qué respondes?', context:r.p, contextEn:r.pen, options:r.o, correct:r.c, note:r.n };
+  }
+  if (kind === 'q') {
+    const c = dg.q[op[1]];
+    return { type:'choice', ref:'dq:'+di+':'+op[1], prompt:c.p, options:c.o, correct:c.c, note:c.n, storyQ:true };
+  }
+  if (kind === 'gap') {
+    const g = dg.gp[op[1]];
+    return { type:'fillblank', ref:'dgap:'+di+':'+op[1], before:g.b, after:g.a, options:g.o, correct:g.c, translation:g.t, g:dg.gn };
+  }
+  if (kind === 'mv') return { type:'match', prompt:'Tap the matching pairs', pairs:op[1].map(i => dg.vc[i]) };
+  if (kind === 'sp') {
+    const l = dg.ln[op[1]];
+    return { type:'speak', ref:'dsp:'+di+':'+op[1], sentence:l[1], translation:l[2] };
+  }
+  throw new Error('bad dialog op ' + kind);
+}
+
+function dialogSectionPairs(base, offset) {
+  const seen = {}, out = [];
+  for (let k = 0; k < 5; k++) {
+    const vc = DIALOGS[base + k].vc;
+    for (let j = 0; j < vc.length; j++) {
+      const p = vc[(j + offset) % vc.length];
+      if (!seen[p[0]] && !seen[p[1]]) { seen[p[0]] = 1; seen[p[1]] = 1; out.push(p); break; }
+    }
+  }
+  return out;
+}
+
+function dialogFinal(sec) {
+  const base = sec * 5, out = [];
+  for (let k = 0; k < 5; k++) {
+    const di = base + k, dg = DIALOGS[di];
+    out.push(buildDialogEx(dg, di, ['rp', k % 3]));
+    out.push(buildDialogEx(dg, di, ['tr', (k * 2 + 1) % 8, k % 2 ? 'en2es' : 'es2en']));
+    out.push(buildDialogEx(dg, di, ['listen', (k * 3) % 8]));
+  }
+  out.push({ type:'match', prompt:'Tap the matching pairs', pairs:dialogSectionPairs(base, 0) });
+  out.push({ type:'match', prompt:'Tap the matching pairs', pairs:dialogSectionPairs(base, 3) });
+  return out;
+}
+
+function composeDialogLesson(nodeIdx) {
+  const off = nodeIdx - DIALOG_START();
+  const sec = Math.floor(off / 21), within = off % 21;
+  if (within === 20) return dialogFinal(sec);
+  const di = sec * 5 + Math.floor(within / 4);
+  return DIALOG_PLANS[within % 4].map(op => buildDialogEx(DIALOGS[di], di, op));
+}
+
+const STORY_NODES = () => (STORIES.length / 5) * 21;
+const DIALOG_START = () => CLASSIC_NODES + STORY_NODES();
+
+/* unit helpers covering classic units, story units and dialogue units */
+const TOTAL_UNITS = () => CLASSIC_UNITS + STORIES.length + DIALOGS.length;
 function unitMeta(i) {
   if (i < CLASSIC_UNITS) { const u = UNITS[i]; return { title:u.title, en:u.en, vocab:u.vocab }; }
-  const s = STORIES[i - CLASSIC_UNITS]; return { title:s.t, en:s.en, vocab:s.vc };
+  if (i < CLASSIC_UNITS + STORIES.length) { const s = STORIES[i - CLASSIC_UNITS]; return { title:s.t, en:s.en, vocab:s.vc }; }
+  const d = DIALOGS[i - CLASSIC_UNITS - STORIES.length]; return { title:d.t, en:d.en, vocab:d.vc };
 }
 function unitEsLines(i) {
   if (i < CLASSIC_UNITS) return UNITS[i].sentences.map(s => [s.es, s.en]);
-  return STORIES[i - CLASSIC_UNITS].ln;
+  if (i < CLASSIC_UNITS + STORIES.length) return STORIES[i - CLASSIC_UNITS].ln;
+  return DIALOGS[i - CLASSIC_UNITS - STORIES.length].ln.map(l => [l[1], l[2]]);
 }
 
 function composeLesson(nodeIdx) {
+  if (nodeIdx >= DIALOG_START()) return composeDialogLesson(nodeIdx);
   if (nodeIdx >= CLASSIC_NODES) return composeStoryLesson(nodeIdx);
   const sec = Math.floor(nodeIdx / 21), within = nodeIdx % 21;
   if (within === 20) {
@@ -2657,21 +3652,24 @@ function renderPath() {
     sd.querySelector('.sd-en').textContent = sec.en;
     if (!isUnlocked(si * 21)) sd.classList.add('locked');
     inner.appendChild(sd);
-    const isStory = si * 21 >= CLASSIC_NODES;
-    const names = isStory ? STORY_NODE_NAMES : NODE_NAMES;
+    const isDialog = si * 21 >= DIALOG_START();
+    const isStory = !isDialog && si * 21 >= CLASSIC_NODES;
+    const names = isDialog ? DIALOG_NODE_NAMES : isStory ? STORY_NODE_NAMES : NODE_NAMES;
     for (let uu = 0; uu < 5; uu++) {
       const u = unitMeta(si * 5 + uu);
       const pal = PALETTE[uu % 5];
       const banner = document.createElement('div'); banner.className = 'unit-banner';
       banner.style.background = pal[0];
-      banner.innerHTML = '<div class="ub-label">' + (isStory ? 'HISTORIA ' : 'UNIT ') + (uu + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
+      banner.innerHTML = '<div class="ub-label">' + (isDialog ? 'DIÁLOGO ' : isStory ? 'HISTORIA ' : 'UNIT ') + (uu + 1) + '</div><div class="ub-title"></div><div class="ub-en"></div>';
       banner.querySelector('.ub-title').textContent = u.title;
       banner.querySelector('.ub-en').textContent = u.en;
       inner.appendChild(banner);
       const nodes = document.createElement('div'); nodes.className = 'nodes';
       for (let l = 0; l < 4; l++) {
         const i = si * 21 + uu * 4 + l;
-        const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' : (isStory && l === 0 ? '<span style="font-size:28px">📖</span>' : ICON_STAR);
+        const icon = l === 3 ? '<span style="font-size:30px">🏆</span>' :
+          (l === 0 && isStory ? '<span style="font-size:28px">📖</span>' :
+           l === 0 && isDialog ? '<span style="font-size:28px">💬</span>' : ICON_STAR);
         nodes.appendChild(nodeButton(i, pal[0], pal[1], names[l], icon));
       }
       inner.appendChild(nodes);
@@ -2799,9 +3797,13 @@ function startSpeaking() {
   unlockedUnits().forEach(u => unitEsLines(u).forEach((l, i) => pool.push([u, i])));
   const pick = shuffle(pool).slice(0, 8);
   nodeIdx = -2; isPractice = false; isMistakeReview = false; isSpeakSession = true;
-  CURRENT = pick.map(p => p[0] < CLASSIC_UNITS
-    ? buildExercise(p[0], ['speak', p[1]], true)
-    : buildStoryEx(STORIES[p[0] - CLASSIC_UNITS], p[0] - CLASSIC_UNITS, ['sp', p[1]]));
+  CURRENT = pick.map(p => {
+    if (p[0] < CLASSIC_UNITS) return buildExercise(p[0], ['speak', p[1]], true);
+    if (p[0] < CLASSIC_UNITS + STORIES.length) {
+      const si = p[0] - CLASSIC_UNITS; return buildStoryEx(STORIES[si], si, ['sp', p[1]]);
+    }
+    const di = p[0] - CLASSIC_UNITS - STORIES.length; return buildDialogEx(DIALOGS[di], di, ['sp', p[1]]);
+  });
   resetLessonState();
 }
 
@@ -3066,6 +4068,14 @@ function renderExercise(ex) {
     const tag = document.createElement('div'); tag.className = 'review-tag';
     tag.textContent = '📖 HISTORIA · listen and read';
     area.appendChild(tag);
+  } else if (ex.type === 'dialog') {
+    const tag = document.createElement('div'); tag.className = 'review-tag';
+    tag.textContent = '💬 CONVERSACIÓN · listen and read';
+    area.appendChild(tag);
+  } else if (ex.isReply) {
+    const tag = document.createElement('div'); tag.className = 'review-tag';
+    tag.textContent = '💬 RESPONDE TÚ';
+    area.appendChild(tag);
   } else if (ex.storyQ) {
     const tag = document.createElement('div'); tag.className = 'review-tag';
     tag.textContent = '🧠 COMPRENSIÓN';
@@ -3083,7 +4093,19 @@ function renderExercise(ex) {
 
   if (ex.type === 'choice') {
     h.textContent = ex.prompt; area.appendChild(h);
-    if (ex.context) area.appendChild(speakerRow(ex.context, 'es', { showText: true }));
+    if (ex.isReply) {
+      const rb = document.createElement('div'); rb.className = 'reply-bub';
+      const av = document.createElement('div'); av.className = 'chat-av'; av.textContent = '🧑‍🍳';
+      const bub = document.createElement('div'); bub.className = 'chat-bub';
+      const who = document.createElement('div'); who.className = 'chat-who'; who.textContent = ex.who || '';
+      const es = document.createElement('div'); es.className = 'chat-es'; es.textContent = ex.context;
+      bub.appendChild(who); bub.appendChild(es);
+      if (ex.contextEn) { const en = document.createElement('div'); en.className = 'chat-en'; en.textContent = ex.contextEn; bub.appendChild(en); }
+      bub.onclick = () => speak(ex.context, 'es');
+      rb.appendChild(av); rb.appendChild(bub);
+      area.appendChild(rb);
+      setTimeout(() => speak(ex.context, 'es'), 350);
+    } else if (ex.context) area.appendChild(speakerRow(ex.context, 'es', { showText: true }));
     const wrap = document.createElement('div'); wrap.className = 'options';
     shuffle(ex.options.map((_, i) => i)).forEach((oi, k) => {
       const card = document.createElement('button'); card.className = 'option-card';
@@ -3171,6 +4193,30 @@ function renderExercise(ex) {
     area.appendChild(wrap);
     setTimeout(() => speakLines(ex.lines.map(l => l[0])), 400);
 
+  } else if (ex.type === 'dialog') {
+    h.textContent = ex.title; area.appendChild(h);
+    const sub = document.createElement('div'); sub.className = 'story-sub'; sub.textContent = ex.en;
+    area.appendChild(sub);
+    const play = document.createElement('button'); play.className = 'btn btn-blue story-play';
+    play.innerHTML = '▶ Escuchar la conversación';
+    play.onclick = () => speakLines(ex.lines.map(l => l[1]));
+    area.appendChild(play);
+    const wrap = document.createElement('div'); wrap.className = 'story-lines';
+    ex.lines.forEach(l => {
+      const row = document.createElement('div'); row.className = 'chat-row' + (l[0] === 1 ? ' me' : '');
+      const av = document.createElement('div'); av.className = 'chat-av'; av.textContent = l[0] === 1 ? '🙋' : '🧑‍🍳';
+      const bub = document.createElement('div'); bub.className = 'chat-bub';
+      const who = document.createElement('div'); who.className = 'chat-who'; who.textContent = ex.who[l[0]];
+      const es = document.createElement('div'); es.className = 'chat-es'; es.textContent = l[1];
+      const en = document.createElement('div'); en.className = 'chat-en'; en.textContent = l[2];
+      bub.appendChild(who); bub.appendChild(es); bub.appendChild(en);
+      bub.onclick = () => speak(l[1], 'es');
+      row.appendChild(av); row.appendChild(bub);
+      wrap.appendChild(row);
+    });
+    area.appendChild(wrap);
+    setTimeout(() => speakLines(ex.lines.map(l => l[1])), 400);
+
   } else if (ex.type === 'speak') {
     h.textContent = 'Say this sentence'; area.appendChild(h);
     area.appendChild(speakerRow(ex.sentence, 'es', { showText: true, turtle: true }));
@@ -3240,7 +4286,7 @@ function handleMatch(ex, lookup, btn, col, txt) {
 function renderFooterAnswer(ex) {
   const f = $('#footer'); f.className = 'footer';
   const fb = $('#feedback'); fb.innerHTML = '';
-  if (ex.type === 'story') {
+  if (ex.type === 'story' || ex.type === 'dialog') {
     const btn0 = $('#check-btn'); btn0.textContent = 'Continue';
     btn0.className = 'btn btn-green'; btn0.disabled = false;
     return;
@@ -3268,7 +4314,7 @@ function refreshCheck() {
 
 function mainButton() {
   const cur = CURRENT[currentIdx];
-  if (phase === 'answer' && cur && cur.type === 'story') {
+  if (phase === 'answer' && cur && (cur.type === 'story' || cur.type === 'dialog')) {
     if (!attempted.has(currentIdx)) { attempted.add(currentIdx); firstTryCorrect++; }
     solved.add(currentIdx); updateProgress();
     if (window.speechSynthesis) speechSynthesis.cancel();
